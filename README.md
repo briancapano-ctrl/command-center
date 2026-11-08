@@ -33,10 +33,10 @@ A Work card shows your work Inbox unread count, next meeting time and the red/or
 1. GitHub: create a public repo named `command-center`, upload this folder. Settings > Pages > Deploy from branch `main`, folder `/docs`.
 2. Pick a long passphrase (five random words). It is the page password and the encryption key.
 3. Google (Gmail, Calendar, YouTube): console.cloud.google.com > new project > enable Gmail API, Google Calendar API, YouTube Data API v3, YouTube Analytics API > OAuth consent screen, External, add yourself as a test user, then set Publishing status to In production (otherwise the token dies in 7 days) > Credentials > OAuth client ID, type Desktop app. Then on the Mac: `python3 setup/google_auth.py CLIENT_ID CLIENT_SECRET` and approve. It prints the refresh token.
-4. Microsoft (Hotmail): portal.azure.com > Microsoft Entra ID > App registrations > New, supported accounts "Personal Microsoft accounts only", then Authentication > Allow public client flows = Yes, then API permissions > Microsoft Graph > Delegated: Mail.ReadWrite, Calendars.Read. Then `python3 setup/ms_auth.py APPLICATION_CLIENT_ID`, sign in as the Hotmail, and copy the refresh token.
+4. Microsoft (Hotmail): either register your own app (portal.azure.com > Microsoft Entra ID > App registrations, personal accounts only, public client flows on, delegated Mail.ReadWrite and Calendars.Read) or use the device-code flow with `python3 setup/ms_auth.py CLIENT_ID`. Sign in only with the Hotmail account, never a work account. Save the printed refresh token as `MS_REFRESH_TOKEN`.
 5. GitHub repo > Settings > Secrets and variables > Actions. Add: `CC_PASSPHRASE`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, `MS_CLIENT_ID`, `MS_REFRESH_TOKEN`, `CC_CONFIG` (paste your edited `config.example.json`), and `NTFY_TOPIC` (any long random string).
 6. Phone: install the ntfy app, subscribe to that same topic.
-7. Mac mini: create a fine-grained GitHub token limited to this repo with Contents read/write. Run `bash mac/install.sh`, enter repo, token and passphrase, then add the printed Python path in System Settings > Privacy & Security > Full Disk Access.
+7. Mac mini: add a deploy key (read/write) to this one repository and put the private half in `mac/deploy_key`. Run `bash mac/install.sh`, enter the dashboard passphrase, then add the printed Python path in System Settings > Privacy & Security > Full Disk Access. No GitHub token is stored on the Mac.
 8. Actions tab > build > Run workflow. Open the Pages URL and unlock.
 
 ## Day to day
