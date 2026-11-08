@@ -20,6 +20,18 @@ class T(unittest.TestCase):
         m = priorities.build({"errors": {"gmail": "boom"}}, {})
         self.assertIn("gmail", m["errors"])
 
+class CollectNoCredentials(unittest.TestCase):
+    def test_collect_runs_without_any_secrets(self):
+        import os
+        from cc import build
+        old = {k: os.environ.pop(k) for k in list(os.environ) if k.startswith(("GOOGLE_", "MS_"))}
+        try:
+            build.sports.collect = lambda: []          # no network in tests
+            src = build.collect({}, "pw")
+            self.assertIn("errors", src)
+        finally:
+            os.environ.update(old)
+
 
 if __name__ == "__main__":
     unittest.main()

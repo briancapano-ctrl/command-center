@@ -105,7 +105,8 @@ def unchanged(model):
 
 
 def collect(cfg, pw):
-    err, src = {}, {"errors": err}
+    err = {}
+    src = {"errors": err}
     src["sports"] = safe("sports", sports.collect, err)
     env = os.environ
     if env.get("GOOGLE_REFRESH_TOKEN"):
