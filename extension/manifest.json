@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "Command Center Work Lane",
+  "version": "1.0.0",
+  "description": "Reads counts from your open Outlook and Copilot tabs and hands them to your Command Center page in this browser. Local only. Sends nothing anywhere.",
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "options_page": "options.html",
+  "action": {
+    "default_title": "Command Center Work Lane",
+    "default_popup": "options.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://outlook.office.com/*",
+        "https://outlook.cloud.microsoft/*",
+        "https://outlook.office365.com/*",
+        "https://m365.cloud.microsoft/chat*"
+      ],
+      "js": [
+        "lane_flag.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://outlook.office.com/*",
+        "https://outlook.cloud.microsoft/*",
+        "https://outlook.office365.com/*"
+      ],
+      "js": [
+        "work_outlook.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://m365.cloud.microsoft/chat*"
+      ],
+      "js": [
+        "work_copilot.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.github.io/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": [
+        "relay.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

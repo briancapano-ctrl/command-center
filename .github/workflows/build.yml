@@ -1,0 +1,37 @@
+name: build
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # every 15 minutes (GitHub may delay a few minutes)
+  push:
+    paths: ["inbox/mac.enc"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: build
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install cryptography
+      - name: Build
+        env:
+          CC_PASSPHRASE: ${{ secrets.CC_PASSPHRASE }}
+          CC_CONFIG: ${{ secrets.CC_CONFIG }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          MS_CLIENT_ID: ${{ secrets.MS_CLIENT_ID }}
+          MS_REFRESH_TOKEN: ${{ secrets.MS_REFRESH_TOKEN }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python -m cc.build
+      - name: Commit site and token state
+        run: |
+          git config user.name "command-center"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs state
+          git diff --cached --quiet || (git commit -m "build [skip ci]" && git pull --rebase && git push)

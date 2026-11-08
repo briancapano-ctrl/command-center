@@ -1,0 +1,19 @@
+{
+  "gmail_address": "briancapano@gmail.com",
+  "outlook_address": "bcapano@hotmail.com",
+  "youtube_handle": "@briancapano",
+  "sweep_gmail_promos": true,
+  "outlook_promo_domains": [
+    "warbyparker.com", "kohls.com", "rallyhouse.com", "cookunity.com", "bl101.com", "dcsg.com", "lids.com",
+    "manscaped.com", "costco.com", "glassesusa.com", "nflshop.com", "fabletics.com", "edmunds.com", "cargurus.com",
+    "gasbuddy.com", "golfcourselawn.com", "whatnot.com", "drinkag1.com", "zillow.com", "redfin.com",
+    "theathletic.com", "newyorktimes.com", "nytimes.com", "instapaper.com", "jonacuff.com", "linkedin.com", "facebookmail.com"
+  ],
+  "manual_channels": [
+    {"name": "X", "handle": "@brian_capano", "stat": "0 followers, 217 following, 12 posts", "as_of": "Nov 8"},
+    {"name": "X, second account", "handle": "@capano_brian", "stat": "0 followers, 8 following, 0 posts", "as_of": "Nov 8"},
+    {"name": "Facebook", "handle": "Brian Capano", "stat": "347 friends", "as_of": "Nov 8"},
+    {"name": "Instagram", "handle": "@briancapano", "stat": "137 followers, 1,670 following, 3 posts", "as_of": "Nov 8"},
+    {"name": "WhatsApp", "handle": "Web", "stat": "No feed available", "as_of": "Nov 8"}
+  ]
+}

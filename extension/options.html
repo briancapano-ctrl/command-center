@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8"><title>Command Center Work Lane</title>
+<style>body{font:14px system-ui;margin:16px;width:420px;color:#111}h1{font-size:16px;margin:0 0 8px}label{display:block;margin:10px 0 4px;font-weight:600}
+textarea{width:100%;height:80px;font:13px ui-monospace,monospace}button{margin-top:8px;padding:6px 12px}small{color:#555;display:block;margin-top:4px}code{background:#eee;padding:0 3px}</style>
+<h1>Command Center Work Lane</h1>
+<label>Folders to count (one per line: folder name, then = then the label shown on the dashboard)</label>
+<textarea id="f" spellcheck="false"></textarea>
+<small>Example: <code>Inbox=Inbox unread</code>. Use generic labels. Only the number leaves Outlook, never names.</small>
+<button id="save">Save</button> <span id="ok"></span>
+<label>Work tabs</label>
+<button id="open">Open and pin my work tabs</button>
+<small>Opens Outlook Mail, Outlook Calendar and Copilot as pinned tabs. Leave them open in this browser window.</small>
+<script src="options.js"></script>
