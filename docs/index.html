@@ -1,1 +1,476 @@
-<!doctype html><meta charset="utf-8"><title>Command Center</title><p>Waiting for the first build. In GitHub: Actions > build > Run workflow.</p>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="command-center" content="1">
+<meta name="theme-color" content="#05070a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<title>Command Center</title>
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05070a;--ink:#eaf0f3;--mute:#8a98a1;--dim:#56636b;--line:rgba(255,255,255,.075);--card:rgba(255,255,255,.035);
+  --acc:#4de3c2;--acc2:#7aa8ff;--warn:#ffb454;--bad:#ff6b5e;--ok:#4de3c2;
+  --f:'Satoshi',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;--m:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --r:16px;--u:1rem;
+}
+*{box-sizing:border-box;margin:0}
+html{font-size:16px;background:var(--bg)}
+body{min-height:100vh;color:var(--ink);font:400 .94rem/1.45 var(--f);font-variant-numeric:tabular-nums lining-nums;-webkit-font-smoothing:antialiased;
+  background:
+   radial-gradient(900px 520px at 8% -8%,rgba(77,227,194,.11),transparent 60%),
+   radial-gradient(800px 520px at 100% 108%,rgba(122,168,255,.10),transparent 60%),var(--bg);background-attachment:fixed}
+body.night{filter:brightness(.5) saturate(.8)}
+.mono{font-family:var(--m)}
+.lbl{font:700 .68rem/1 var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.card{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.02));border:1px solid var(--line);border-radius:var(--r);padding:calc(var(--u)*1.05) calc(var(--u)*1.15);backdrop-filter:blur(6px);overflow:hidden}
+.card>h2{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.7rem}
+.card>h2 .sub{font:400 .72rem var(--f);color:var(--dim);letter-spacing:0;text-transform:none}
+.wrap{max-width:1280px;margin:0 auto;padding:1.2rem 1rem 3rem}
+
+/* header */
+.top{display:grid;grid-template-columns:auto 1fr auto;gap:1.5rem;align-items:center;margin-bottom:1rem}
+.clock{font:300 clamp(2.6rem,6vw,4.4rem)/1 var(--f);letter-spacing:-.04em}
+.clock small{font-size:.38em;color:var(--mute);margin-left:.15em;letter-spacing:0}
+.date{color:var(--mute);margin-top:.35rem;font-weight:500}
+.hello h1{font:900 clamp(1.3rem,2.2vw,1.9rem)/1.1 var(--f);letter-spacing:-.025em}
+.hello p{color:var(--mute);margin-top:.3rem;max-width:60ch}
+.wx{display:flex;align-items:center;gap:.7rem;justify-content:flex-end}
+.wx svg{width:2.4rem;height:2.4rem}
+.wx .t{font:300 2rem/1 var(--f);letter-spacing:-.03em}
+.wx .d{color:var(--mute);font-size:.78rem}
+.ctl{position:fixed;top:.7rem;right:.7rem;display:flex;gap:.4rem;z-index:20;transition:opacity .4s}
+.ctl button{font:500 .72rem var(--f);color:var(--mute);background:rgba(10,14,18,.8);border:1px solid var(--line);border-radius:999px;padding:.35rem .7rem;cursor:pointer}
+.ctl button:hover,.ctl button.on{color:var(--ink);border-color:var(--acc)}
+body.idle .ctl{opacity:0}
+body.wall .ctl{top:auto;bottom:.6rem;right:.8rem}
+
+/* kpis */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem;margin-bottom:.9rem}
+.kpi .v{font:300 clamp(2rem,3.2vw,3rem)/1 var(--f);letter-spacing:-.04em;margin:.55rem 0 .25rem}
+.kpi .n{color:var(--mute);font-size:.78rem}
+.kpi .v.txt{font-size:clamp(1.3rem,2vw,1.9rem);line-height:1.15;margin:.8rem 0 .5rem}
+body.wall .kpi .v.txt{font-size:clamp(1.6rem,4.2vh,3rem)}
+.kpi svg.sp{position:absolute;right:.8rem;bottom:.7rem;width:42%;height:34%;max-height:5rem;opacity:.9}
+body.wall .kpi{min-height:0}
+.kpi.up .v{color:var(--warn)}
+
+/* main grid */
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,.95fr);gap:.8rem;align-items:start}
+.col{display:grid;gap:.8rem}
+.task{display:grid;grid-template-columns:1.25rem 1fr auto;gap:.8rem;padding:.7rem 0;border-top:1px solid var(--line);align-items:start}
+.task:first-of-type{border-top:0}
+.task input{appearance:none;width:1.1rem;height:1.1rem;margin-top:.15rem;border:1.5px solid var(--dim);border-radius:50%;cursor:pointer;display:grid;place-content:center}
+.task input:checked{background:var(--acc);border-color:var(--acc)}
+.task input:checked::after{content:"";width:.3rem;height:.55rem;border:solid #04120d;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.task .t{font-weight:500;font-size:1rem}.task .w{color:var(--mute);font-size:.78rem;margin-top:.15rem}
+.task.done .t{text-decoration:line-through;color:var(--dim)}
+.pill{font:700 .62rem var(--f);letter-spacing:.08em;text-transform:uppercase;padding:.28rem .6rem;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
+.p-high{color:var(--bad)}.p-med{color:var(--warn)}.p-low{color:var(--mute)}.p-info{color:var(--acc2)}
+.empty{color:var(--mute);padding:.6rem 0}
+.work .wrow{display:flex;justify-content:space-between;gap:1rem;align-items:baseline;padding:.45rem 0;border-top:1px solid var(--line);font-size:.9rem}
+.work .wrow:first-of-type{border-top:0}.work .wk{color:var(--mute);white-space:nowrap}.work .wv{font-weight:500;text-align:right}
+.work .wv.hot{color:var(--warn,#ffb454)}.work .wv.bad{color:var(--bad)}
+.work .wlinks{display:flex;gap:.6rem;margin-top:.5rem;font-size:.75rem}.work .wlinks a{color:var(--mute);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:.2rem .6rem}.work .wlinks a:hover{color:var(--ink);border-color:var(--acc)}
+body.wall .work .wlinks{display:none}
+.ev{display:grid;grid-template-columns:4.6rem 1fr auto;gap:.7rem;padding:.55rem 0;border-top:1px solid var(--line);align-items:baseline}
+.ev:first-of-type{border-top:0}
+.ev .when{color:var(--mute);font-size:.78rem}.ev .what{font-weight:500}.ev .in{font:500 .72rem var(--m);color:var(--acc)}
+.ev.past{opacity:.45}.ev.now{background:linear-gradient(90deg,rgba(77,227,194,.12),transparent);margin:0 -1.15rem;padding-left:1.15rem;padding-right:1.15rem;border-top-color:transparent}
+.day{font:700 .66rem var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:.9rem 0 .2rem}
+.day:first-child{margin-top:0}
+.game{padding:.6rem 0;border-top:1px solid var(--line)}.game:first-of-type{border-top:0}
+.game .row{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem}
+.game b{font-size:1rem}.game .sc{font:500 1.35rem var(--m);letter-spacing:-.02em}
+.game .st{color:var(--mute);font-size:.76rem;margin-top:.1rem}
+.livetag{display:inline-flex;align-items:center;gap:.35rem;color:var(--bad);font:700 .62rem var(--f);letter-spacing:.12em}
+.livetag::before{content:"";width:.45rem;height:.45rem;border-radius:50%;background:var(--bad);animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25;transform:scale(.7)}}
+.tri{width:100%;border-collapse:collapse;font-size:.82rem}.tri td{padding:.5rem .6rem .5rem 0;border-top:1px solid var(--line);vertical-align:top}.tri tr:first-child td{border-top:0}.tri td:first-child{color:var(--mute);width:4.5rem;font-weight:500}.tri td:last-child{color:var(--mute)}
+.chan{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.7rem}
+.ch{padding:.8rem 1rem}.ch .nm{display:flex;justify-content:space-between;align-items:center;gap:.5rem;font-weight:700}
+.ch .h{color:var(--dim);font-size:.72rem;margin:.1rem 0 .4rem;word-break:break-all}.ch .s{font-size:.85rem}.ch .x{color:var(--mute);font-size:.72rem;margin-top:.3rem}
+.dot{width:.55rem;height:.55rem;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(77,227,194,.15);flex:none}
+.dot.snap{background:var(--warn);box-shadow:0 0 0 3px rgba(255,180,84,.15)}.dot.off{background:var(--dim);box-shadow:none}.dot.bad{background:var(--bad);box-shadow:0 0 0 3px rgba(255,107,94,.18)}
+.health{display:flex;flex-wrap:wrap;gap:.4rem .9rem;margin-top:1rem;color:var(--mute);font-size:.74rem;align-items:center}
+.health span{display:inline-flex;align-items:center;gap:.4rem}
+.stale{background:rgba(255,107,94,.12);border:1px solid rgba(255,107,94,.4);color:#ffb1aa;border-radius:12px;padding:.6rem .9rem;margin-bottom:.8rem;font-weight:500}
+.foot{margin-top:1.4rem;color:var(--dim);font-size:.72rem}
+
+/* lock */
+#lock{max-width:340px;margin:22vh auto;padding:0 1rem;text-align:center}
+#lock h1{font:900 1.7rem var(--f);letter-spacing:-.03em;margin-bottom:.4rem}#lock p{color:var(--mute);margin-bottom:1.1rem}
+#lock input[type=password]{width:100%;padding:.8rem 1rem;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);font-size:1rem}
+#lock button{margin-top:.8rem;width:100%;padding:.8rem;border-radius:12px;border:0;background:var(--acc);color:#04120d;font:700 1rem var(--f);cursor:pointer}
+#lock label{display:block;margin-top:.8rem;color:var(--mute);font-size:.82rem}#msg{color:var(--bad);margin-top:.7rem;min-height:1.2em}
+
+/* WALL MODE: one screen, no scrolling, big type */
+body.wall{height:100vh;overflow:hidden}
+body.wall .wrap{max-width:none;height:100vh;padding:1.4vh 1.4vw;display:grid;grid-template-rows:auto auto auto minmax(0,1fr) auto auto;gap:1.2vh}
+body.wall #stale:empty{margin-top:-1.2vh}
+body.wall{font-size:clamp(13px,.55vw + .85vh,26px)}
+body.wall .top{margin:0}
+body.wall .clock{font-size:clamp(3rem,9vh,7rem)}
+body.wall .kpis{margin:0;grid-template-columns:repeat(5,1fr)}
+body.wall .kpi .v{font-size:clamp(2rem,6vh,4.4rem)}
+body.wall .grid{grid-template-columns:1.25fr 1fr .95fr;min-height:0;height:100%}
+body.wall .col{display:grid;height:100%;min-height:0;grid-template-rows:minmax(0,1fr);align-content:stretch;overflow:hidden}
+body.wall .col:last-child{grid-template-rows:auto minmax(0,1fr)}
+body.wall .col .card.fill{flex:1;min-height:0;overflow:hidden}
+body.wall .foot,body.wall .chan-sec,body.wall .desk-only{display:none}
+body.wall .wall-strip{display:flex}
+.wall-strip{display:none;gap:.6rem;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.wall-strip .chip{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem .8rem;border:1px solid var(--line);border-radius:999px;background:var(--card);font-size:.8em}
+
+@media(max-width:980px){.top{grid-template-columns:1fr}.wx{justify-content:flex-start}.grid{grid-template-columns:1fr}.ctl{position:static;margin-bottom:.6rem}body.wall .ctl{position:fixed;margin:0}}
+/* WALL MODE on a vertical (portrait) monitor: one tall column, bigger type, same no-scroll guarantee */
+@media (orientation:portrait){
+  body.wall{font-size:clamp(13px,1.45vw + .45vh,28px)}
+  body.wall .wrap{padding:1.2vh 2.4vw;gap:1vh}
+  body.wall .top{grid-template-columns:auto 1fr auto;row-gap:.2rem}
+  body.wall .clock{font-size:clamp(3rem,9vw,8rem)}
+  body.wall .kpis{grid-template-columns:repeat(2,1fr)}
+  body.wall .kpis .kpi:last-child{grid-column:1/-1}
+  body.wall .kpi .v{font-size:clamp(2rem,5.2vw,4.6rem)}
+  body.wall .kpi .v.txt{font-size:clamp(1.6rem,4.4vw,3.2rem)}
+  body.wall .grid{grid-template-columns:1fr;grid-template-rows:minmax(0,1.15fr) minmax(0,1fr) minmax(0,.85fr);gap:1vh}
+  body.wall .col{display:grid;grid-template-rows:minmax(0,1fr);height:100%}
+  body.wall .col:last-child{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr)}
+  body.wall .col:last-child .card{height:100%}
+  body.wall .wall-strip{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="lock" hidden><h1>Command Center</h1><p>Enter your passphrase.</p>
+<form id="f"><input id="pw" type="password" autocomplete="current-password" placeholder="Passphrase" aria-label="Passphrase" required>
+<label><input id="rem" type="checkbox" checked> Remember on this device</label>
+<button type="submit">Unlock</button><div id="msg" role="alert"></div></form></div>
+<div class="ctl" id="ctl" hidden>
+  <button id="bMode" title="Toggle wall display (W)">Wall</button>
+  <button id="bFull" title="Fullscreen (F)">Fullscreen</button>
+  <button id="bAwake" title="Keep the screen on">Keep awake</button>
+  <button id="bLock" title="Forget passphrase">Lock</button>
+</div>
+<div id="app" class="wrap" hidden></div>
+<script>
+const BLOB = {"v": 1, "iter": 200000, "salt": "EZveIup91Gab6uETPu+kiw==", "iv": "/kuveH6A3lueFzMz", "ct": "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"};
+const PLAIN = /*__PLAIN__*/null;
+let PASS = null, D = null, WX = null, LIVE = {};
+const $ = (s,r=document)=>r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const store = (()=>{try{localStorage.setItem("t","1");localStorage.removeItem("t");return localStorage}catch(e){const m={};return{getItem:k=>m[k]??null,setItem:(k,v)=>{m[k]=v},removeItem:k=>{delete m[k]}}}})();
+
+/* ---------- crypto ---------- */
+async function decryptBlob(blob, pass){
+  const km = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey({name:"PBKDF2", salt:b64(blob.salt), iterations:blob.iter, hash:"SHA-256"}, km, {name:"AES-GCM", length:256}, false, ["decrypt"]);
+  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM", iv:b64(blob.iv)}, key, b64(blob.ct))));
+}
+
+/* ---------- helpers ---------- */
+const TZ = () => (D && D.meta && D.meta.tz) || "America/New_York";
+const dkey = d => new Intl.DateTimeFormat("en-CA", {timeZone:TZ(), year:"numeric", month:"2-digit", day:"2-digit"}).format(d);
+const hourIn = d => Number(new Intl.DateTimeFormat("en-US", {hour:"numeric", hour12:false, timeZone:TZ()}).format(d)) % 24;
+const dayDiff = d => Math.round((Date.parse(dkey(d)) - Date.parse(dkey(new Date()))) / 86400000);
+const fmtTime = d => d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit", timeZone:TZ()});
+const rel = ms => { const m = Math.round(ms/60000); if(m<1) return "now"; if(m<60) return m+"m"; const h=Math.floor(m/60); return (h<24 ? h+"h "+(m%60?(m%60)+"m":"") : Math.floor(h/24)+"d").trim(); };
+function spark(vals, color){
+  if(!vals || vals.length<2) return "";
+  const w=100,h=40,mn=Math.min(...vals),mx=Math.max(...vals),r=mx-mn||1;
+  const pts = vals.map((v,i)=>[(i/(vals.length-1))*w, h-4-((v-mn)/r)*(h-8)]);
+  const d = pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+  const last = pts[pts.length-1];
+  return `<svg class="sp" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="${color}" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round"/><circle cx="${last[0]}" cy="${last[1]}" r="2.2" fill="${color}"/></svg>`;
+}
+const WXI = {
+  sun:'<svg viewBox="0 0 48 48" fill="none" stroke="#ffb454" stroke-width="2.4" stroke-linecap="round"><circle cx="24" cy="24" r="8"/><path d="M24 6v5M24 37v5M6 24h5M37 24h5M11 11l3.5 3.5M33.5 33.5L37 37M37 11l-3.5 3.5M14.5 33.5L11 37"/></svg>',
+  cloud:'<svg viewBox="0 0 48 48" fill="none" stroke="#9fb3bf" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 35a8 8 0 010-16 11 11 0 0120.5 3A6.5 6.5 0 0134 35z"/></svg>',
+  rain:'<svg viewBox="0 0 48 48" fill="none" stroke="#7aa8ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 29a8 8 0 010-16 11 11 0 0120.5 3A6.5 6.5 0 0134 29z"/><path d="M16 35l-2 5M25 35l-2 5M34 35l-2 5"/></svg>',
+  snow:'<svg viewBox="0 0 48 48" fill="none" stroke="#cfe6ff" stroke-width="2.4" stroke-linecap="round"><path d="M24 6v36M8.4 15l31.2 18M8.4 33l31.2-18"/></svg>',
+  storm:'<svg viewBox="0 0 48 48" fill="none" stroke="#ffb454" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 28a8 8 0 010-16 11 11 0 0120.5 3A6.5 6.5 0 0134 28z"/><path d="M25 28l-5 8h6l-4 8"/></svg>',
+  fog:'<svg viewBox="0 0 48 48" fill="none" stroke="#9fb3bf" stroke-width="2.4" stroke-linecap="round"><path d="M8 18h32M12 25h28M8 32h32M14 39h22"/></svg>'
+};
+function wxInfo(c){ if(c===0) return ["sun","Clear"]; if(c<=2) return ["sun","Mostly clear"]; if(c===3) return ["cloud","Overcast"]; if(c<=48) return ["fog","Fog"]; if(c<=67||(c>=80&&c<=82)) return ["rain","Rain"]; if(c<=77||c>=85&&c<=86) return ["snow","Snow"]; return ["storm","Storms"]; }
+
+/* ---------- render ---------- */
+function shell(){
+  const g = new Date(D.generated), now = new Date(), age = (now-g)/60000;
+  const name = D.meta?.name || "Brian";
+  const h = hourIn(now);
+  const greet = (h<12?"Good morning":h<17?"Good afternoon":"Good evening")+", "+name;
+  const nTasks = D.tasks.length;
+  const nextEv = nextEvent();
+  const line = (nTasks ? `${nTasks} thing${nTasks===1?"":"s"} worth a look.` : "Nothing needs you.") + (nextEv ? ` Next: ${nextEv.title} in ${rel(nextEv._d-now)}.` : "");
+  const stale = (D.sources||[]).filter(s=>!s.ok);
+  $("#app").innerHTML = `
+  <header class="top">
+    <div><div class="clock mono" id="clock"></div><div class="date" id="date"></div></div>
+    <div class="hello"><h1>${esc(greet)}</h1><p id="line">${esc(line)}</p></div>
+    <div class="wx" id="wx"></div>
+  </header>
+  <div id="stale"></div>
+  <section class="kpis" id="kpis"></section>
+  <div class="grid">
+    <div class="col">
+      <section class="card fill"><h2 class="lbl">Needs you <span class="sub" id="prog"></span></h2><div id="tasks"></div></section>
+    </div>
+    <div class="col"><section class="card fill"><h2 class="lbl">Today and next <span class="sub" id="evsub"></span></h2><div id="events"></div></section>
+      <section class="card work" id="work"></section></div>
+    <div class="col"><section class="card"><h2 class="lbl">Your teams <span class="sub">live</span></h2><div id="teams"></div></section>
+      <section class="card fill tri-card"><h2 class="lbl">Inbox triage</h2><table class="tri"><tbody>${D.triage.map(r=>`<tr><td>${esc(r.acct)}</td><td>${esc(r.finding)}</td></tr>`).join("")}</tbody></table></section></div>
+  </div>
+  <section class="wall-strip" id="strip"></section>
+  <section class="chan-sec"><h2 class="lbl" style="margin:1.3rem 0 .7rem">Channels</h2><div class="chan" id="chan"></div></section>
+  <div class="health" id="health"></div>
+  <p class="foot">Runs on GitHub and the Mac mini. No AI credits. Press W for wall mode, F for fullscreen.</p>`;
+  renderKpis(); renderTasks(); renderEvents(); renderTeams(); renderChannels(); renderStrip(); tick(); renderWx();
+}
+function nextEvent(){
+  const now = new Date();
+  const list = (D.events||[]).filter(e=>!e.all_day && e.start).map(e=>({...e,_d:new Date(e.start)})).filter(e=>e._d>now).sort((a,b)=>a._d-b._d);
+  return list[0];
+}
+const prevVals = {};
+function renderKpis(){
+  const hist = D.history||{};
+  $("#kpis").innerHTML = D.kpis.map(k=>{
+    const arr = k.key==="need"?null:hist[k.key]; const color = "#4de3c2";
+    return `<div class="card kpi"><div class="lbl">${esc(k.label)}</div><div class="v ${typeof k.num==="number"?"":"txt"}" data-k="${esc(k.key)}">${esc(k.value)}</div><div class="n">${esc(k.note)}</div>${spark(arr,color)}</div>`;
+  }).join("");
+  D.kpis.forEach(k=>{
+    const el = $(`.v[data-k="${k.key}"]`); const to = k.num, from = prevVals[k.key];
+    if(typeof to==="number" && typeof from==="number" && from!==to){
+      const t0=performance.now(); const step=t=>{const p=Math.min(1,(t-t0)/700); el.textContent=Math.round(from+(to-from)*(1-Math.pow(1-p,3))).toLocaleString(); if(p<1) requestAnimationFrame(step); else el.textContent=k.value}; requestAnimationFrame(step);
+    }
+    if(typeof to==="number") prevVals[k.key]=to;
+  });
+}
+function today(){ return dkey(new Date()); }
+function renderTasks(){
+  const done = JSON.parse(store.getItem("done:"+today())||"{}");
+  $("#tasks").innerHTML = D.tasks.length ? D.tasks.map((x,i)=>`<label class="task ${done[x.t]?"done":""}"><input type="checkbox" data-t="${esc(x.t)}" ${done[x.t]?"checked":""}><span><div class="t">${esc(x.t)}</div><div class="w">${esc(x.w)}</div></span><span class="pill ${esc(x.p[1])}">${esc(x.p[0])}</span></label>`).join("") : '<div class="empty">All clear. Nothing needs you.</div>';
+  $("#prog").textContent = D.tasks.length ? Object.values(done).filter(Boolean).length+" of "+D.tasks.length+" done" : "";
+  document.querySelectorAll("#tasks input").forEach(b=>b.addEventListener("change",e=>{done[b.dataset.t]=e.target.checked;store.setItem("done:"+today(),JSON.stringify(done));renderTasks();}));
+  fit();
+}
+function renderEvents(){
+  const now = new Date();
+  const evs = (D.events||[]).filter(e=>e.start).map(e=>({...e,_d:new Date(e.all_day? e.start+"T12:00:00" : e.start)})).sort((a,b)=>a._d-b._d);
+  const byDay = {};
+  evs.forEach(e=>{const k=e.all_day? e.start.slice(0,10) : dkey(e._d); (byDay[k]=byDay[k]||[]).push(e);});
+  let html="", first=true;
+  Object.keys(byDay).sort().forEach(k=>{
+    const list=byDay[k]; const d0=new Date(k+"T12:00:00"); const diff=Math.round((Date.parse(k)-Date.parse(dkey(now)))/86400000);
+    const label = diff===0 ? "Today" : diff===1 ? "Tomorrow" : d0.toLocaleDateString([], {weekday:"long", month:"short", day:"numeric"});
+    html += `<div class="day">${esc(label)}</div>`;
+    list.sort((a,b)=>(b.all_day?1:0)-(a.all_day?1:0) || a._d-b._d).forEach(e=>{
+      const past = !e.all_day && e._d<now && diff===0; const soon = !e.all_day && e._d>=now && e._d-now<3600000*3 && diff===0;
+      const cls = past?"past":(soon&&first?"now":""); if(soon&&first) first=false;
+      html += `<div class="ev ${cls}"><span class="when">${e.all_day?"All day":esc(fmtTime(e._d))}</span><span class="what">${esc(e.title)}</span><span class="in">${soon?esc(rel(e._d-now)):""}</span></div>`;
+    });
+  });
+  $("#events").innerHTML = html || '<div class="empty">Nothing scheduled in the next 7 days.</div>';
+  $("#evsub").textContent = evs.length ? evs.length+" in 7 days" : ""; fit();
+}
+function gameHtml(t){
+  const L = LIVE[t.team];
+  let st="", sc="";
+  if(L){
+    sc = L.score; st = L.state==="in" ? `<span class="livetag">LIVE</span> ${esc(L.detail||"")}` : L.state==="post" ? "Final" : "Today " + esc(L.detail||"");
+    return `<div class="game"><div class="row"><b>${esc(t.team)}</b><span class="sc">${esc(sc)}</span></div><div class="st">${st} ${esc(L.name||"")}</div></div>`;
+  }
+  const nx=(t.next||[])[0], lt=(t.last||[])[0];
+  const when = nx ? new Date(nx.when).toLocaleString([], {weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit", timeZone:TZ()}) : "No game scheduled";
+  const last = lt ? "Last: "+Object.entries(lt.score||{}).map(([a,b])=>a+" "+b).join(", ") : "";
+  return `<div class="game"><div class="row"><b>${esc(t.team)}</b><span class="st">${nx?esc(nx.name):""}</span></div><div class="st">${esc(when)}</div><div class="st">${esc(last)}</div></div>`;
+}
+
+/* wall mode: hide trailing rows that do not fit, so nothing is ever cut in half */
+let fitQ=0;
+function fit(){ cancelAnimationFrame(fitQ); fitQ=requestAnimationFrame(()=>{
+  const items = c => [...c.querySelectorAll("#tasks>*, #events>*, #teams>*, .tri tr, #work .wrow")];
+  document.querySelectorAll(".grid .col").forEach(col=>{
+    const cards=[...col.querySelectorAll(".card")];
+    cards.forEach(c=>{ items(c).forEach(i=>i.style.display=""); if(c.classList.contains("tri-card")) c.style.display=""; });
+    if(!document.body.classList.contains("wall")) return;
+    const over = c => c.scrollHeight > c.clientHeight+1;
+    for(let g=0; g<200; g++){
+      let target = cards.find(c=>over(c) && items(c).filter(i=>i.style.display!=="none").length>1);
+      if(!target && over(col)) target = [...cards].reverse().find(c=>items(c).filter(i=>i.style.display!=="none").length>1);
+      if(!target){ const tri = cards.find(c=>c.classList.contains("tri-card") && c.style.display!=="none" && over(c)); if(tri){ tri.style.display="none"; continue; } break; }
+      let vis = items(target).filter(i=>i.style.display!=="none"); vis[vis.length-1].style.display="none";
+      vis = items(target).filter(i=>i.style.display!=="none"); while(vis.length>1 && vis[vis.length-1].classList.contains("day")){ vis[vis.length-1].style.display="none"; vis.pop(); }
+    }
+  });
+});}
+window.addEventListener("resize", fit);
+function renderTeams(){ $("#teams").innerHTML = (D.teams||[]).map(gameHtml).join("") || '<div class="empty">Schedules unavailable.</div>'; fit(); }
+function renderChannels(){
+  const cls = {live:"",snap:"snap",off:"off"};
+  $("#chan").innerHTML = D.channels.map(c=>`<article class="card ch"><div class="nm">${esc(c.name)}<span class="dot ${cls[c.state]||""}" title="${esc(c.state==="live"?"Connected":c.state==="snap"?"Manual entry":"Not connected")}"></span></div><div class="h">${esc(c.handle)}</div><div class="s">${esc(c.stat)}</div><div class="x">${esc(c.next)}</div></article>`).join("");
+}
+function renderStrip(){
+  $("#strip").innerHTML = D.channels.map(c=>`<span class="chip"><span class="dot ${c.state==="snap"?"snap":c.state==="off"?"off":""}"></span>${esc(c.name)} <span style="color:var(--mute)">${esc(c.stat)}</span></span>`).join("");
+}
+function renderHealth(){
+  const now = new Date();
+  const items = (D.sources||[]).map(s=>{
+    const age = s.updated ? (now-new Date(s.updated))/60000 : null;
+    const limit = s.key==="mac" ? 180 : 120;
+    const bad = !s.ok || (age!==null && age>limit);
+    return `<span title="${esc(s.err||"")}"><span class="dot ${bad?"bad":""}"></span>${esc(s.label)} ${s.ok&&age!==null?esc(rel(age*60000))+" ago":"offline"}</span>`;
+  });
+  $("#health").innerHTML = items.join("");
+  const g = new Date(D.generated), a=(now-g)/60000;
+  $("#stale").innerHTML = a>90 ? `<div class="stale">Data is ${esc(rel(a*60000))} old. The cloud job may have stopped.</div>` : "";
+}
+function renderWx(){
+  if(!WX){ $("#wx").innerHTML=""; return; }
+  const [ic,txt]=wxInfo(WX.code);
+  $("#wx").innerHTML = `${WXI[ic]}<div><div class="t">${Math.round(WX.t)}°</div><div class="d">${esc(txt)}, H ${Math.round(WX.hi)}° L ${Math.round(WX.lo)}°${WX.pp!=null?`, ${WX.pp}% rain`:""}</div></div>`;
+}
+function tick(){
+  const n = new Date(), z = TZ();
+  const c = $("#clock"); if(c) c.innerHTML = n.toLocaleTimeString([], {hour:"numeric", minute:"2-digit", timeZone:z}).replace(/\s?(AM|PM)/i,"<small>$1</small>");
+  const d = $("#date"); if(d) d.textContent = n.toLocaleDateString([], {weekday:"long", month:"long", day:"numeric", year:"numeric", timeZone:z});
+  const h = hourIn(n);
+  document.body.classList.toggle("night", (D?.meta?.dim!==false) && (h>=22 || h<6) && !location.search.includes("dim=off"));
+}
+
+/* ---------- live data: weather, scores, data file ---------- */
+async function loadWx(){
+  try{
+    const {lat,lon} = D.meta;
+    const j = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=auto&forecast_days=1`)).json();
+    WX = {t:j.current.temperature_2m, code:j.current.weather_code, hi:j.daily.temperature_2m_max[0], lo:j.daily.temperature_2m_min[0], pp:j.daily.precipitation_probability_max[0]};
+    renderWx();
+  }catch(e){}
+}
+async function loadScores(){
+  let anyLive=false;
+  for(const t of (D.teams||[])){
+    try{
+      const j = await (await fetch(`https://site.api.espn.com/apis/site/v2/sports/${t.path}/scoreboard`)).json();
+      const ev = (j.events||[]).find(e=>(e.competitions?.[0]?.competitors||[]).some(c=>c.team?.abbreviation===t.abbr));
+      if(!ev){ delete LIVE[t.team]; continue; }
+      const comp = ev.competitions[0], st = comp.status.type;
+      const sameDay = dkey(new Date(ev.date))===dkey(new Date());
+      if(st.state==="pre" && !sameDay){ delete LIVE[t.team]; continue; }
+      if(st.state==="post" && !sameDay){ delete LIVE[t.team]; continue; }
+      const away = comp.competitors.find(c=>c.homeAway==="away"), home = comp.competitors.find(c=>c.homeAway==="home");
+      LIVE[t.team] = {state:st.state, detail:st.shortDetail, name:ev.shortName, score: st.state==="pre" ? "" : `${away.team.abbreviation} ${away.score}  ${home.team.abbreviation} ${home.score}`};
+      if(st.state==="in") anyLive=true;
+    }catch(e){}
+  }
+  renderTeams();
+  setTimeout(loadScores, anyLive ? 30000 : 300000);
+}
+async function refreshData(){
+  if(!BLOB && !PLAIN) return;
+  if(PLAIN) return;
+  try{
+    const blob = await (await fetch("data.enc.json?t="+Date.now(), {cache:"no-store"})).json();
+    const nd = await decryptBlob(blob, PASS);
+    if(nd.generated !== D.generated){ D = nd; rerender(); }
+  }catch(e){}
+}
+/* ---------- work lane: counts only, handed over by the local browser add-on; never stored, never uploaded ---------- */
+let WORK = null, WORK_AT = 0;
+window.addEventListener("message", e => {
+  if (e.source !== window || !e.data || e.data.source !== "cc-work-bridge" || e.data.v !== 1) return;
+  WORK = e.data.work || null; WORK_AT = Date.now(); renderWork();
+});
+function renderWork(){
+  const el = $("#work"); if(!el) return;
+  const now = Date.now(), FRESH = 25*60000;
+  const age = p => p && p.ts ? now - p.ts : Infinity;
+  const links = '<div class="wlinks"><a href="https://m365.cloud.microsoft/chat" target="_blank" rel="noopener">Open Copilot</a><a href="https://outlook.office.com/mail/" target="_blank" rel="noopener">Open Outlook</a></div>';
+  if(!WORK || (!WORK.mail && !WORK.cal && !WORK.copilot)){
+    el.innerHTML = `<h2 class="lbl">Work <span class="sub">not connected</span></h2><div class="empty">Add-on not detected in this browser. Work lane is off.</div>${links}`;
+    fit(); return;
+  }
+  const rows = [];
+  const m = WORK.mail;
+  if(m){ const stale = age(m) > FRESH;
+    (m.folders||[]).forEach(f=>rows.push(`<div class="wrow"><span class="wk">${esc(f.label)}</span><span class="wv ${stale?"bad":f.n>0?"hot":""}">${stale?"sign in needed":f.n}</span></div>`)); }
+  const c = WORK.cal;
+  if(c){ const stale = age(c) > FRESH;
+    if(stale) rows.push('<div class="wrow"><span class="wk">Next meeting</span><span class="wv bad">sign in needed</span></div>');
+    else { const up = (c.events||[]).map(x=>({s:new Date(x.s),e:new Date(x.e)})).filter(x=>dkey(x.s)===dkey(new Date()) && x.e>new Date()).sort((a,b)=>a.s-b.s);
+      const nx = up[0];
+      rows.push(`<div class="wrow"><span class="wk">Next meeting</span><span class="wv">${nx ? (nx.s<=new Date() ? "Now, until "+esc(fmtTime(nx.e)) : esc(fmtTime(nx.s))+" (in "+esc(rel(nx.s-new Date()))+")") : "None left today"}</span></div>`);
+      if(up.length>1) rows.push(`<div class="wrow"><span class="wk">Later today</span><span class="wv">${up.length-1} more</span></div>`); } }
+  const b = WORK.copilot;
+  if(b){ const stale = age(b) > 60*60000;
+    rows.push(`<div class="wrow"><span class="wk">Copilot briefing</span><span class="wv ${stale?"bad":""}">${stale?"sign in needed":`${b.red} urgent, ${b.orange} watch, ${b.yellow} low`}</span></div>`);
+    if(!stale && b.title) rows.push(`<div class="wrow"><span class="wk">As of</span><span class="wv">${esc(String(b.title).replace(/^.*?(briefing|digest)\s*\|\s*/i,"").slice(0,60))}</span></div>`); }
+  const live = [m,c,b].filter(Boolean).every(p=>age(p) <= 60*60000);
+  el.innerHTML = `<h2 class="lbl">Work <span class="sub">${live?"live":"check sign-in"}</span></h2>${rows.join("")}${links}`;
+  fit();
+}
+setInterval(renderWork, 30000);
+
+function rerender(){ renderWork(); renderKpis(); renderTasks(); renderEvents(); renderTeams(); renderChannels(); renderStrip(); renderHealth(); $("#line").textContent = ""; shellLine(); }
+function shellLine(){
+  const nTasks=D.tasks.length, ne=nextEvent();
+  $("#line").textContent = (nTasks ? `${nTasks} thing${nTasks===1?"":"s"} worth a look.` : "Nothing needs you.") + (ne ? ` Next: ${ne.title} in ${rel(ne._d-new Date())}.` : "");
+}
+
+/* ---------- modes & controls ---------- */
+function setWall(on){
+  document.body.classList.toggle("wall", on); if(D) renderTasks(); fit();
+  $("#bMode").textContent = on ? "Desk" : "Wall"; $("#bMode").classList.toggle("on", on);
+  history.replaceState(null,"", on ? "#wall" : location.pathname + location.search);
+}
+let wake=null;
+async function toggleAwake(){
+  try{
+    if(wake){ await wake.release(); wake=null; $("#bAwake").classList.remove("on"); return; }
+    wake = await navigator.wakeLock.request("screen"); $("#bAwake").classList.add("on");
+    wake.addEventListener("release",()=>{wake=null;$("#bAwake").classList.remove("on")});
+  }catch(e){ $("#bAwake").textContent="Not supported"; }
+}
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible" && $("#bAwake")?.classList.contains("on")===false && store.getItem("awake")==="1") toggleAwake(); });
+let idleT; function wakeUI(){ document.body.classList.remove("idle"); clearTimeout(idleT); idleT=setTimeout(()=>document.body.classList.add("idle"),6000); }
+["mousemove","keydown","touchstart"].forEach(e=>addEventListener(e,wakeUI,{passive:true}));
+addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT") return; if(e.key==="w"||e.key==="W") setWall(!document.body.classList.contains("wall")); if(e.key==="f"||e.key==="F") toggleFs(); });
+function toggleFs(){ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.(); }
+
+async function start(model){
+  D = model;
+  $("#lock").hidden = true; $("#app").hidden = false; $("#ctl").hidden = false;
+  shell(); renderHealth();
+  setWall(location.hash==="#wall");
+  $("#bMode").onclick = ()=>setWall(!document.body.classList.contains("wall"));
+  $("#bFull").onclick = toggleFs; $("#bAwake").onclick = ()=>{ store.setItem("awake", wake?"0":"1"); toggleAwake(); };
+  $("#bLock").onclick = ()=>{ store.removeItem("cc_pw"); location.reload(); };
+  wakeUI(); loadWx(); loadScores();
+  setInterval(tick, 1000); setInterval(()=>{renderEvents();renderHealth();shellLine();}, 30000);
+  setInterval(loadWx, 900000); setInterval(refreshData, 90000);
+  // gentle drift protects panels from burn-in
+  let k=0; setInterval(()=>{ k=(k+1)%4; document.body.style.transform = `translate(${[0,2,2,0][k]}px,${[0,0,2,2][k]}px)`; }, 300000);
+}
+async function boot(){
+  if(PLAIN){ start(PLAIN); return; }
+  $("#lock").hidden = false;
+  const saved = store.getItem("cc_pw");
+  if(saved){ try{ PASS = saved; start(await decryptBlob(BLOB, saved)); return; }catch(e){ store.removeItem("cc_pw"); } }
+}
+$("#f").addEventListener("submit", async e=>{
+  e.preventDefault();
+  try{ PASS = $("#pw").value; const m = await decryptBlob(BLOB, PASS); if($("#rem").checked) store.setItem("cc_pw", PASS); start(m); }
+  catch(err){ $("#msg").textContent = "Wrong passphrase."; }
+});
+boot();
+</script>
+</body>
+</html>
