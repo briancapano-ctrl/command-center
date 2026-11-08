@@ -15,7 +15,7 @@ def refresh(client_id, refresh_token):
 
 
 def _g(tok, path):
-    return http("GET", G + path, headers={"Authorization": f"Bearer {tok}"})
+    return http("GET", G + urllib.parse.quote(path, safe="/?$&=,:()"), headers={"Authorization": f"Bearer {tok}"})
 
 
 def folders(tok):
@@ -25,7 +25,7 @@ def folders(tok):
 
 
 def inbox_unread(tok, n=100):
-    j = _g(tok, "/me/mailFolders/inbox/messages?$filter=isRead eq false&$top=%d&$orderby=receivedDateTime desc"
+    j = _g(tok, "/me/mailFolders/inbox/messages?$filter=isRead eq false and receivedDateTime ge 2000-01-01T00:00:00Z&$top=%d&$orderby=receivedDateTime desc"
                 "&$select=id,from,subject,receivedDateTime" % n)
     out = []
     for m in j.get("value", []):
