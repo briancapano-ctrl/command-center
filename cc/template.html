@@ -117,7 +117,7 @@ body.wall #stale:empty{margin-top:-1.2vh}
 body.wall{font-size:clamp(13px,.55vw + .85vh,26px)}
 body.wall .top{margin:0}
 body.wall .clock{font-size:clamp(3rem,9vh,7rem)}
-body.wall .kpis{margin:0;grid-template-columns:repeat(5,1fr)}
+body.wall .kpis{margin:0;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:1fr}
 body.wall .kpi .v{font-size:clamp(2rem,6vh,4.4rem)}
 body.wall .grid{grid-template-columns:1.25fr 1fr .95fr;min-height:0;height:100%}
 body.wall .col{display:grid;height:100%;min-height:0;grid-template-rows:minmax(0,1fr);align-content:stretch;overflow:hidden}
@@ -135,11 +135,11 @@ body.wall .wall-strip{display:flex}
   body.wall .wrap{padding:1.2vh 2.4vw;gap:1vh}
   body.wall .top{grid-template-columns:auto 1fr auto;row-gap:.2rem}
   body.wall .clock{font-size:clamp(3rem,9vw,8rem)}
-  body.wall .kpis{grid-template-columns:repeat(2,1fr)}
+  body.wall .kpis{grid-template-columns:repeat(2,1fr);grid-auto-flow:row;grid-auto-columns:auto}
   body.wall .kpis .kpi:last-child{grid-column:1/-1}
   body.wall .kpi .v{font-size:clamp(2rem,5.2vw,4.6rem)}
   body.wall .kpi .v.txt{font-size:clamp(1.6rem,4.4vw,3.2rem)}
-  body.wall .grid{grid-template-columns:1fr;grid-template-rows:minmax(0,1.15fr) minmax(0,1fr) minmax(0,.85fr);gap:1vh}
+  body.wall .grid{grid-template-columns:1fr;grid-template-rows:minmax(0,1.45fr) minmax(0,1.15fr) minmax(0,.7fr);gap:1vh}
   body.wall .col{display:grid;grid-template-rows:minmax(0,1fr);height:100%}
   body.wall .col:last-child{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr)}
   body.wall .col:last-child .card{height:100%}
@@ -232,7 +232,7 @@ function shell(){
   <section class="chan-sec"><h2 class="lbl" style="margin:1.3rem 0 .7rem">Channels</h2><div class="chan" id="chan"></div></section>
   <div class="health" id="health"></div>
   <p class="foot">Runs on GitHub and the Mac mini. No AI credits. Press W for wall mode, F for fullscreen.</p>`;
-  renderKpis(); renderTasks(); renderEvents(); renderTeams(); renderChannels(); renderStrip(); tick(); renderWx();
+  renderKpis(); renderTasks(); renderEvents(); renderTeams(); renderChannels(); renderStrip(); renderWork(); tick(); renderWx();
 }
 function nextEvent(){
   const now = new Date();
