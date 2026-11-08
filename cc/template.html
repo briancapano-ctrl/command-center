@@ -467,7 +467,7 @@ async function boot(){
 }
 $("#f").addEventListener("submit", async e=>{
   e.preventDefault();
-  try{ PASS = $("#pw").value; const m = await decryptBlob(BLOB, PASS); if($("#rem").checked) store.setItem("cc_pw", PASS); start(m); }
+  try{ PASS = $("#pw").value.replace(/^[\s.,;:]+|[\s.,;:]+$/g, ""); const m = await decryptBlob(BLOB, PASS); if($("#rem").checked) store.setItem("cc_pw", PASS); start(m); }
   catch(err){ $("#msg").textContent = "Wrong passphrase."; }
 });
 boot();
