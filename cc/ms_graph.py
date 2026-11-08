@@ -25,10 +25,12 @@ def folders(tok):
 
 
 def inbox_unread(tok, n=100):
-    j = _g(tok, "/me/mailFolders/inbox/messages?$filter=isRead eq false and receivedDateTime ge 2000-01-01T00:00:00Z&$top=%d&$orderby=receivedDateTime desc"
-                "&$select=id,from,subject,receivedDateTime" % n)
+    j = _g(tok, "/me/mailFolders/inbox/messages?$top=%d&$orderby=receivedDateTime desc"
+                "&$select=id,from,subject,receivedDateTime,isRead" % n)
     out = []
     for m in j.get("value", []):
+        if m.get("isRead"):
+            continue
         addr = ((m.get("from") or {}).get("emailAddress") or {}).get("address", "")
         out.append({"id": m["id"], "from": addr, "domain": domain_of(addr),
                     "subject": m.get("subject", ""), "date": m.get("receivedDateTime", "")})
