@@ -1,17 +1,22 @@
 #!/bin/bash
-# One-time installer for the Mac mini. Run:  bash install.sh
+# One-time installer for the Mac mini. In Terminal:  bash ~/Downloads/CommandCenterMac/install.sh
+# Folder must contain: install.sh, mac_collect.py, deploy_key
 set -e
+HERE="$(cd "$(dirname "$0")" && pwd)"
 DIR="$HOME/CommandCenter"; CONF="$HOME/.config/command-center"; PLIST="$HOME/Library/LaunchAgents/com.commandcenter.mac.plist"
+REPO="${GH_REPO:-briancapano-ctrl/command-center}"
 mkdir -p "$DIR" "$CONF"
-cp "$(dirname "$0")/mac_collect.py" "$DIR/mac_collect.py"
-PY="$(python3 -c 'import os,sys;print(os.path.realpath(sys.executable))')"
+cp "$HERE/mac_collect.py" "$DIR/mac_collect.py"
+if [ -f "$HERE/deploy_key" ]; then
+  mv "$HERE/deploy_key" "$CONF/deploy_key"; chmod 600 "$CONF/deploy_key"
+fi
+[ -f "$CONF/deploy_key" ] || { echo "deploy_key missing"; exit 1; }
 if [ ! -f "$CONF/env" ]; then
-  read -p "GitHub repo (owner/name): " REPO
-  read -s -p "GitHub token (fine-grained, Contents read/write on that repo): " TOK; echo
-  read -s -p "Passphrase (same one you will use to unlock the page): " PW; echo
-  printf "GH_REPO=%s\nGH_TOKEN=%s\nCC_PASSPHRASE=%s\n" "$REPO" "$TOK" "$PW" > "$CONF/env"
+  read -s -p "Dashboard passphrase (the one you unlock the page with): " PW; echo
+  printf "GH_REPO=%s\nCC_PASSPHRASE=%s\n" "$REPO" "$PW" > "$CONF/env"
   chmod 600 "$CONF/env"
 fi
+PY="$(python3 -c 'import os,sys;print(os.path.realpath(sys.executable))')"
 cat > "$PLIST" <<PL
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -27,6 +32,6 @@ PL
 launchctl bootout "gui/$(id -u)/com.commandcenter.mac" 2>/dev/null || true
 launchctl bootstrap "gui/$(id -u)" "$PLIST"
 echo
-echo "Installed. One manual step: System Settings > Privacy & Security > Full Disk Access > add this file:"
+echo "Installed. One manual step: System Settings > Privacy & Security > Full Disk Access > click +, press Cmd+Shift+G, paste this path, Open:"
 echo "  $PY"
-echo "Then test:  launchctl kickstart -k gui/$(id -u)/com.commandcenter.mac ; sleep 5 ; cat $DIR/log.txt"
+echo "Then test:  launchctl kickstart -k gui/$(id -u)/com.commandcenter.mac ; sleep 15 ; cat $DIR/log.txt"

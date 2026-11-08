@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Runs on the Mac mini. Reads texts and reminders locally, encrypts the result, pushes it to your GitHub repo.
 Python 3.9 standard library plus the macOS `openssl` and `sqlite` already installed. Nothing leaves the Mac unencrypted."""
-import base64, datetime as dt, glob, json, os, re, shutil, sqlite3, subprocess, sys, tempfile, urllib.request
+import base64, datetime as dt, glob, json, os, re, shutil, sqlite3, subprocess, sys, tempfile
 
 HOME = os.path.expanduser("~")
 CONF = os.path.join(HOME, ".config", "command-center", "env")
@@ -132,20 +132,44 @@ def encrypt(payload, passphrase):
     return r.stdout
 
 
+def _git(env, args, cwd=None, timeout=90):
+    key = os.path.join(HOME, ".config", "command-center", "deploy_key")
+    kh = os.path.join(HOME, ".config", "command-center", "known_hosts")
+    ssh = (f"ssh -i {key} -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new "
+           f"-o UserKnownHostsFile={kh} -o ConnectTimeout=20")
+    r = subprocess.run(["git", "-c", "user.name=command-center-mac", "-c", "user.email=mac@command-center.local"] + args,
+                       cwd=cwd, capture_output=True, text=True, timeout=timeout,
+                       env={**os.environ, "GIT_SSH_COMMAND": ssh, "GIT_TERMINAL_PROMPT": "0"})
+    if r.returncode != 0:
+        raise RuntimeError(f"git {' '.join(args[:2])} failed: {r.stderr.strip()[:200]}")
+    return r.stdout
+
+
 def push(env, blob):
-    repo, tok = env["GH_REPO"], env["GH_TOKEN"]
-    url = f"https://api.github.com/repos/{repo}/contents/inbox/mac.enc"
-    hdr = {"Authorization": f"Bearer {tok}", "Accept": "application/vnd.github+json", "User-Agent": "command-center"}
-    sha = None
-    try:
-        sha = json.load(urllib.request.urlopen(urllib.request.Request(url, headers=hdr), timeout=20)).get("sha")
-    except Exception:
-        pass
-    body = {"message": "mac snapshot", "content": base64.b64encode(blob).decode()}
-    if sha:
-        body["sha"] = sha
-    req = urllib.request.Request(url, data=json.dumps(body).encode(), headers=hdr, method="PUT")
-    urllib.request.urlopen(req, timeout=30).read()
+    """Commits inbox/mac.enc to the repo over SSH with a deploy key limited to this one repository."""
+    repo = env["GH_REPO"]
+    url = f"ssh://git@ssh.github.com:443/{repo}.git"
+    work = os.path.join(HOME, "CommandCenter", "repo")
+    for attempt in (1, 2):
+        if not os.path.isdir(os.path.join(work, ".git")):
+            shutil.rmtree(work, ignore_errors=True)
+            os.makedirs(os.path.dirname(work), exist_ok=True)
+            _git(env, ["clone", "--depth", "1", url, work])
+        else:
+            _git(env, ["fetch", "--depth", "1", "origin", "main"], cwd=work)
+            _git(env, ["reset", "--hard", "origin/main"], cwd=work)
+        os.makedirs(os.path.join(work, "inbox"), exist_ok=True)
+        open(os.path.join(work, "inbox", "mac.enc"), "wb").write(blob)
+        _git(env, ["add", "inbox/mac.enc"], cwd=work)
+        if not _git(env, ["status", "--porcelain"], cwd=work).strip():
+            return
+        _git(env, ["commit", "-m", "mac snapshot"], cwd=work)
+        try:
+            _git(env, ["push", "origin", "HEAD:main"], cwd=work)
+            return
+        except RuntimeError:
+            if attempt == 2:
+                raise
 
 
 def main():
