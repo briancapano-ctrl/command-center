@@ -19,10 +19,12 @@ def _g(tok, path):
 
 
 def folders(tok):
-    j = _g(tok, "/me/mailFolders?$top=100&$select=id,displayName,unreadItemCount,totalItemCount,childFolderCount")
+    j = _g(tok, "/me/mailFolders?$top=100&$select=id,displayName,unreadItemCount,totalItemCount,childFolderCount"
+                "&$expand=singleValueExtendedProperties($filter=id eq 'Long 0xe08')")
     out = []
     for f in j.get("value", []):
-        out.append({"name": f["displayName"], "unread": f.get("unreadItemCount", 0), "total": f.get("totalItemCount", 0)})
+        sz = next((int(p["value"]) for p in f.get("singleValueExtendedProperties", []) if p.get("value", "").isdigit()), None)
+        out.append({"name": f["displayName"], "unread": f.get("unreadItemCount", 0), "total": f.get("totalItemCount", 0), "bytes": sz})
         if f.get("childFolderCount"):
             try:
                 c = _g(tok, f"/me/mailFolders/{f['id']}/childFolders?$top=50&$select=displayName,unreadItemCount,totalItemCount")
