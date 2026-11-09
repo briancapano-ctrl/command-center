@@ -66,7 +66,7 @@ def sweep(tok, promo_domains, msgs):
 PROTECTED = ("robinhood", "citi", "pennmutual", "starlink", "apple.com", "perplexity", "stubhub", "school")
 
 
-def sweep_backlog(tok, promo_domains, cursor, pages=40):
+def sweep_backlog(tok, promo_domains, cursor, pages=20):
     """Rolling pass back through the inbox, newest to oldest, for approved promo senders only (mark read and archive).
     Pages by received date, which is cheap on a large mailbox. Returns (swept, next_cursor); cursor None means start over."""
     swept = 0
