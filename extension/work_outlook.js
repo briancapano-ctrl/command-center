@@ -1,12 +1,19 @@
 // Runs on your Outlook web pages. Reads only: unread counts for the folders you list, and meeting start/end times.
 // It never reads sender names, subjects, meeting titles or message text.
 (() => {
+  // After the add-on is reloaded or updated, copies already running in open tabs lose their connection.
+  // Stop quietly instead of logging "Extension context invalidated" every 30 seconds.
+  const alive = () => { try { return !!(chrome.runtime && chrome.runtime.id); } catch (e) { return false; } };
+  const timers = [];
+  const every = (fn, ms) => timers.push(setInterval(() => { if (!alive()) { timers.forEach(clearInterval); return; } fn(); }, ms));
+  const put = obj => { if (alive()) chrome.storage.local.set(obj).catch(() => {}); };
   const DEFAULTS = { folders: [{ match: "Inbox", label: "Inbox unread" }] };
   const norm = t => t.replace(/\s+/g, " ").trim();
   const bare = t => norm(t).replace(/^[^A-Za-z0-9]+/, "").toLowerCase();
 
   async function cfg() {
-    const { cc_cfg } = await chrome.storage.local.get("cc_cfg");
+    if (!alive()) return { ...DEFAULTS };
+    const { cc_cfg } = await chrome.storage.local.get("cc_cfg").catch(() => ({}));
     return { ...DEFAULTS, ...(cc_cfg || {}) };
   }
 
@@ -25,7 +32,7 @@
       const hit = named.find(x => x.name === want) || named.find(x => x.name.includes(want));
       return hit ? { label: f.label, n: hit.n } : { label: f.label, n: null };
     }).filter(x => x.n !== null);
-    if (out.length) chrome.storage.local.set({ cc_mail: { ts: Date.now(), folders: out } });
+    if (out.length) put({ cc_mail: { ts: Date.now(), folders: out } });
   }
 
   function scanCalendar() {
@@ -40,18 +47,18 @@
       if (!isNaN(s) && !isNaN(e)) events.push({ s: s.toISOString(), e: e.toISOString() });
     });
     if (events.length || document.querySelector('[role="grid"],[role="application"]')) {
-      chrome.storage.local.set({ cc_cal: { ts: Date.now(), events } });
+      put({ cc_cal: { ts: Date.now(), events } });
     }
   }
 
   function tick() {
     try {
-      if (location.pathname.startsWith("/mail")) scanMail();
+      if (location.pathname.startsWith("/mail")) scanMail().catch(() => {});
       if (location.pathname.startsWith("/calendar")) scanCalendar();
     } catch (e) { /* page changed under us; try again next tick */ }
   }
   setTimeout(tick, 6000);
-  setInterval(tick, 30000);
+  every(tick, 30000);
 
   // Calendar tab: go back to today's view once an hour and after midnight so "next meeting" stays right.
   if (location.pathname.startsWith("/calendar") && sessionStorage.getItem("cc_lane") === "1") {
@@ -61,6 +68,6 @@
       sessionStorage.setItem("cc_cal_day", day());
       if (!location.pathname.startsWith("/calendar/view/day")) location.replace(location.origin + "/calendar/view/day");
     }
-    setInterval(() => location.replace(location.origin + "/calendar/view/day"), 60 * 60 * 1000);
+    every(() => location.replace(location.origin + "/calendar/view/day"), 60 * 60 * 1000);
   }
 })();

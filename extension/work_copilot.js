@@ -1,6 +1,12 @@
 // Runs on your Copilot chat tab. Finds your newest briefing chat, then counts the red, orange and yellow priority headings.
 // It stores the counts and the briefing's own date line only. No customer names or text.
 (() => {
+  // After the add-on is reloaded or updated, copies already running in open tabs lose their connection.
+  // Stop quietly instead of logging "Extension context invalidated" every 30 seconds.
+  const alive = () => { try { return !!(chrome.runtime && chrome.runtime.id); } catch (e) { return false; } };
+  const timers = [];
+  const every = (fn, ms) => timers.push(setInterval(() => { if (!alive()) { timers.forEach(clearInterval); return; } fn(); }, ms));
+  const put = obj => { if (alive()) chrome.storage.local.set(obj).catch(() => {}); };
   const PATTERN = /briefing|digest/i;
   const NOT_BRIEFING = /code|automation|prompt|template|setup|instruction|build/i;
   const GUARD = "cc_copilot_nav";
@@ -23,7 +29,7 @@
     const scope = heads.slice(start + 1);
     const count = e => scope.filter(h => h.innerText.trim().startsWith(e)).length;
     const title = heads[start].innerText.trim().replace(/^[^A-Za-z0-9]+/, "");
-    chrome.storage.local.set({ cc_copilot: { ts: Date.now(), title, red: count("\u{1F534}"), orange: count("\u{1F7E0}"), yellow: count("\u{1F7E1}") } });
+    put({ cc_copilot: { ts: Date.now(), title, red: count("\u{1F534}"), orange: count("\u{1F7E0}"), yellow: count("\u{1F7E1}") } });
     return true;
   }
 
@@ -43,7 +49,7 @@
     } catch (e) { /* retry next tick */ }
   }
   setTimeout(tick, 7000);
-  setInterval(tick, 30000);
+  every(tick, 30000);
   // Re-open the chat list every 15 minutes so a new morning briefing is picked up.
-  setInterval(() => { if (sessionStorage.getItem("cc_lane") === "1") { sessionStorage.removeItem(GUARD); location.href = "https://m365.cloud.microsoft/chat"; } }, 15 * 60000);
+  every(() => { if (sessionStorage.getItem("cc_lane") === "1") { sessionStorage.removeItem(GUARD); location.href = "https://m365.cloud.microsoft/chat"; } }, 15 * 60000);
 })();
