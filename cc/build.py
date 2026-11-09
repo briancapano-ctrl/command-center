@@ -135,6 +135,17 @@ def collect(cfg, pw):
             if cfg.get("outlook_promo_domains") and msgs:
                 src["outlook_swept"] = safe("outlook", lambda: M.sweep(tok, cfg["outlook_promo_domains"], msgs), err) or 0
                 msgs = M.inbox_unread(tok) if src["outlook_swept"] else msgs
+            if cfg.get("outlook_promo_domains") and "--demo" not in sys.argv:
+                CUR = os.path.join(ROOT, "state", "ms_cursor.json")
+                def _bk():
+                    cur = json.load(open(CUR)).get("skip", 0) if os.path.exists(CUR) else 0
+                    n, nxt = M.sweep_backlog(tok, cfg["outlook_promo_domains"], cur)
+                    json.dump({"skip": nxt}, open(CUR, "w"))
+                    return n
+                extra = safe("outlook_backlog", _bk, err) or 0
+                if extra:
+                    src["outlook_swept"] += extra
+                    msgs = M.inbox_unread(tok)
             src["outlook_unread"] = msgs
             src["outlook_cal"] = safe("outlook_cal", lambda: M.calendar(tok), err)
     src["mac"] = safe("mac", lambda: read_mac(pw), err)

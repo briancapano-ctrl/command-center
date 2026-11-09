@@ -63,6 +63,38 @@ def sweep(tok, promo_domains, msgs):
     return len(wanted)
 
 
+PROTECTED = ("robinhood", "citi", "pennmutual", "starlink", "apple.com", "perplexity", "stubhub", "school")
+
+
+def sweep_backlog(tok, promo_domains, cursor, pages=20):
+    """Rolling pass through the whole unread inbox for approved promo senders only (mark read and archive).
+    Returns (swept, next_cursor). Cursor counts unread messages that were kept, so archived ones do not shift it."""
+    swept, skip = 0, int(cursor or 0)
+    for _ in range(pages):
+        j = _g(tok, "/me/mailFolders/inbox/messages?$filter=isRead eq false&$top=100&$skip=%d&$select=id,from" % skip)
+        vals = j.get("value", [])
+        if not vals:
+            return swept, 0
+        hit = []
+        for m in vals:
+            dom = domain_of(((m.get("from") or {}).get("emailAddress") or {}).get("address", ""))
+            if any(x in dom for x in PROTECTED):
+                continue
+            if any(dom == d or dom.endswith("." + d) for d in promo_domains):
+                hit.append(m["id"])
+        for i in range(0, len(hit), 10):
+            chunk = hit[i:i + 10]
+            for op, mk in (("r", lambda mid: {"method": "PATCH", "url": f"/me/messages/{mid}", "headers": {"Content-Type": "application/json"}, "body": {"isRead": True}}),
+                           ("m", lambda mid: {"method": "POST", "url": f"/me/messages/{mid}/move", "headers": {"Content-Type": "application/json"}, "body": {"destinationId": "archive"}})):
+                http("POST", G + "/$batch", headers={"Authorization": f"Bearer {tok}"},
+                     body={"requests": [dict(mk(mid), id=f"{op}{k}") for k, mid in enumerate(chunk)]})
+        swept += len(hit)
+        skip += len(vals) - len(hit)
+        if len(vals) < 100:
+            return swept, 0
+    return swept, skip
+
+
 def calendar(tok, days=7):
     t0 = now()
     t1 = t0 + dt.timedelta(days=days)
