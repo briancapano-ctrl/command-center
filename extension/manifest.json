@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Command Center Work Lane",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Reads counts from your open Outlook and Copilot tabs and hands them to your Command Center page in this browser. Local only. Sends nothing anywhere.",
   "permissions": [
     "storage",
