@@ -1,2 +1,4 @@
 __pycache__/
 *.pyc
+.taste-skill/
+__pycache__/
