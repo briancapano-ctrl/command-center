@@ -12,12 +12,14 @@
 
   function read() {
     const outs = [...document.querySelectorAll('[data-testid="chatOutput"],[data-testid="markdown-reply"]')];
-    const last = outs[outs.length - 1];
-    if (!last) return false;
-    const heads = [...last.querySelectorAll("h1,h2,h3")];
-    let start = -1;
-    heads.forEach((h, i) => { if (/briefing|digest/i.test(h.innerText)) start = i; });
-    if (start < 0) return false; // not a briefing reply; keep the last good counts
+    if (!outs.length) return false;
+    // newest reply in this chat that is a briefing (has a heading with "briefing" or "digest")
+    let heads = [], start = -1;
+    for (let k = outs.length - 1; k >= 0 && start < 0; k--) {
+      heads = [...outs[k].querySelectorAll("h1,h2,h3")];
+      heads.forEach((h, i) => { if (start < 0 && /briefing|digest/i.test(h.innerText)) start = i; });
+    }
+    if (start < 0) return false; // no briefing reply here; keep the last good counts
     const scope = heads.slice(start + 1);
     const count = e => scope.filter(h => h.innerText.trim().startsWith(e)).length;
     const title = heads[start].innerText.trim().replace(/^[^A-Za-z0-9]+/, "");
