@@ -258,6 +258,8 @@ body[data-scene=overview] .overlay{display:none}
 .sc{display:grid;gap:var(--gap);height:100%;min-height:0}
 .sc>.card{overflow:hidden;min-height:0}
 .sc>.card.tl{min-height:520px}
+.work-health{margin:.2rem 0 .6rem;background:var(--warn-bg);color:var(--warn-ink);border-radius:12px;padding:.5rem .8rem;font-size:.8rem;line-height:1.45}
+.work-warn{color:var(--warn-ink)}
 @media(max-width:480px){.ctl{gap:.25rem;margin-top:1.6rem}.ctl button{padding:.35rem .6rem;font-size:.72rem}#window{width:min(100%,300px)}}
 .big{font:400 clamp(2.6rem,5vw,4.4rem)/1 var(--serif);letter-spacing:-.01em}
 .sc-today{grid-template-columns:1.25fr 1fr}.sc-today .side{display:grid;gap:var(--gap);grid-template-rows:auto 1fr;min-height:0}
@@ -597,9 +599,19 @@ function renderWork(){
     ${!linked?'<p class="work-note">Connect the work add-on in this Comet browser.</p>':
     `<div class="work-next"><small>${nx?esc(workDate(nx.s))+" · "+esc(workTime(nx)):"Work calendar"}</small><b>${nx?esc(nx.title):esc(workCalendarMessage())}</b></div>
     ${preview||`<p class="work-note">${b?`${Number(b.red)||0} urgent · ${Number(b.orange)||0} watch · ${Number(b.yellow)||0} low. Reload the updated add-on for details.`:"Waiting for the Copilot briefing."}</p>`}`}
-    <p class="work-note">Browser only. Personal data never goes to Copilot.</p>`;
+    ${workHealth().length?`<p class="work-note work-warn">${esc(workHealth()[0])}</p>`:""}<p class="work-note">Browser only. Personal data never goes to Copilot.</p>`;
   fit();
 }
+function workHealth(){
+  if(!WORK) return ["The work add-on is not reporting. Open this page in Comet with the add-on on."];
+  const m=t=>t?Math.round((Date.now()-t)/60000):null, out=[];
+  const chk=(o,lim,name,fix)=>{ const a=o?m(o.ts):null; if(a===null) out.push(`${name}: not connected. ${fix}`); else if(a>lim) out.push(`${name}: last update ${a} minutes ago. ${fix}`); };
+  chk(WORK.cal,25,"Work calendar","Keep the Outlook calendar tab open.");
+  chk(WORK.mail,25,"Work mail","Keep the Outlook mail tab open.");
+  chk(WORK.copilot,75,"Briefing","Keep the Latest Daily Briefing tab open.");
+  return out;
+}
+function workHealthHtml(){ const h=workHealth(); return h.length?`<div class="work-health" data-testid="work-health">${h.map(x=>`<div>${esc(x)}</div>`).join("")}</div>`:""; }
 function workLevel(x){ return x==="urgent"?"Urgent":x==="watch"?"Watch":"Low"; }
 function workAge(p){ if(!p?.ts) return "Not connected"; const m=Math.max(0,Math.floor((Date.now()-p.ts)/60000)); return m<1?"Synced just now":`Synced ${m}m ago`; }
 function workDate(s){ const d=new Date(s);return dkey(d)===dkey(new Date())?"Today":d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",timeZone:TZ()}); }
@@ -620,7 +632,7 @@ function sceneWork(){
   const items=(b?.items||[]).map((x,i)=>`<article class="work-item" data-testid="work-priority-${i}"><span class="work-priority ${esc(x.level)}">${esc(workLevel(x.level))}</span><h3>${esc(x.title)}</h3>${x.summary?`<p>${esc(x.summary)}</p>`:""}${x.action?`<div class="work-action"><b>Next action</b><p>${esc(x.action)}</p></div>`:""}</article>`).join("");
   const cpHref=b?.href&&/^https:\/\/m365\.cloud\.microsoft\/chat\/conversation\//.test(b.href)?b.href:"https://m365.cloud.microsoft/chat";
   return `<div class="sc sc-work">
-    <section class="card work-agenda"><h2 class="lbl">Work calendar <span class="sub">${esc(workAge(c))}</span></h2><p class="work-source">Allbridge · ${esc(c?.range||"Current work week")}${agenda?` · ${up.length} appointments`:""}</p>
+    <section class="card work-agenda"><h2 class="lbl">Work calendar <span class="sub">${esc(workAge(c))}</span></h2>${workHealthHtml()}<p class="work-source">Allbridge · ${esc(c?.range||"Current work week")}${agenda?` · ${up.length} appointments`:""}</p>
     <div class="work-scroll">${agenda||`<div class="empty">${esc(workCalendarMessage())}</div>`}${c?.status==="partial"&&agenda?`<p class="work-note">${esc(c.message)}</p>`:""}${c&&Date.now()-c.ts>25*60000?'<p class="work-note">Calendar feed is stale. Open Outlook to check sign-in.</p>':""}</div>
     <div class="work-bottom"><a href="https://outlook.cloud.microsoft/calendar/view/workweek#cc-lane" target="_blank" rel="noopener">Open work calendar</a><span>${mail||"Mail not connected"}</span></div></section>
     <section class="card work-briefing"><h2 class="lbl">Briefing priorities <span class="sub">${esc(workAge(b))}</span></h2><p class="work-source">${esc(b?.title||"Your latest Copilot briefing")}</p>
@@ -661,7 +673,9 @@ function shellLine(){
   const fact = (typeof decorFact==="function" && DECOR.th) ? decorFact()+" " : "";
   const br = (typeof briefLine==="function") ? briefLine() : "";
   if (br) { $("#line").textContent = br; return; }
-  $("#line").textContent = fact + (nTasks ? `${nTasks} thing${nTasks===1?" is":"s are"} worth a look.` : "Nothing needs you.") + (ne ? ` Next: ${ne.title} in ${rel(ne._d-new Date())}.` : "");
+  $("#line").textContent = fact + (nTasks ? `${nTasks} thing${nTasks===1?" is":"s are"} worth a look.` : "Nothing needs you.") + (()=>{ const wn=(typeof workUpcoming==="function"?workUpcoming():[]).find(x=>!x.allDay&&Date.parse(x.s)>Date.now()); const wd=wn?new Date(wn.s):null;
+    const pick=(wd&&(!ne||wd<ne._d))?{title:wn.title,_d:wd,work:1}:ne;
+    return pick?` Next${pick.work?" (work)":""}: ${pick.title} in ${rel(pick._d-new Date())}.`:""; })();
 }
 
 /* ---------- modes & controls ---------- */
