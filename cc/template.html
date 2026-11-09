@@ -109,7 +109,12 @@ body.wall .work .wlinks{display:none}
 .work-when{display:flex;flex-direction:column;gap:.25rem;font-size:.85rem}.work-when b{font-weight:600}.work-when span{color:var(--muted)}
 .sc-work .work-appointment h3,.sc-work .work-item h3{font:600 1rem/1.35 var(--sans);color:var(--ink);margin:0;overflow-wrap:anywhere}
 .work-appointment p,.work-appointment small{font-size:.8rem;color:var(--muted);margin:.3rem 0 0}
-.work-item{padding:1rem 0 1.25rem;border-top:1px solid var(--rule)}.work-item .work-priority{display:block;margin-bottom:.4rem}
+.work-item{padding:1rem 0 1.25rem;border-top:1px solid var(--rule)}.work-item .work-priority{display:inline-block;margin-bottom:.4rem}.work-item h3{display:block}
+.work-new{display:inline-block;margin-left:.5rem;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--acc2)}
+.work-item.handled{opacity:.5}
+.work-handle{margin-top:.7rem;font:500 .74rem var(--sans);color:var(--ink2);background:var(--surface);border:0;border-radius:999px;padding:.3rem .8rem;cursor:pointer}.work-handle:hover{background:var(--raised);color:var(--ink)}
+.work-toggle{margin:.6rem 0}
+body.wall .work-handle{display:none}
 .work-item p{font-size:.9rem;line-height:1.6;color:var(--ink2);margin:.6rem 0 0;overflow-wrap:anywhere}
 .work-action{padding:.75rem 1rem;background:var(--raised);border-radius:12px;margin-top:.8rem}.work-action>b{font-size:.78rem;font-weight:600}.work-action p{margin-top:.3rem}
 .work-bottom{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-top:1rem;border-top:1px solid var(--rule);font-size:.75rem;color:var(--muted)}
@@ -594,7 +599,7 @@ function renderWork(){
   const el = $("#work"); if(!el) return;
   const b=WORK?.copilot, c=WORK?.cal, nx=workUpcoming()[0];
   const linked=!!(b||c||WORK?.mail);
-  const preview=(b?.items||[]).slice(0,2).map(x=>`<div class="work-peek"><span class="work-priority ${esc(x.level)}">${esc(workLevel(x.level))}</span><span>${esc(x.title)}</span></div>`).join("");
+  const hd=workBriefState(b).handled, preview=(b?.items||[]).filter(x=>!hd.includes(x.title)).slice(0,2).map(x=>`<div class="work-peek"><span class="work-priority ${esc(x.level)}">${esc(workLevel(x.level))}</span><span>${esc(x.title)}</span></div>`).join("");
   el.innerHTML=`<h2 class="lbl">Work <button class="work-open" data-s="work" data-testid="open-work">Open work view</button></h2>
     ${!linked?'<p class="work-note">Connect the work add-on in this Comet browser.</p>':
     `<div class="work-next"><small>${nx?esc(workDate(nx.s))+" · "+esc(workTime(nx)):"Work calendar"}</small><b>${nx?esc(nx.title):esc(workCalendarMessage())}</b></div>
@@ -602,6 +607,25 @@ function renderWork(){
     ${workHealth().length?`<p class="work-note work-warn">${esc(workHealth()[0])}</p>`:""}<p class="work-note">Browser only. Personal data never goes to Copilot.</p>`;
   fit();
 }
+let WORK_SHOWALL=false;
+function workBriefState(b){
+  const key=b?.title||"", items=(b?.items||[]).map(x=>x.title);
+  let st={};try{st=JSON.parse(store.getItem("wbrief")||"{}")}catch(e){}
+  if(key&&st.cur?.key!==key){ st={prev:st.cur?.titles||null,cur:{key,titles:items},handled:[]}; store.setItem("wbrief",JSON.stringify(st)); }
+  const fresh=st.prev?items.filter(t=>!st.prev.includes(t)):[];
+  return {handled:(st.handled||[]).filter(t=>items.includes(t)),fresh};
+}
+function workToggleHandled(t){
+  let st={};try{st=JSON.parse(store.getItem("wbrief")||"{}")}catch(e){}
+  const h=new Set(st.handled||[]); h.has(t)?h.delete(t):h.add(t); st.handled=[...h];
+  store.setItem("wbrief",JSON.stringify(st));
+}
+document.addEventListener("click",e=>{
+  const h=e.target.closest?.("[data-wh]"), t=e.target.closest?.("[data-wtoggle]");
+  if(!h&&!t) return;
+  if(h) workToggleHandled(h.dataset.wh); else WORK_SHOWALL=!WORK_SHOWALL;
+  renderWork(); if(SCENE==="work") renderScene(false);
+});
 function workHealth(){
   if(!WORK) return ["The work add-on is not reporting. Open this page in Comet with the add-on on."];
   const m=t=>t?Math.round((Date.now()-t)/60000):null, out=[];
@@ -629,7 +653,11 @@ function sceneWork(){
   const c=WORK?.cal,b=WORK?.copilot,m=WORK?.mail,up=workUpcoming();
   const mail=(m?.folders||[]).map(f=>`${esc(f.label)}: ${Number(f.n)||0}`).join(" · ");
   const agenda=up.map((x,i)=>`<article class="work-appointment" data-testid="work-appointment-${i}"><div class="work-when"><b>${esc(workDate(x.s))}</b><span>${esc(workTime(x))}</span></div><div><h3>${esc(x.title)}</h3>${x.location?`<p>${esc(x.location)}</p>`:""}${x.private?'<small>Details hidden</small>':""}</div></article>`).join("");
-  const items=(b?.items||[]).map((x,i)=>`<article class="work-item" data-testid="work-priority-${i}"><span class="work-priority ${esc(x.level)}">${esc(workLevel(x.level))}</span><h3>${esc(x.title)}</h3>${x.summary?`<p>${esc(x.summary)}</p>`:""}${x.action?`<div class="work-action"><b>Next action</b><p>${esc(x.action)}</p></div>`:""}</article>`).join("");
+  const bk=workBriefState(b), hid=bk.handled;
+  const shown=(b?.items||[]).map((x,i)=>({x,i})).filter(o=>!hid.includes(o.x.title)||WORK_SHOWALL);
+  const items=shown.map(({x,i})=>{ const done=hid.includes(x.title), isNew=bk.fresh.includes(x.title);
+    return `<article class="work-item${done?" handled":""}" data-testid="work-priority-${i}"><span class="work-priority ${esc(x.level)}">${esc(workLevel(x.level))}</span>${isNew?'<span class="work-new">New</span>':""}<h3>${esc(x.title)}</h3>${x.summary?`<p>${esc(x.summary)}</p>`:""}${x.action?`<div class="work-action"><b>Next action</b><p>${esc(x.action)}</p></div>`:""}<button class="work-handle" data-wh="${esc(x.title)}" data-testid="work-handle-${i}">${done?"Undo handled":"Mark handled"}</button></article>`}).join("")
+    + (hid.length?`<button class="work-handle work-toggle" data-wtoggle="1">${WORK_SHOWALL?"Hide":"Show"} ${hid.length} handled</button>`:"");
   const cpHref=b?.href&&/^https:\/\/m365\.cloud\.microsoft\/chat\/conversation\//.test(b.href)?b.href:"https://m365.cloud.microsoft/chat";
   return `<div class="sc sc-work">
     <section class="card work-agenda"><h2 class="lbl">Work calendar <span class="sub">${esc(workAge(c))}</span></h2>${workHealthHtml()}<p class="work-source">Allbridge · ${esc(c?.range||"Current work week")}${agenda?` · ${up.length} appointments`:""}</p>
