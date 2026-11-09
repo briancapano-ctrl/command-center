@@ -33,7 +33,6 @@
         "https://outlook.office365.com/*"
       ],
       "js": [
-        "work_parse.js",
         "work_outlook.js"
       ],
       "run_at": "document_idle"
@@ -43,7 +42,6 @@
         "https://m365.cloud.microsoft/chat*"
       ],
       "js": [
-        "work_parse.js",
         "work_copilot.js"
       ],
       "run_at": "document_idle"
