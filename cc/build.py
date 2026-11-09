@@ -144,6 +144,8 @@ DAILY = os.path.join(ROOT, "state", "daily.json")
 
 def daily_totals(src):
     """Cleanup counters add up across the day's runs instead of showing only the latest run."""
+    if "--demo" in sys.argv:
+        return
     try:
         day = now().strftime("%Y-%m-%d")
         st = json.load(open(DAILY)) if os.path.exists(DAILY) else {}
