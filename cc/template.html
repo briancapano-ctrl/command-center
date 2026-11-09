@@ -972,9 +972,9 @@ function moonPath(cx,cy,r,age){
 function lightInfo(now){
   const lat=D?.meta?.lat||36.02, lon=D?.meta?.lon||-78.48, today=localDate(now);
   const s=sunTimes(today,lat,lon), y=sunTimes(new Date(today.getTime()-DAY),lat,lon), tm=sunTimes(new Date(today.getTime()+DAY),lat,lon);
-  const t=now.getTime(), M=60000;
+  const t=now.getTime(), M=60000, R=+s.rise, S=+s.set;
   let phase="day";
-  if(t<s.rise-45*M||t>s.set+45*M) phase="night"; else if(t<s.rise) phase="dawn"; else if(t<s.rise+50*M) phase="morning"; else if(t>s.set) phase="dusk"; else if(t>s.set-70*M) phase="golden";
+  if(t<R-45*M||t>S+45*M) phase="night"; else if(t<R) phase="dawn"; else if(t<R+50*M) phase="morning"; else if(t>S) phase="dusk"; else if(t>S-70*M) phase="golden";
   const forced=QS.get("light"); if(forced) phase=forced;
   return {s,y,tm,phase,dark:phase==="night"||phase==="dusk"};
 }
@@ -1087,7 +1087,7 @@ function drawWindow(){
   const t=now.getTime();
   if(!night||ph==="dusk"){
     const f=Math.min(1,Math.max(0,(t-li.s.rise)/(li.s.set-li.s.rise)));
-    if(t>li.s.rise-20*60000&&t<li.s.set+20*60000&&!over){ const sx=X0+20+f*(W-40), sy=Y0+150-Math.sin(Math.PI*f)*120; o+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="13" fill="${ph==="golden"||ph==="dawn"||ph==="morning"?"#f1a95b":"#f6d36b"}"/>`; }
+    if(t>li.s.rise-20*60000&&t<+li.s.set+20*60000&&!over){ const sx=X0+20+f*(W-40), sy=Y0+150-Math.sin(Math.PI*f)*120; o+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="13" fill="${ph==="golden"||ph==="dawn"||ph==="morning"?"#f1a95b":"#f6d36b"}"/>`; }
   }
   if(night){
     if(!over) for(let k=0;k<22;k++){ const x=X0+R()*W, y=Y0+R()*110; o+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(0.6+R()*0.9).toFixed(2)}" fill="#f4f1e6">${anim?`<animate attributeName="opacity" values="1;.3;1" dur="${(2+R()*4).toFixed(1)}s" begin="-${(R()*4).toFixed(1)}s" repeatCount="indefinite"/>`:""}</circle>`; }
