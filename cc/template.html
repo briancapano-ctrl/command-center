@@ -221,6 +221,18 @@ body.wall:not(.idle) .snav.wallnav button.on{color:#04110d;width:auto}
 @media (orientation:portrait){body.wall .sc-sports{grid-template-columns:1fr}}
 .snav #bAuto{display:none}
 .drawer .it{margin-bottom:.4rem}
+
+/* ===== v4: Mac lane cards ===== */
+.hm{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}.hm div{background:rgba(255,255,255,.04);border-radius:12px;padding:.6rem .7rem}.hm .lbl{margin-bottom:.25rem}.hm b{font:300 1.5rem/1.1 var(--f);letter-spacing:-.03em;display:block}.hm small{color:var(--mute);font-size:.72rem}
+.hm .bad b{color:var(--bad)}.hm .warnb b{color:var(--warn)}
+.upbar{display:flex;gap:2px;margin-top:.5rem;height:.5rem}.upbar i{flex:1;border-radius:2px;background:var(--acc);opacity:.75}.upbar i.d{background:var(--bad);opacity:1}
+.bd{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--line);font-size:.9rem}.bd:last-child{border-bottom:0}.bd small{color:var(--mute)}.bd .in{font:600 .72rem var(--f);color:var(--acc);white-space:nowrap}.bd.today .in{color:var(--warn)}
+.mem{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:.5rem;aspect-ratio:3/1.6;margin-top:.3rem}.mem img{width:100%;height:100%;object-fit:cover;border-radius:10px;display:block}.mem figure{position:relative;margin:0;overflow:hidden;border-radius:10px}.mem figure:first-child{grid-row:1/3}
+.mem figcaption{position:absolute;left:.5rem;bottom:.4rem;font:700 .75rem var(--f);background:rgba(0,0,0,.55);padding:.15rem .5rem;border-radius:99px}
+.sc-home{grid-template-columns:1.2fr 1fr 1fr}.sc-home .hm b{font-size:clamp(1.6rem,3vw,2.8rem)}.sc-home .memcard{display:flex;flex-direction:column}.sc-home .mem{aspect-ratio:auto;flex:1;min-height:0;margin-top:.5rem}
+@media (orientation:portrait){body.wall .sc-home{grid-template-columns:1fr 1fr;grid-template-rows:auto minmax(0,1fr)}body.wall .sc-home>.card:first-child{grid-column:1/-1}body.wall .sc-home .hm{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:980px){.sc-home{grid-template-columns:1fr}}
+body.wall #mem,body.wall #bdays{display:none}
 </style>
 </head>
 <body>
@@ -300,8 +312,10 @@ function shell(){
       <section class="card fill"><h2 class="lbl">Needs you <span class="sub" id="prog"></span></h2><form class="qa" id="qa"><input placeholder="Add something for today, press Enter" maxlength="120" autocomplete="off"></form><div id="tasks"></div></section>
     </div>
     <div class="col"><section class="card fill"><h2 class="lbl">Today and next <span class="sub" id="evsub"></span></h2><div id="events"></div></section>
-      <section class="card work" id="work"></section></div>
+      <section class="card work" id="work"></section>
+      <section class="card" id="home"></section></div>
     <div class="col"><section class="card"><h2 class="lbl">Your teams <span class="sub">live</span></h2><div id="teams"></div></section>
+      <section class="card" id="bdays"></section><section class="card" id="mem"></section>
       <section class="card fill tri-card"><h2 class="lbl">Inbox triage</h2><table class="tri"><tbody>${D.triage.map(r=>`<tr><td>${esc(r.acct)}</td><td>${esc(r.finding)}</td></tr>`).join("")}</tbody></table></section></div>
   </div>
   <section class="overlay" id="overlay"></section>
@@ -309,7 +323,7 @@ function shell(){
   <section class="chan-sec"><h2 class="lbl" style="margin:1.3rem 0 .7rem">Channels</h2><div class="chan" id="chan"></div></section>
   <div class="health" id="health"></div>
   <p class="foot">Runs on GitHub and the Mac mini. No AI credits. Press W for wall mode, F for fullscreen.</p>`;
-  renderKpis(); renderTasks(); renderEvents(); renderTeams(); renderChannels(); renderStrip(); renderWork(); tick(); renderWx();
+  renderKpis(); renderTasks(); renderEvents(); renderTeams(); renderChannels(); renderStrip(); renderWork(); renderHome(); renderBdays(); renderMem(); tick(); renderWx();
 }
 function nextEvent(){
   const now = new Date();
@@ -345,7 +359,7 @@ function renderEvents(){
     list.sort((a,b)=>(b.all_day?1:0)-(a.all_day?1:0) || a._d-b._d).forEach(e=>{
       const past = !e.all_day && e._d<now && diff===0; const soon = !e.all_day && e._d>=now && e._d-now<3600000*3 && diff===0;
       const cls = past?"past":(soon&&first?"now":""); if(soon&&first) first=false;
-      html += `<div class="ev ${cls}"><span class="when">${e.all_day?"All day":esc(fmtTime(e._d))}</span><span class="what">${esc(e.title)}</span><span class="in">${soon?esc(rel(e._d-now)):""}</span></div>`;
+      html += `<div class="ev ${cls}"><span class="when">${e.all_day?"All day":esc(fmtTime(e._d))}</span><span class="what">${esc(e.title)}${e.cal&&!/google|outlook|birthdays|holiday/i.test(e.cal)?` <small style="color:var(--dim)">${esc(e.cal)}</small>`:""}</span><span class="in">${soon?esc(rel(e._d-now)):""}</span></div>`;
     });
   });
   $("#events").innerHTML = html || '<div class="empty">Nothing scheduled in the next 7 days.</div>';
@@ -367,7 +381,7 @@ function gameHtml(t){
 /* wall mode: hide trailing rows that do not fit, so nothing is ever cut in half */
 let fitQ=0;
 function fit(){ cancelAnimationFrame(fitQ); fitQ=requestAnimationFrame(()=>{
-  const items = c => [...c.querySelectorAll("#tasks>*, #events>*, #teams>*, .tri tr, #work .wrow")];
+  const items = c => [...c.querySelectorAll("#tasks>*, #events>*, #teams>*, .tri tr, #work .wrow, #bdays .bd")];
   document.querySelectorAll(".grid .col").forEach(col=>{
     const cards=[...col.querySelectorAll(".card")];
     cards.forEach(c=>{ items(c).forEach(i=>i.style.display=""); if(c.classList.contains("tri-card")) c.style.display=""; });
@@ -521,7 +535,7 @@ addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT") return; if(e.key=
 function toggleFs(){ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.(); }
 
 /* ===== v3: scenes, drawer, local tasks, progress ring ===== */
-const SCENES=[["overview","Overview",50],["today","Today",25],["sports","Sports",22],["inbox","Inbox",25],["week","Week",25],["pulse","Pulse",15]];
+const SCENES=[["overview","Overview",50],["today","Today",25],["sports","Sports",22],["inbox","Inbox",25],["week","Week",25],["home","Home",22],["pulse","Pulse",15]];
 let SCENE="overview", sceneAt=Date.now(), autoOn=store.getItem("cc_auto")!=="0", pauseUntil=0, lastSports=0;
 const GM="https://mail.google.com/mail/u/0/";
 const fmtN=n=>n==null?"n/a":Number(n).toLocaleString();
@@ -687,7 +701,43 @@ function scenePulse(){
   const src=(D.sources||[]).map(s=>{const age=s.updated?(now-new Date(s.updated))/60000:null;return `<span class="chip2" style="border-color:${s.ok?"rgba(77,227,194,.4)":"rgba(255,107,94,.5)"}">${s.ok?"&#9679;":"&#9888;"} ${esc(s.label)} ${s.ok&&age!==null?esc(rel(age*60000))+" ago":"offline"}</span>`}).join("");
   return `<div class="sc sc-pulse">${ch}<section class="card" style="grid-column:1/-1"><h2 class="lbl">Data sources</h2><div class="chips">${src}</div></section></div>`;
 }
-const RENDER={today:sceneToday,sports:sceneSports,inbox:sceneInbox,week:sceneWeek,pulse:scenePulse};
+
+/* ---- v4: Mac lane ---- */
+function homeHtml(big){
+  const h=D.home; if(!h) return '<div class="w">The Mac mini has not reported home health yet.</div>';
+  const n=h.net||{}, d=h.disk||{}, b=h.backup||{};
+  const net=n.up===false?["Offline","bad"]:n.ms==null?["n/a",""]:[n.ms+" ms",n.ms>80?"warnb":""];
+  const av=n.avail_24h==null?"n/a":n.avail_24h+"%";
+  const bk=b.ok?[(b.age_h<1?"Just now":b.age_h<48?Math.round(b.age_h)+"h ago":Math.round(b.age_h/24)+"d ago"),b.age_h>72?"warnb":""]:["Failing","bad"];
+  return `<div class="hm">
+    <div class="${net[1]}"><div class="lbl">Internet</div><b>${esc(net[0])}</b><small>${n.gw_ms!=null?"router "+n.gw_ms+" ms":"ping to 1.1.1.1"}</small></div>
+    <div class="${n.avail_24h!=null&&n.avail_24h<99?"warnb":""}"><div class="lbl">Uptime 24h</div><b>${esc(av)}</b><small>${n.outages_24h||0} drop${n.outages_24h===1?"":"s"}, worst ${n.worst_ms||0} ms</small></div>
+    <div class="${bk[1]}"><div class="lbl">Backup</div><b>${esc(bk[0])}</b><small>${b.ok?"Time Machine":esc((b.err||"").slice(0,40))}</small></div>
+    <div class="${d.pct_used>=90?"bad":d.pct_used>=80?"warnb":""}"><div class="lbl">Mac disk</div><b>${d.free_gb!=null?d.free_gb+" GB":"n/a"}</b><small>free, ${d.pct_used||0}% used</small></div>
+    <div><div class="lbl">Mac up</div><b>${h.uptime_days!=null?h.uptime_days+"d":"n/a"}</b><small>since last restart</small></div>
+    <div><div class="lbl">Checks</div><b>${n.checks_24h||0}</b><small>in 24h, every 10 min</small></div></div>`;
+}
+function renderHome(){ const el=$("#home"); if(!el) return; el.innerHTML=`<h2 class="lbl">Home <span class="sub">Mac mini</span></h2>${homeHtml()}`; }
+function bdayRows(list){
+  if(!list||!list.length) return '<div class="w">No birthdays in the next 45 days.</div>';
+  return list.map(b=>{const d=new Date(b.date+"T12:00:00");const when=b.days===0?"Today":b.days===1?"Tomorrow":d.toLocaleDateString([],{weekday:"short",month:"short",day:"numeric"});
+    return `<div class="bd ${b.days===0?"today":""}"><span>${esc(b.name)}<br><small>${esc(b.src)}</small></span><span class="in">${esc(when)}${b.days>1?` · ${b.days}d`:""}</span></div>`}).join("");
+}
+function renderBdays(){ const el=$("#bdays"); if(!el) return; el.innerHTML=`<h2 class="lbl">Birthdays <span class="sub">next 45 days</span></h2>${bdayRows((D.birthdays||[]).slice(0,5))}`; }
+function memHtml(){
+  const m=D.memories; if(!m) return '<div class="w">Photos need the Mac mini.</div>';
+  if(!m.count) return '<div class="w">No photos from this day in past years.</div>';
+  const yrs=m.years||[], span=yrs.length?(yrs[0]===yrs[yrs.length-1]?yrs[0]:`${yrs[0]} to ${yrs[yrs.length-1]}`):"";
+  const th=(m.thumbs||[]).map(t=>`<figure><img src="data:image/jpeg;base64,${t.b64}" alt=""><figcaption>${t.year}</figcaption></figure>`).join("");
+  return `<div class="w">${m.count} photo${m.count===1?"":"s"} taken on this day, ${esc(span)}.</div>${th?`<div class="mem">${th}</div>`:""}`;
+}
+function renderMem(){ const el=$("#mem"); if(!el) return; el.innerHTML=`<h2 class="lbl">On this day <span class="sub">Photos</span></h2>${memHtml()}`; }
+function sceneHome(){
+  return `<div class="sc sc-home"><section class="card"><h2 class="lbl">Home <span class="sub">Mac mini, every 10 minutes</span></h2>${homeHtml(true)}</section>
+  <section class="card"><h2 class="lbl">Birthdays <span class="sub">next 45 days</span></h2>${bdayRows((D.birthdays||[]).slice(0,8))}</section>
+  <section class="card memcard"><h2 class="lbl">On this day <span class="sub">Photos</span></h2>${memHtml()}</section></div>`;
+}
+const RENDER={today:sceneToday,sports:sceneSports,inbox:sceneInbox,week:sceneWeek,home:sceneHome,pulse:scenePulse};
 function renderScene(fresh=true){
   const ov=$("#overlay"); if(!ov) return; ov.classList.toggle("still",!fresh);
   ov.innerHTML=SCENE==="overview"?"":RENDER[SCENE]();
@@ -719,7 +769,7 @@ addEventListener("keydown",e=>{
   else if(e.key==="ArrowLeft") setScene(SCENES[(i+SCENES.length-1)%SCENES.length][0],true);
   else if(e.key===" "){ e.preventDefault(); toggleAuto(); }
   else if(e.key==="Escape") closeDrawer();
-  else if(/^[1-6]$/.test(e.key)) setScene(SCENES[Number(e.key)-1][0],true);
+  else if(/^[1-7]$/.test(e.key)) setScene(SCENES[Number(e.key)-1][0],true);
 });
 function initV3(){
   if(!$("#drawer")){ document.body.insertAdjacentHTML("beforeend",`<div class="dbk" id="dbk"></div><aside class="drawer" id="drawer"><header><b id="dt"></b><button id="dx">Close</button></header><div id="db"></div></aside><div class="rot" id="rot"></div>`); }

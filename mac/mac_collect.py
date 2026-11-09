@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Runs on the Mac mini. Reads texts and reminders locally, encrypts the result, pushes it to your GitHub repo.
+"""Runs on the Mac mini. Reads texts, reminders, Apple Calendar, birthdays, photo memories and home health locally, encrypts the result, pushes it to your GitHub repo.
 Python 3.9 standard library plus the macOS `openssl` and `sqlite` already installed. Nothing leaves the Mac unencrypted."""
 import base64, datetime as dt, glob, json, os, re, shutil, sqlite3, subprocess, sys, tempfile
 
@@ -7,6 +7,20 @@ HOME = os.path.expanduser("~")
 CONF = os.path.join(HOME, ".config", "command-center", "env")
 APPLE_EPOCH = 978307200
 DAYS = 30  # only count unread texts newer than this, so ancient unread spam does not inflate the number
+ENV = {}
+
+
+def skip_lists():
+    return {x.strip().lower() for x in ENV.get("CC_SKIP_LISTS", "To do").split(",") if x.strip()}
+
+
+def work_re():
+    words = [re.escape(x.strip()) for x in ENV.get("CC_WORK_WORDS", "Allbridge,bid,DIRECTV,Ruckus,COHO,Koch").split(",") if x.strip()]
+    return re.compile(r"\b(" + "|".join(words) + r")", re.I) if words else None
+SKIP_CALS = {"scheduled reminders", "found in mail", "found in natural language", "us holidays", "birthdays", "facebook birthdays", "default"}
+CAL_DB = os.path.join(HOME, "Library/Group Containers/group.com.apple.calendar/Calendar.sqlitedb")
+PHOTOS_DB = glob.glob(os.path.join(HOME, "Pictures/*.photoslibrary/database/Photos.sqlite"))
+NET_LOG = os.path.join(HOME, "CommandCenter", "net.jsonl")
 ASK = re.compile(r"(\?|can you|could you|please|let me know|when are you|are you able|need you|call me)", re.I)
 
 
@@ -97,31 +111,202 @@ def imessage():
             hrs = (now - when) / 3600
             body = decode_body(last[0], last[1])
             if hrs <= 72 and ASK.search(body):
-                waiting.append({"label": label, "ago": f"{int(hrs)}h" if hrs < 48 else f"{int(hrs // 24)}d"})
+                waiting.append({"label": label, "ago": f"{int(hrs)}h" if hrs < 48 else f"{int(hrs // 24)}d",
+                                "snippet": re.sub(r"\s+", " ", body).strip()[:90]})
     return {"unread_total": total, "unread_chats": len(chats),
             "top_unread": [{"label": c["label"], "unread": c["unread"]} for c in chats[:6]], "waiting": waiting[:6]}
 
 
 def reminders():
     out, seen = [], set()
+    skip, wre = skip_lists(), work_re()
     for p in glob.glob(os.path.join(HOME, "Library/Group Containers/group.com.apple.reminders/Container_v1/Stores/*.sqlite")):
         try:
             db = sqlite3.connect(snapshot(p))
-            for title, due, tz in db.execute("""select ZTITLE, ZDUEDATE, ZTIMEZONE from ZREMCDREMINDER
-                where coalesce(ZCOMPLETED,0)=0 and coalesce(ZMARKEDFORDELETION,0)=0 and ZDUEDATE is not null"""):
-                if tz:  # fixed instant
-                    d = dt.datetime.fromtimestamp(due + APPLE_EPOCH).astimezone()
-                else:   # floating: the stored clock time is the local clock time
-                    d = dt.datetime.utcfromtimestamp(due + APPLE_EPOCH).replace(tzinfo=dt.datetime.now().astimezone().tzinfo)
-                key = (title, d.strftime("%Y-%m-%d %H:%M"))
+            rows = db.execute("""select r.ZTITLE, r.ZDUEDATE, r.ZTIMEZONE, coalesce(l.ZNAME,''), coalesce(r.ZFLAGGED,0)
+                from ZREMCDREMINDER r left join ZREMCDBASELIST l on l.Z_PK=r.ZLIST
+                where coalesce(r.ZCOMPLETED,0)=0 and coalesce(r.ZMARKEDFORDELETION,0)=0
+                and (r.ZDUEDATE is not null or coalesce(r.ZFLAGGED,0)=1)""").fetchall()
+            for title, due, tz, lst, flagged in rows:
+                if lst.lower() in skip or (wre and wre.search(title or "")):
+                    continue
+                if due is not None:
+                    if tz:  # fixed instant
+                        d = dt.datetime.fromtimestamp(due + APPLE_EPOCH).astimezone()
+                    else:   # floating: the stored clock time is the local clock time
+                        d = dt.datetime.utcfromtimestamp(due + APPLE_EPOCH).replace(tzinfo=dt.datetime.now().astimezone().tzinfo)
+                    key = (title, d.strftime("%Y-%m-%d %H:%M"))
+                else:
+                    d, key = None, (title, "flag")
                 if key in seen:
                     continue
                 seen.add(key)
-                out.append({"title": title, "due": d.isoformat()})
+                out.append({"title": title, "due": d.isoformat() if d else None, "list": lst, "flagged": bool(flagged)})
         except Exception:
             continue
-    out.sort(key=lambda r: r["due"])
+    out.sort(key=lambda r: (r["due"] or "9999"))
     return out[:40]
+
+
+def _cal_rows(days_ahead, cal_filter):
+    """Occurrences from Apple Calendar's own cache, so recurring events are already expanded."""
+    if not os.path.exists(CAL_DB):
+        return []
+    db = sqlite3.connect(snapshot(CAL_DB))
+    t0 = dt.datetime.now().timestamp() - APPLE_EPOCH - 86400
+    t1 = t0 + (days_ahead + 1) * 86400
+    rows = db.execute("""select o.occurrence_date, o.occurrence_end_date, i.summary, i.all_day, c.title, coalesce(s.name,''), coalesce(l.title,'')
+        from OccurrenceCache o join CalendarItem i on i.ROWID=o.event_id join Calendar c on c.ROWID=i.calendar_id
+        left join Store s on s.ROWID=c.store_id left join Location l on l.ROWID=i.location_id
+        where o.occurrence_date >= ? and o.occurrence_date < ? and coalesce(i.hidden,0)=0 and coalesce(i.status,0)<>3
+        order by o.occurrence_date""", (t0, t1)).fetchall()
+    out = []
+    for st, en, title, all_day, cal, store, loc in rows:
+        if not cal_filter(cal or "", store or ""):
+            continue
+        out.append((st, en, title or "(no title)", bool(all_day), cal or "", store or "", loc or ""))
+    return out
+
+
+def _iso(apple_ts, all_day):
+    d = dt.datetime.fromtimestamp(apple_ts + APPLE_EPOCH)
+    if all_day:  # the cache stores all-day occurrences at local midnight
+        return d.strftime("%Y-%m-%d")
+    return d.astimezone().isoformat()
+
+
+def calendar():
+    """iCloud / local calendars from Calendar.app. Skips the holiday feed, mail-detected items and anything already covered."""
+    ok = lambda cal, store: cal.lower() not in SKIP_CALS and store.lower() not in ("other", "reminders", "subscribed calendars")
+    out, seen = [], set()
+    for st, en, title, all_day, cal, store, loc in _cal_rows(14, ok):
+        key = (title, round(st))
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({"title": title, "start": _iso(st, all_day), "end": None if all_day else _iso(en, False), "all_day": all_day,
+                    "cal": cal if cal and not re.match(r"^[0-9A-F-]{36}$", cal) else "iCloud", "location": loc})
+    return out[:60]
+
+
+def birthdays():
+    """Contacts and Facebook birthdays that Calendar.app already knows about, next 45 days."""
+    ok = lambda cal, store: cal.lower() in ("birthdays", "facebook birthdays")
+    out, seen = [], set()
+    for st, en, title, all_day, cal, store, loc in _cal_rows(45, ok):
+        name = re.sub(r"[\u2019']s birthday$", "", title, flags=re.I).strip()
+        day = _iso(st, True)
+        if (name.lower(), day) in seen or dt.date.fromisoformat(day) < dt.date.today():
+            continue
+        seen.add((name.lower(), day))
+        out.append({"name": name, "date": day, "src": "Facebook" if "facebook" in cal.lower() else "Contacts"})
+    out.sort(key=lambda b: b["date"])
+    return out[:12]
+
+
+def photos():
+    """'On this day' memories from the Photos library: a count, the years, and up to three small thumbnails."""
+    if not PHOTOS_DB:
+        return None
+    lib = os.path.dirname(os.path.dirname(PHOTOS_DB[0]))
+    db = sqlite3.connect(snapshot(PHOTOS_DB[0]))
+    md = dt.date.today().strftime("%m-%d")
+    rows = db.execute("""select ZUUID, strftime('%Y', ZDATECREATED+978307200,'unixepoch','localtime'), coalesce(ZFAVORITE,0)
+        from ZASSET where coalesce(ZTRASHEDSTATE,0)=0 and coalesce(ZHIDDEN,0)=0 and ZKIND=0
+        and strftime('%m-%d', ZDATECREATED+978307200,'unixepoch','localtime')=?
+        and strftime('%Y', ZDATECREATED+978307200,'unixepoch','localtime')<strftime('%Y','now','localtime')
+        order by ZFAVORITE desc, ZUUID""", (md,)).fetchall()
+    if not rows:
+        return {"count": 0, "years": [], "thumbs": []}
+    years = sorted({int(y) for _, y, _ in rows if y})
+    thumbs, tmp = [], tempfile.mkdtemp()
+    for uuid, y, fav in rows:
+        if len(thumbs) >= 3:
+            break
+        cands = glob.glob(os.path.join(lib, "resources", "derivatives", uuid[0], uuid + "_1_105_c.jpeg"))
+        if not cands:
+            continue
+        out = os.path.join(tmp, uuid + ".jpg")
+        r = subprocess.run(["sips", "-Z", "420", "-s", "format", "jpeg", "-s", "formatOptions", "70", cands[0], "--out", out],
+                           capture_output=True, timeout=30)
+        if r.returncode == 0 and os.path.exists(out) and os.path.getsize(out) < 90000:
+            thumbs.append({"year": int(y), "b64": base64.b64encode(open(out, "rb").read()).decode()})
+    shutil.rmtree(tmp, ignore_errors=True)
+    return {"count": len(rows), "years": years, "thumbs": thumbs}
+
+
+def _ping(host):
+    try:
+        r = subprocess.run(["ping", "-c", "3", "-i", "0.3", "-W", "1500", host], capture_output=True, text=True, timeout=12)
+        m = re.search(r"= [\d.]+/([\d.]+)/", r.stdout)
+        loss = re.search(r"([\d.]+)% packet loss", r.stdout)
+        return (float(m.group(1)) if m else None), (float(loss.group(1)) if loss else 100.0)
+    except Exception:
+        return None, 100.0
+
+
+def home():
+    """Mac and home-network health. Keeps a 24-hour ping log so the page can show uptime."""
+    out = {}
+    try:
+        st = os.statvfs("/")
+        free, total = st.f_bavail * st.f_frsize, st.f_blocks * st.f_frsize
+        out["disk"] = {"free_gb": round(free / 1e9), "total_gb": round(total / 1e9), "pct_used": round(100 - free / total * 100)}
+    except Exception:
+        pass
+    try:
+        boot = subprocess.run(["sysctl", "-n", "kern.boottime"], capture_output=True, text=True, timeout=5).stdout
+        m = re.search(r"sec = (\d+)", boot)
+        if m:
+            out["uptime_days"] = round((dt.datetime.now().timestamp() - int(m.group(1))) / 86400, 1)
+    except Exception:
+        pass
+    try:
+        r = subprocess.run(["tmutil", "latestbackup"], capture_output=True, text=True, timeout=20)
+        m = re.search(r"(\d{4}-\d{2}-\d{2})-(\d{6})", r.stdout)
+        if m:
+            when = dt.datetime.strptime(m.group(1) + m.group(2), "%Y-%m-%d%H%M%S")
+            out["backup"] = {"last": when.isoformat(), "age_h": round((dt.datetime.now() - when).total_seconds() / 3600, 1), "ok": True}
+        else:
+            msg = (r.stderr or r.stdout).strip()
+            out["backup"] = {"last": None, "ok": False, "err": re.sub(r"UserInfo=.*", "", msg)[:120] or "No backup found"}
+    except Exception as e:
+        out["backup"] = {"last": None, "ok": False, "err": str(e)[:120]}
+    gw = None
+    try:
+        rt = subprocess.run(["route", "-n", "get", "default"], capture_output=True, text=True, timeout=5).stdout
+        m = re.search(r"gateway: (\S+)", rt)
+        gw = m.group(1) if m else None
+    except Exception:
+        pass
+    inet_ms, inet_loss = _ping("1.1.1.1")
+    gw_ms, gw_loss = _ping(gw) if gw else (None, None)
+    up = inet_loss < 100
+    ts = dt.datetime.now().timestamp()
+    hist = []
+    try:
+        for line in open(NET_LOG):
+            try:
+                rec = json.loads(line)
+                if ts - rec["t"] < 86400:
+                    hist.append(rec)
+            except Exception:
+                continue
+    except FileNotFoundError:
+        pass
+    hist.append({"t": ts, "up": up, "ms": inet_ms})
+    try:
+        os.makedirs(os.path.dirname(NET_LOG), exist_ok=True)
+        open(NET_LOG, "w").write("".join(json.dumps(h) + "\n" for h in hist))
+    except Exception:
+        pass
+    avail = round(100 * sum(1 for h in hist if h["up"]) / len(hist))
+    outages = sum(1 for a, b in zip(hist, hist[1:]) if a["up"] and not b["up"])
+    # bucket latency to 5 ms so the snapshot does not change (and push) on every run
+    out["net"] = {"up": up, "ms": None if inet_ms is None else int(round(inet_ms / 5) * 5), "loss": inet_loss,
+                  "gw_ms": None if gw_ms is None else int(round(gw_ms / 5) * 5), "avail_24h": avail, "outages_24h": outages,
+                  "checks_24h": len(hist), "worst_ms": int(round(max((h["ms"] or 0) for h in hist) / 5) * 5)}
+    return out
 
 
 def encrypt(payload, passphrase):
@@ -174,9 +359,10 @@ def push(env, blob):
 
 def main():
     env = load_env()
+    ENV.update(env)
     now = dt.datetime.now().astimezone()
     snap = {"as_of": "Updated " + now.strftime("%-I:%M %p"), "as_of_iso": now.isoformat()}
-    for key, fn in (("imessage", imessage), ("reminders", reminders)):
+    for key, fn in (("imessage", imessage), ("reminders", reminders), ("calendar", calendar), ("birthdays", birthdays), ("photos", photos), ("home", home)):
         try:
             snap[key] = fn()
         except Exception as e:
@@ -185,7 +371,10 @@ def main():
     im = snap.get("imessage") or {}
     flat = {**snap, **{k: v for k, v in im.items()}, "reminders": snap.get("reminders") or []}
     if "--dry-run" in sys.argv:
-        print(json.dumps(flat, indent=2, default=str)[:4000])
+        ph = dict(flat.get("photos") or {})
+        if ph.get("thumbs"):
+            ph["thumbs"] = [{"year": t["year"], "bytes": len(t["b64"])} for t in ph["thumbs"]]
+        print(json.dumps({**flat, "photos": ph}, indent=2, default=str)[:6000])
         return
     # Push only when something changed, or at least once an hour so the page can tell the Mac is alive.
     import hashlib, time

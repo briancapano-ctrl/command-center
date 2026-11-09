@@ -16,6 +16,11 @@ def _fmt_time(iso, all_day):
     return "All day" if all_day else d.strftime("%-I:%M %p")
 
 
+def _rl(r):
+    lst = (r.get("list") or "").strip()
+    return f"Apple Reminder ({lst})" if lst and lst.lower() != "reminders" else "Apple Reminder"
+
+
 def build(src, cfg):
     n = now()
     errors = src.get("errors", {})
@@ -27,15 +32,46 @@ def build(src, cfg):
         d = short_date(r.get("due")) if r.get("due") else None
         if d and d.date() < n.date():
             days = (n.date() - d.date()).days
-            tasks.append({"t": r["title"], "w": f"Apple Reminder, {days} day{'s' if days != 1 else ''} overdue.", "p": ["Overdue", "p-high"], "rank": 0})
+            tasks.append({"t": r["title"], "w": f"{_rl(r)}, {days} day{'s' if days != 1 else ''} overdue.", "p": ["Overdue", "p-high"], "rank": 0})
         elif d and d.date() == n.date():
-            tasks.append({"t": r["title"], "w": "Apple Reminder due today.", "p": ["Today", "p-high"], "rank": 1})
+            tasks.append({"t": r["title"], "w": f"{_rl(r)} due today.", "p": ["Today", "p-high"], "rank": 1})
         elif d and (d.date() - n.date()).days <= 2:
-            tasks.append({"t": r["title"], "w": f"Apple Reminder due {d.strftime('%a %b %-d')}.", "p": [d.strftime('%a'), "p-med"], "rank": 3})
+            tasks.append({"t": r["title"], "w": f"{_rl(r)} due {d.strftime('%a %b %-d')}.", "p": [d.strftime('%a'), "p-med"], "rank": 3})
+        elif not d and r.get("flagged"):
+            tasks.append({"t": r["title"], "w": f"{_rl(r)}, flagged.", "p": ["Flagged", "p-med"], "rank": 3})
+
+    # ---- birthdays (Mac: Contacts and Facebook via Calendar.app)
+    bdays = []
+    for b in mac.get("birthdays") or []:
+        try:
+            bd = dt.date.fromisoformat(b["date"])
+        except Exception:
+            continue
+        days = (bd - n.date()).days
+        bdays.append({"name": b["name"], "date": b["date"], "days": days, "src": b.get("src", "")})
+        if days == 0:
+            tasks.append({"t": f"Wish {b['name']} a happy birthday", "w": f"Today. From your {b.get('src', 'contacts')}.", "p": ["Today", "p-high"], "rank": 1})
+        elif 0 < days <= 2:
+            tasks.append({"t": f"Birthday coming up: {b['name']}", "w": f"{bd.strftime('%A')}. From your {b.get('src', 'contacts')}.", "p": [bd.strftime("%a"), "p-med"], "rank": 3})
+
+    # ---- home and Mac health (Mac)
+    home = mac.get("home") or {}
+    bk = home.get("backup") or {}
+    if home and not bk.get("ok"):
+        tasks.append({"t": "Time Machine backup is failing on the Mac mini", "w": (bk.get("err") or "No backup found")[:90] + ".", "p": ["Mac", "p-med"], "rank": 3})
+    elif bk.get("age_h", 0) > 72:
+        tasks.append({"t": "Mac mini has not backed up in 3 days", "w": f"Last Time Machine backup {bk['age_h'] / 24:.0f} days ago.", "p": ["Mac", "p-med"], "rank": 3})
+    dk = home.get("disk") or {}
+    if dk.get("pct_used", 0) >= 90:
+        tasks.append({"t": f"Mac mini disk is {dk['pct_used']}% full", "w": f"{dk['free_gb']} GB free of {dk['total_gb']} GB.", "p": ["Mac", "p-med"], "rank": 3})
+    nt = home.get("net") or {}
+    if nt and nt.get("checks_24h", 0) >= 6 and nt.get("outages_24h", 0) >= 2:
+        tasks.append({"t": f"Home internet dropped {nt['outages_24h']} times in 24 hours", "w": f"{nt['avail_24h']}% available. Worst latency {nt['worst_ms']} ms.", "p": ["Home", "p-med"], "rank": 3})
 
     # ---- texts waiting on you (Mac)
     for c in (mac.get("waiting") or [])[:4]:
-        tasks.append({"t": f"Reply to {c['label']}", "w": f"Last message {c['ago']} ago ends with a question or request.", "p": ["Reply", "p-med"], "rank": 2})
+        w = f"\u201c{c['snippet']}\u201d, {c['ago']} ago." if c.get("snippet") else f"Last message {c['ago']} ago ends with a question or request."
+        tasks.append({"t": f"Reply to {c['label']}", "w": w, "p": ["Reply", "p-med"], "rank": 2})
 
     # ---- mail that looks actionable
     mails = []
@@ -63,9 +99,14 @@ def build(src, cfg):
 
     # ---- events today / tomorrow and birthdays
     events = []
-    for e in (src.get("gcal") or []) + (src.get("outlook_cal") or []):
+    seen_ev = set()
+    for e in (src.get("gcal") or []) + (src.get("outlook_cal") or []) + (mac.get("calendar") or []):
         d = short_date(e["start"]) if e.get("start") else None
         if d:
+            k = (e.get("title", "").strip().lower(), d.date())
+            if k in seen_ev:
+                continue
+            seen_ev.add(k)
             events.append({**e, "d": d})
     events.sort(key=lambda e: e["d"])
     for e in events:
@@ -146,7 +187,7 @@ def build(src, cfg):
     # ---- channels
     def ch(name, handle, ok, stat, nxt_note):
         channels.append({"name": name, "handle": handle, "state": "live" if ok else "off", "stat": stat, "next": nxt_note})
-    ch("iMessage and SMS", "Mac mini", bool(mac), f"{unread_texts} unread" if mac else "No report", mac.get("as_of", "Mac job has not reported") if mac else "Run the Mac installer.")
+    ch("Mac mini", "texts, reminders, calendar, photos, home", bool(mac), f"{unread_texts} unread texts" if mac else "No report", mac.get("as_of", "Mac job has not reported") if mac else "Run the Mac installer.")
     ch("Gmail", cfg.get("gmail_address", ""), bool(g), f"{g['unread_estimate']:,} unread" if g else "Not connected", errors.get("gmail", ""))
     ch("Hotmail and Outlook", cfg.get("outlook_address", ""), bool(fo), f"{inbox['unread']:,} unread" if fo and inbox else "Not connected", errors.get("outlook", ""))
     ch("Calendars", ", ".join(n for n in (src.get("gcal_names") or []) if n and "holiday" not in n.lower())[:80] or "Google, Outlook", bool(events) or bool(src.get("gcal") is not None), f"{len(events)} event{'' if len(events)==1 else 's'} in 7 days", errors.get("gcal", ""))
@@ -165,7 +206,10 @@ def build(src, cfg):
                                    "folders": [{"name": f["name"], "unread": f["unread"]} for f in top]}
     if mac:
         inbox_detail["texts"] = {"unread": unread_texts, "chats": mac.get("unread_chats", 0), "waiting": (mac.get("waiting") or [])[:6]}
-    events_out = [{"title": e["title"], "start": e["start"], "all_day": e["all_day"], "cal": e.get("cal", ""), "end": e.get("end")} for e in events]
+    events_out = [{"title": e["title"], "start": e["start"], "all_day": e["all_day"], "cal": e.get("cal", ""), "end": e.get("end"), "loc": e.get("location", "")} for e in events]
+    ph = mac.get("photos") or None
+    memories = {"count": ph["count"], "years": ph["years"], "thumbs": ph.get("thumbs", [])} if ph else None
     return {"generated": n.isoformat(), "meta": {"name": cfg.get("name", "Brian"), "lat": cfg.get("lat", 36.0217), "lon": cfg.get("lon", -78.4756), "tz": "America/New_York", "dim": cfg.get("night_dim", True)},
             "events": events_out, "kpis": kpis, "tasks": tasks[:9], "week": week, "teams": sports,
-            "triage": triage, "channels": channels, "inbox": inbox_detail, "errors": errors}
+            "triage": triage, "channels": channels, "inbox": inbox_detail,
+            "birthdays": bdays[:8], "home": home or None, "memories": memories, "errors": errors}
