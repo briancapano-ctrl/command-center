@@ -66,17 +66,22 @@ def sweep(tok, promo_domains, msgs):
 PROTECTED = ("robinhood", "citi", "pennmutual", "starlink", "apple.com", "perplexity", "stubhub", "school")
 
 
-def sweep_backlog(tok, promo_domains, cursor, pages=20):
-    """Rolling pass through the whole unread inbox for approved promo senders only (mark read and archive).
-    Returns (swept, next_cursor). Cursor counts unread messages that were kept, so archived ones do not shift it."""
-    swept, skip = 0, int(cursor or 0)
+def sweep_backlog(tok, promo_domains, cursor, pages=40):
+    """Rolling pass back through the inbox, newest to oldest, for approved promo senders only (mark read and archive).
+    Pages by received date, which is cheap on a large mailbox. Returns (swept, next_cursor); cursor None means start over."""
+    swept = 0
     for _ in range(pages):
-        j = _g(tok, "/me/mailFolders/inbox/messages?$filter=isRead eq false&$top=100&$skip=%d&$select=id,from" % skip)
+        q = "/me/mailFolders/inbox/messages?$top=100&$orderby=receivedDateTime desc&$select=id,from,isRead,receivedDateTime"
+        if cursor:
+            q += "&$filter=receivedDateTime lt " + cursor
+        j = _g(tok, q)
         vals = j.get("value", [])
         if not vals:
-            return swept, 0
+            return swept, None
         hit = []
         for m in vals:
+            if m.get("isRead"):
+                continue
             dom = domain_of(((m.get("from") or {}).get("emailAddress") or {}).get("address", ""))
             if any(x in dom for x in PROTECTED):
                 continue
@@ -89,10 +94,10 @@ def sweep_backlog(tok, promo_domains, cursor, pages=20):
                 http("POST", G + "/$batch", headers={"Authorization": f"Bearer {tok}"},
                      body={"requests": [dict(mk(mid), id=f"{op}{k}") for k, mid in enumerate(chunk)]})
         swept += len(hit)
-        skip += len(vals) - len(hit)
+        cursor = vals[-1].get("receivedDateTime")
         if len(vals) < 100:
-            return swept, 0
-    return swept, skip
+            return swept, None
+    return swept, cursor
 
 
 def calendar(tok, days=7):

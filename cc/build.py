@@ -138,9 +138,9 @@ def collect(cfg, pw):
             if cfg.get("outlook_promo_domains") and "--demo" not in sys.argv:
                 CUR = os.path.join(ROOT, "state", "ms_cursor.json")
                 def _bk():
-                    cur = json.load(open(CUR)).get("skip", 0) if os.path.exists(CUR) else 0
+                    cur = json.load(open(CUR)).get("before") if os.path.exists(CUR) else None
                     n, nxt = M.sweep_backlog(tok, cfg["outlook_promo_domains"], cur)
-                    json.dump({"skip": nxt}, open(CUR, "w"))
+                    json.dump({"before": nxt}, open(CUR, "w"))
                     return n
                 extra = safe("outlook_backlog", _bk, err) or 0
                 if extra:
