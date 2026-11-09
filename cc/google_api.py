@@ -80,10 +80,15 @@ def gmail(tok, sweep=True, recent_n=50):
     return {"unread_estimate": est, "recent": recent, "cleared": cleared, "cats": cats}
 
 
+CAL_NAMES = []
+
+
 def calendar(tok, days=7):
+    global CAL_NAMES
     t0 = now()
     t1 = t0 + dt.timedelta(days=days)
     cals = _g(tok, "https://www.googleapis.com/calendar/v3/users/me/calendarList").get("items", [])
+    CAL_NAMES = [c.get("summary", "") for c in cals]
     out = []
     for c in cals:
         params = {"timeMin": t0.isoformat(), "timeMax": t1.isoformat(), "singleEvents": "true",

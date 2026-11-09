@@ -149,7 +149,7 @@ def build(src, cfg):
     ch("iMessage and SMS", "Mac mini", bool(mac), f"{unread_texts} unread" if mac else "No report", mac.get("as_of", "Mac job has not reported") if mac else "Run the Mac installer.")
     ch("Gmail", cfg.get("gmail_address", ""), bool(g), f"{g['unread_estimate']:,} unread" if g else "Not connected", errors.get("gmail", ""))
     ch("Hotmail and Outlook", cfg.get("outlook_address", ""), bool(fo), f"{inbox['unread']:,} unread" if fo and inbox else "Not connected", errors.get("outlook", ""))
-    ch("Calendars", "Google, Outlook", bool(events) or bool(src.get("gcal") is not None), f"{len(events)} event{'' if len(events)==1 else 's'} in 7 days", errors.get("gcal", ""))
+    ch("Calendars", ", ".join(n for n in (src.get("gcal_names") or []) if n and "holiday" not in n.lower())[:80] or "Google, Outlook", bool(events) or bool(src.get("gcal") is not None), f"{len(events)} event{'' if len(events)==1 else 's'} in 7 days", errors.get("gcal", ""))
     yt = src.get("youtube")
     ch("YouTube", cfg.get("youtube_handle", ""), bool(yt), f"{yt['subs']:,} subs, {yt['videos']} videos, {yt['views_30d'] if yt['views_30d'] is not None else 'n/a'} views in 30 days" if yt else "Not connected", errors.get("youtube", ""))
     for m in cfg.get("manual_channels", []):

@@ -114,6 +114,7 @@ def collect(cfg, pw):
         if tok:
             src["gmail"] = safe("gmail", lambda: G.gmail(tok, sweep=cfg.get("sweep_gmail_promos", True)), err)
             src["gcal"] = safe("gcal", lambda: G.calendar(tok), err)
+            src["gcal_names"] = list(G.CAL_NAMES)
             src["youtube"] = safe("youtube", lambda: G.youtube(tok), err)
     refresh = None
     if os.path.exists(MS_STATE):
