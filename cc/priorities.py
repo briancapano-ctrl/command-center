@@ -83,6 +83,8 @@ def build(src, cfg):
         mails.append(("Hotmail", m))
     seen = 0
     for acct, m in mails:
+        if "command-center] Run failed" in (m.get("subject") or ""):
+            continue
         d = short_date(m.get("date") or "") if m.get("date") else None
         if m.get("date") and not d:
             try:

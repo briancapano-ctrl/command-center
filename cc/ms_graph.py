@@ -19,9 +19,18 @@ def _g(tok, path):
 
 
 def folders(tok):
-    j = _g(tok, "/me/mailFolders?$top=100&$select=displayName,unreadItemCount,totalItemCount")
-    return [{"name": f["displayName"], "unread": f.get("unreadItemCount", 0), "total": f.get("totalItemCount", 0)}
-            for f in j.get("value", [])]
+    j = _g(tok, "/me/mailFolders?$top=100&$select=id,displayName,unreadItemCount,totalItemCount,childFolderCount")
+    out = []
+    for f in j.get("value", []):
+        out.append({"name": f["displayName"], "unread": f.get("unreadItemCount", 0), "total": f.get("totalItemCount", 0)})
+        if f.get("childFolderCount"):
+            try:
+                c = _g(tok, f"/me/mailFolders/{f['id']}/childFolders?$top=50&$select=displayName,unreadItemCount,totalItemCount")
+                out += [{"name": f["displayName"] + "/" + x["displayName"], "unread": x.get("unreadItemCount", 0), "total": x.get("totalItemCount", 0)}
+                        for x in c.get("value", [])]
+            except Exception:
+                pass
+    return out
 
 
 def inbox_unread(tok, n=100):

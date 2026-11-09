@@ -135,7 +135,30 @@ def collect(cfg, pw):
             src["outlook_unread"] = msgs
             src["outlook_cal"] = safe("outlook_cal", lambda: M.calendar(tok), err)
     src["mac"] = safe("mac", lambda: read_mac(pw), err)
+    daily_totals(src)
     return src
+
+
+DAILY = os.path.join(ROOT, "state", "daily.json")
+
+
+def daily_totals(src):
+    """Cleanup counters add up across the day's runs instead of showing only the latest run."""
+    try:
+        day = now().strftime("%Y-%m-%d")
+        st = json.load(open(DAILY)) if os.path.exists(DAILY) else {}
+        if st.get("day") != day:
+            st = {"day": day, "gmail": 0, "outlook": 0}
+        if src.get("gmail"):
+            st["gmail"] += src["gmail"].get("cleared") or 0
+            src["gmail"]["cleared"] = st["gmail"]
+        if "outlook_swept" in src:
+            st["outlook"] += src.get("outlook_swept") or 0
+            src["outlook_swept"] = st["outlook"]
+        os.makedirs(os.path.dirname(DAILY), exist_ok=True)
+        json.dump(st, open(DAILY, "w"))
+    except Exception:
+        pass
 
 
 def main():
