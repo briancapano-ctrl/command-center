@@ -34,6 +34,21 @@ test("Briefing selects the latest briefing reply and extracts priorities", async
   expect(b.items[1].summary).toContain("Pricing is pending");
 });
 
+test("Briefing reads the P1/P2/P3 digest format", async ({ page }) => {
+  await page.setContent(`<div data-testid="markdown-reply"><h1>ALLBRIDGE DAILY DIGEST – November 6, 2026</h1>
+    <h2>1. EXECUTIVE PRIORITY</h2><ol><li>P1 | Example Inn: clear the blocker</li></ol>
+    <h2>2. ACTIONS</h2>
+    <h3>Example Inn | P1 | FOLLOW UP</h3><p>VERIFIED FACTS: A document is outstanding.</p><p>RECOMMENDATION: Verify the document.</p>
+    <h3>Example Group | P2 | WAIT</h3><p>VERIFIED FACTS: Pricing is pending.</p>
+    <h3>Example Resort | P3 | REVIEW REQUIRED</h3><p>VERIFIED FACTS: Monitor.</p>
+    <h2>3. TODAY AND TOMORROW MEETINGS</h2></div>`);
+  await page.addScriptTag({ content: parser });
+  const b = await page.evaluate(() => CCWorkParse.briefing(document, "https://m365.cloud.microsoft/chat/conversation/example"));
+  expect(b.items).toHaveLength(3);
+  expect([b.red, b.orange, b.yellow]).toEqual([1, 1, 1]);
+  expect(b.items[0].action).toContain("Verify the document");
+});
+
 test("Background reloads a stale registered tab only and rate limits retries", async () => {
   const store = { cc_lane_tabs: { mail: 123, cal: 456, copilot: 789 }, cc_mail: { ts: Date.now() - 8*60000 }, cc_cal: { ts: Date.now() }, cc_copilot: { ts: Date.now() } };
   const events = {}, reloads = [];

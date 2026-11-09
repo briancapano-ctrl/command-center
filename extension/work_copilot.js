@@ -49,13 +49,15 @@
     }
     if (!start) return null;
     const heads = [...last.querySelectorAll("h1,h2,h3")];
-    const priorities = heads.slice(heads.indexOf(start) + 1).filter(h => /^[🔴🟠🟡]/u.test(clean(h.textContent)));
+    // Items are headings that start with a red/orange/yellow circle, or the newer digest format "Account | P1 | STATUS".
+    const tier = t => { const m = clean(t).match(/\|\s*P([123])\s*(?:\||$)/i); return m ? m[1] : ""; };
+    const priorities = heads.slice(heads.indexOf(start) + 1).filter(h => /^[🔴🟠🟡]/u.test(clean(h.textContent)) || tier(h.textContent));
     const items = priorities.map((h, i) => {
-      const raw = clean(h.textContent), level = raw.startsWith("🔴") ? "urgent" : raw.startsWith("🟠") ? "watch" : "low";
+      const raw = clean(h.textContent), t = tier(raw), level = raw.startsWith("🔴") || t === "1" ? "urgent" : raw.startsWith("🟠") || t === "2" ? "watch" : "low";
       const nodes = [...last.querySelectorAll("h1,h2,h3,p,li")];
       const begin = nodes.indexOf(h), end = priorities[i + 1] ? nodes.indexOf(priorities[i + 1]) : nodes.length;
       const body = nodes.slice(begin + 1, end);
-      const actionAt = body.findIndex(e => /(?:Monday|next|today|tomorrow)\s+action|next step|recommended action/i.test(e.textContent));
+      const actionAt = body.findIndex(e => /(?:Monday|next|today|tomorrow)\s+action|next step|recommended action|recommendation/i.test(e.textContent));
       const actionNodes = actionAt < 0 ? [] : body.slice(actionAt, actionAt + 5).filter(e => e.tagName === "P" || e.tagName === "LI");
       const context = body.filter(e => e.tagName === "P" && !/^\s*(?:Monday|next|today|tomorrow)\s+action/i.test(e.textContent)).slice(0, 2);
       return {
