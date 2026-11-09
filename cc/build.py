@@ -95,7 +95,10 @@ def unchanged(model):
     sig = json.dumps({**{k: model[k] for k in ("kpis", "tasks", "week", "teams", "triage", "channels", "errors")},
                       "sources": [(x["key"], x["ok"]) for x in model["sources"]]}, sort_keys=True, default=str)
     import hashlib
-    h = hashlib.sha256(sig.encode()).hexdigest()
+    # A UI change must publish even if the mailbox/calendar snapshot is unchanged.
+    with open(render.TEMPLATE, "rb") as template:
+        ui_hash = hashlib.sha256(template.read()).hexdigest()
+    h = hashlib.sha256((sig + ui_hash).encode()).hexdigest()
     prev = json.load(open(LAST)) if os.path.exists(LAST) else {}
     fresh = prev.get("h") == h and prev.get("t") and (now() - short_date(prev["t"])).total_seconds() < 3300
     if not fresh:
