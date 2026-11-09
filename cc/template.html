@@ -141,6 +141,8 @@ body[data-scene=work]:not(.wall) .hello h1{font-size:1.5rem}body[data-scene=work
 .dot.snap{background:var(--warn-ink)}.dot.off{background:var(--faint)}.dot.bad{background:var(--negative)}
 .health{display:flex;flex-wrap:wrap;gap:.4rem .9rem;margin-top:1rem;color:var(--muted);font-size:.76rem;align-items:center}
 .health span{display:inline-flex;align-items:center;gap:.4rem}
+body:not(.wall) .health .hsum{display:none}
+body.wall .health>span:not(.hsum){display:none}
 .stale{background:var(--warn-bg);color:var(--warn-ink);border-radius:14px;padding:.6rem .9rem;margin-bottom:.8rem;font-weight:500}
 .foot{margin-top:1.4rem;color:var(--muted);font-size:.76rem;line-height:1.6}
 .foot a{color:var(--ink2)}
@@ -255,6 +257,8 @@ body[data-scene=overview] .overlay{display:none}
 .overlay{min-height:0}
 .sc{display:grid;gap:var(--gap);height:100%;min-height:0}
 .sc>.card{overflow:hidden;min-height:0}
+.sc>.card.tl{min-height:520px}
+@media(max-width:480px){.ctl{gap:.25rem;margin-top:1.6rem}.ctl button{padding:.35rem .6rem;font-size:.72rem}#window{width:min(100%,300px)}}
 .big{font:400 clamp(2.6rem,5vw,4.4rem)/1 var(--serif);letter-spacing:-.01em}
 .sc-today{grid-template-columns:1.25fr 1fr}.sc-today .side{display:grid;gap:var(--gap);grid-template-rows:auto 1fr;min-height:0}
 .tl{position:relative;min-height:520px}.tlin{position:absolute;inset:2.8rem 1rem 1rem 3.3rem}
@@ -513,7 +517,11 @@ function renderHealth(){
     const bad = !s.ok || (age!==null && age>limit);
     return `<span title="${esc(s.err||"")}"><span class="dot ${bad?"bad":""}"></span>${esc(s.label)} ${s.ok&&age!==null?esc(rel(age*60000))+" ago":"offline"}</span>`;
   });
-  $("#health").innerHTML = items.join("");
+  const ages=(D.sources||[]).map(s=>s.updated?(now-new Date(s.updated))/60000:null);
+  const nbad=(D.sources||[]).filter((s,i)=>!s.ok||(ages[i]!==null&&ages[i]>(s.key==="mac"?180:120)));
+  const oldest=Math.max(0,...ages.filter(a=>a!==null));
+  const sum = nbad.length ? `<span class="hsum"><span class="dot bad"></span>${esc(nbad.map(s=>s.label).join(", "))} not updating</span>` : `<span class="hsum"><span class="dot"></span>All ${ages.length} sources fresh, oldest ${esc(rel(oldest*60000))}</span>`;
+  $("#health").innerHTML = sum + items.join("");
   const g = new Date(D.generated), a=(now-g)/60000;
   $("#stale").innerHTML = a>90 ? `<div class="stale">Data is ${esc(rel(a*60000))} old. The cloud job may have stopped.</div>` : "";
 }
@@ -623,10 +631,36 @@ function sceneWork(){
 }
 setInterval(renderWork, 30000);
 
+
+/* Morning brief, meeting lead-up and conflict check. Work details stay in this browser. */
+function briefLine(){
+  try{
+    const now=new Date(), nowMs=now.getTime(), tk=dkey(now), up=workUpcoming();
+    const today=up.filter(x=>!x.allDay&&dkey(new Date(x.s))===tk);
+    const nx=today.find(x=>Date.parse(x.s)>nowMs-60000), soon=up.find(x=>!x.allDay&&Date.parse(x.s)>nowMs-60000&&Date.parse(x.s)-nowMs<=15*60000);
+    if(soon){ const m=Math.round((Date.parse(soon.s)-nowMs)/60000);
+      return m<=0?`${soon.title} is starting now.`:`${soon.title} starts in ${m} minute${m===1?"":"s"}.`; }
+    const mine=(D.events||[]).filter(e=>!e.all_day&&e.start&&dkey(new Date(e.start))===tk).map(e=>({t:e.title,s:Date.parse(e.start),e:e.end?Date.parse(e.end):Date.parse(e.start)+3600000}));
+    const clash=today.filter(w=>Date.parse(w.e)>nowMs).map(w=>({w,p:mine.find(q=>q.s<Date.parse(w.e)&&q.e>Date.parse(w.s)&&q.e>nowMs)})).find(x=>x.p);
+    const hr=Number(new Intl.DateTimeFormat("en-US",{hour:"numeric",hour12:false,timeZone:TZ()}).format(now))%24;
+    if(hr>=5&&hr<11&&(today.length||mine.length)){
+      let t=`Today: ${today.length} work meeting${today.length===1?"":"s"}`;
+      if(nx) t+=`, first up ${fmtTime(new Date(nx.s))}`;
+      if(mine.length) t+=`, ${mine.length} personal`;
+      t+=".";
+      if(clash) t+=` Heads up: ${clash.p.t} overlaps a work meeting at ${fmtTime(new Date(clash.w.s))}.`;
+      return t;
+    }
+    if(clash && Date.parse(clash.w.s)-nowMs<4*3600000) return `Heads up: ${clash.p.t} overlaps a work meeting at ${fmtTime(new Date(clash.w.s))}.`;
+  }catch(e){}
+  return "";
+}
 function rerender(){ applyDecor(); renderWork(); renderKpis(); renderTasks(); renderEvents(); renderTeams(); renderChannels(); renderStrip(); renderHealth(); $("#line").textContent = ""; shellLine(); }
 function shellLine(){
   const nTasks=D.tasks.length, ne=nextEvent();
   const fact = (typeof decorFact==="function" && DECOR.th) ? decorFact()+" " : "";
+  const br = (typeof briefLine==="function") ? briefLine() : "";
+  if (br) { $("#line").textContent = br; return; }
   $("#line").textContent = fact + (nTasks ? `${nTasks} thing${nTasks===1?" is":"s are"} worth a look.` : "Nothing needs you.") + (ne ? ` Next: ${ne.title} in ${rel(ne._d-new Date())}.` : "");
 }
 
