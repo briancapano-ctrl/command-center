@@ -23,7 +23,7 @@ unread count for the folders you pick, your next meeting time today, and the red
 Keep the three pinned tabs open. Only these pinned tabs ever reload or navigate themselves. Your other Outlook and Copilot tabs are only read.
 
 ## How it behaves
-- A watchdog checks every 2 minutes; if a pinned work tab stopped updating (Comet can put background tabs to sleep), it reloads just that tab.
+- The three work tabs report in to the add-on when they load, so it knows exactly which tabs are its own. A watchdog checks every 2 minutes and, if one of them stopped updating (Comet can put background tabs to sleep), reloads just that tab. After you reload or update the add-on, it refreshes its own tabs and the Command Center page by itself.
 - It refreshes every 30 seconds. If a number is older than 25 minutes (1 hour for the briefing), the card says "sign in needed" instead of showing a stale number.
 - The Copilot tab reopens the chat list every 15 minutes and opens your newest chat whose title contains "briefing" or "digest".
 - The calendar tab returns to today's day view hourly and after midnight.

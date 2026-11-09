@@ -1,6 +1,7 @@
 // Runs on your Command Center page only (it checks for the page's marker). Passes the stored counts to the page.
 (() => {
   if (!document.querySelector('meta[name="command-center"]')) return;
+  try { chrome.runtime.sendMessage({ cc: "relay" }).catch(() => {}); } catch (e) { /* add-on reloading */ }
   const alive = () => { try { return !!(chrome.runtime && chrome.runtime.id); } catch (e) { return false; } };
   let t = null;
   const send = async () => {

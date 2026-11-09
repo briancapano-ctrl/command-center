@@ -49,6 +49,7 @@
     } catch (e) { /* retry next tick */ }
   }
   setTimeout(tick, 7000);
+  document.addEventListener("resume", () => { if (alive()) tick(); });   // tab woke up from sleep: count right away
   every(tick, 30000);
   // Re-open the chat list every 15 minutes so a new morning briefing is picked up.
   every(() => { if (sessionStorage.getItem("cc_lane") === "1") { sessionStorage.removeItem(GUARD); location.href = "https://m365.cloud.microsoft/chat"; } }, 15 * 60000);

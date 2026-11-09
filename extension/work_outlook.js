@@ -58,6 +58,7 @@
     } catch (e) { /* page changed under us; try again next tick */ }
   }
   setTimeout(tick, 6000);
+  document.addEventListener("resume", () => { if (alive()) tick(); });   // tab woke up from sleep: count right away
   every(tick, 30000);
 
   // Calendar tab: go back to today's view once an hour and after midnight so "next meeting" stays right.
