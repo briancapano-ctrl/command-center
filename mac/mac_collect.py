@@ -263,6 +263,10 @@ def home():
     except Exception:
         pass
     try:
+        di = subprocess.run(["tmutil", "destinationinfo"], capture_output=True, text=True, timeout=20)
+        if "No destinations configured" in (di.stdout + di.stderr):
+            out["backup"] = {"last": None, "ok": None, "off": True, "err": "No backup drive set up"}
+            raise StopIteration
         r = subprocess.run(["tmutil", "latestbackup"], capture_output=True, text=True, timeout=20)
         m = re.search(r"(\d{4}-\d{2}-\d{2})-(\d{6})", r.stdout)
         if m:
@@ -271,6 +275,8 @@ def home():
         else:
             msg = (r.stderr or r.stdout).strip()
             out["backup"] = {"last": None, "ok": False, "err": re.sub(r"UserInfo=.*", "", msg)[:120] or "No backup found"}
+    except StopIteration:
+        pass
     except Exception as e:
         out["backup"] = {"last": None, "ok": False, "err": str(e)[:120]}
     gw = None

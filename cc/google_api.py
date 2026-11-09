@@ -43,11 +43,13 @@ def _list_ids(tok, q, cap=3000):
 
 
 def sweep_promos(tok):
-    """Approved standing action: archive + mark read promotions/social, labeled for undo."""
+    """Approved standing action: archive + mark read promotions/social/older updates, labeled for undo."""
     label = _label_id(tok, f"{CLEANUP_LABEL} {now():%Y-%m-%d}")
     total = 0
-    for cat in ("promotions", "social"):
-        ids = _list_ids(tok, f"is:unread in:inbox category:{cat}")
+    # Updates (approved Nov 8): only mail older than 2 days that Gmail did not flag important or you did not star,
+    # so fresh codes, receipts and bank alerts still show up first.
+    for cat, extra in (("promotions", ""), ("social", ""), ("updates", " older_than:2d -is:important -is:starred")):
+        ids = _list_ids(tok, f"is:unread in:inbox category:{cat}{extra}")
         for i in range(0, len(ids), 1000):
             _p(tok, "https://gmail.googleapis.com/gmail/v1/users/me/messages/batchModify",
                {"ids": ids[i:i + 1000], "addLabelIds": [label], "removeLabelIds": ["INBOX", "UNREAD"]})

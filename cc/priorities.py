@@ -57,7 +57,9 @@ def build(src, cfg):
     # ---- home and Mac health (Mac)
     home = mac.get("home") or {}
     bk = home.get("backup") or {}
-    if home and not bk.get("ok"):
+    if home and bk.get("off"):
+        pass
+    elif home and not bk.get("ok"):
         tasks.append({"t": "Time Machine backup is failing on the Mac mini", "w": (bk.get("err") or "No backup found")[:90] + ".", "p": ["Mac", "p-med"], "rank": 3})
     elif bk.get("age_h", 0) > 72:
         tasks.append({"t": "Mac mini has not backed up in 3 days", "w": f"Last Time Machine backup {bk['age_h'] / 24:.0f} days ago.", "p": ["Mac", "p-med"], "rank": 3})
@@ -150,7 +152,7 @@ def build(src, cfg):
     # ---- inbox triage
     g = src.get("gmail")
     if g:
-        triage.append({"acct": "Gmail", "finding": f"{g['cleared']:,} promotions and social messages archived and marked read today." if g["cleared"] else "No promotions or social mail to clear today.",
+        triage.append({"acct": "Gmail", "finding": f"{g['cleared']:,} promotions, social and older update messages archived and marked read today." if g["cleared"] else "No promotions, social or older update mail to clear today.",
                        "action": "Undo: search the Cleanup label in Gmail."})
         top = Counter(m["domain"] for m in g["recent"]).most_common(3)
         if top:
