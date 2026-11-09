@@ -95,6 +95,31 @@ body.wall .ctl{top:auto;bottom:.6rem;right:.8rem}
 .work .wv.hot{color:var(--warn-ink)}.work .wv.bad{color:var(--negative)}
 .work .wlinks{display:flex;gap:.5rem;margin-top:.6rem;font-size:.78rem}.work .wlinks a{color:var(--ink2);text-decoration:none;background:var(--raised);border-radius:999px;padding:.25rem .7rem}.work .wlinks a:hover{color:var(--ink)}
 body.wall .work .wlinks{display:none}
+.work-open{margin-left:auto;white-space:nowrap;font:500 .78rem var(--sans);border:0;border-radius:99px;padding:.35rem .7rem;background:var(--ink);color:var(--ground);cursor:pointer}
+.work-next{display:flex;flex-direction:column;gap:.25rem;margin:.6rem 0}.work-next small{color:var(--muted);font-size:.78rem}.work-next b{font-weight:500;font-size:.95rem}
+.work-peek{display:flex;align-items:baseline;gap:.6rem;padding:.5rem 0;border-top:1px solid var(--rule);font-size:.9rem}
+.work-priority{font-size:.75rem;font-weight:600;color:var(--muted);white-space:nowrap}
+.work-priority.urgent{color:var(--negative)}.work-priority.watch{color:var(--warn-ink)}
+.work-note{font-size:.75rem;color:var(--muted);line-height:1.5;margin-top:.5rem}
+.sc-work{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);grid-template-rows:minmax(0,1fr) auto;gap:var(--gap);min-width:0}
+.sc-work>.card{display:flex;flex-direction:column;min-width:0;padding:1.25rem}
+.work-source{font-size:.85rem;color:var(--muted);margin:.1rem 0 1rem}
+.work-scroll{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;flex:1}
+.work-appointment{display:grid;grid-template-columns:minmax(110px,.65fr) minmax(0,1.35fr);gap:.8rem;padding:1rem 0;border-top:1px solid var(--rule)}
+.work-when{display:flex;flex-direction:column;gap:.25rem;font-size:.85rem}.work-when b{font-weight:600}.work-when span{color:var(--muted)}
+.sc-work .work-appointment h3,.sc-work .work-item h3{font:600 1rem/1.35 var(--sans);color:var(--ink);margin:0;overflow-wrap:anywhere}
+.work-appointment p,.work-appointment small{font-size:.8rem;color:var(--muted);margin:.3rem 0 0}
+.work-item{padding:1rem 0 1.25rem;border-top:1px solid var(--rule)}.work-item .work-priority{display:block;margin-bottom:.4rem}
+.work-item p{font-size:.9rem;line-height:1.6;color:var(--ink2);margin:.6rem 0 0;overflow-wrap:anywhere}
+.work-action{padding:.75rem 1rem;background:var(--raised);border-radius:12px;margin-top:.8rem}.work-action>b{font-size:.78rem;font-weight:600}.work-action p{margin-top:.3rem}
+.work-bottom{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-top:1rem;border-top:1px solid var(--rule);font-size:.75rem;color:var(--muted)}
+.work-bottom a{color:var(--ink);text-underline-offset:3px;white-space:nowrap}
+.work-privacy{grid-column:1/-1;font-size:.75rem;color:var(--muted);margin:0}
+body:not(.wall) .sc-work{height:auto;align-items:start}body:not(.wall) .sc-work .work-scroll{max-height:65vh}
+@media(max-width:750px){.sc-work{grid-template-columns:1fr}.work-bottom{flex-wrap:wrap}.work-appointment{grid-template-columns:1fr;gap:.4rem}.work-when{flex-direction:row;gap:.6rem}.work-privacy{grid-column:auto}
+body[data-scene=work]:not(.wall) .top>div:first-child,body[data-scene=work]:not(.wall) .top .win,body[data-scene=work]:not(.wall) .top .hang,body[data-scene=work]:not(.wall) .hello p{display:none}
+body[data-scene=work]:not(.wall) .hello h1{font-size:1.5rem}body[data-scene=work]:not(.wall) .top{margin-bottom:.75rem}body[data-scene=work]:not(.wall) .wrap{padding-top:1rem}}
+@media(orientation:portrait){body.wall .sc-work{grid-template-columns:1fr;grid-template-rows:minmax(0,.8fr) minmax(0,1.2fr) auto}}
 .ev{display:grid;grid-template-columns:4.8rem 1fr auto;gap:.7rem;padding:.55rem 0;border-top:1px solid var(--rule);align-items:baseline}
 .ev:first-of-type{border-top:0}
 .ev .when{color:var(--muted);font-size:.8rem}.ev .what{font-weight:500}.ev .in{font:600 .76rem var(--sans);color:var(--accent)}
@@ -548,39 +573,53 @@ async function refreshData(){
     if(nd.generated !== D.generated){ D = nd; rerender(); }
   }catch(e){}
 }
-/* ---------- work lane: counts only, handed over by the local browser add-on; never stored, never uploaded ---------- */
+/* ---------- Work: browser-local agenda and extracted Copilot priorities. Never added to D or uploaded. ---------- */
 let WORK = null, WORK_AT = 0;
 window.addEventListener("message", e => {
   if (e.source !== window || !e.data || e.data.source !== "cc-work-bridge" || e.data.v !== 1) return;
   WORK = e.data.work || null; WORK_AT = Date.now(); renderWork();
+  if(typeof SCENE !== "undefined" && SCENE === "work") renderScene(false);
 });
 function renderWork(){
   const el = $("#work"); if(!el) return;
-  const now = Date.now(), FRESH = 25*60000;
-  const age = p => p && p.ts ? now - p.ts : Infinity;
-  const links = '<div class="wlinks"><a href="https://m365.cloud.microsoft/chat" target="_blank" rel="noopener">Open Copilot</a><a href="https://outlook.office.com/mail/" target="_blank" rel="noopener">Open Outlook</a></div>';
-  if(!WORK || (!WORK.mail && !WORK.cal && !WORK.copilot)){
-    el.innerHTML = `<h2 class="lbl">Work <span class="sub">not connected</span></h2><div class="empty">Add-on not detected in this browser. Work lane is off.</div>${links}`;
-    fit(); return;
-  }
-  const rows = [];
-  const m = WORK.mail;
-  if(m){ const stale = age(m) > FRESH;
-    (m.folders||[]).forEach(f=>rows.push(`<div class="wrow"><span class="wk">${esc(f.label)}</span><span class="wv ${stale?"bad":f.n>0?"hot":""}">${stale?"sign in needed":f.n}</span></div>`)); }
-  const c = WORK.cal;
-  if(c){ const stale = age(c) > FRESH;
-    if(stale) rows.push('<div class="wrow"><span class="wk">Next meeting</span><span class="wv bad">sign in needed</span></div>');
-    else { const up = (c.events||[]).map(x=>({s:new Date(x.s),e:new Date(x.e)})).filter(x=>dkey(x.s)===dkey(new Date()) && x.e>new Date()).sort((a,b)=>a.s-b.s);
-      const nx = up[0];
-      rows.push(`<div class="wrow"><span class="wk">Next meeting</span><span class="wv">${nx ? (nx.s<=new Date() ? "Now, until "+esc(fmtTime(nx.e)) : esc(fmtTime(nx.s))+" (in "+esc(rel(nx.s-new Date()))+")") : "None left today"}</span></div>`);
-      if(up.length>1) rows.push(`<div class="wrow"><span class="wk">Later today</span><span class="wv">${up.length-1} more</span></div>`); } }
-  const b = WORK.copilot;
-  if(b){ const stale = age(b) > 60*60000;
-    rows.push(`<div class="wrow"><span class="wk">Copilot briefing</span><span class="wv ${stale?"bad":""}">${stale?"sign in needed":`${b.red} urgent, ${b.orange} watch, ${b.yellow} low`}</span></div>`);
-    if(!stale && b.title) rows.push(`<div class="wrow"><span class="wk">As of</span><span class="wv">${esc(String(b.title).replace(/^.*?(briefing|digest)\s*\|\s*/i,"").slice(0,60))}</span></div>`); }
-  const live = [m,c,b].filter(Boolean).every(p=>age(p) <= 60*60000);
-  el.innerHTML = `<h2 class="lbl">Work <span class="sub">${live?"live":"check sign-in"}</span></h2>${rows.join("")}${links}`;
+  const b=WORK?.copilot, c=WORK?.cal, nx=workUpcoming()[0];
+  const linked=!!(b||c||WORK?.mail);
+  const preview=(b?.items||[]).slice(0,2).map(x=>`<div class="work-peek"><span class="work-priority ${esc(x.level)}">${esc(workLevel(x.level))}</span><span>${esc(x.title)}</span></div>`).join("");
+  el.innerHTML=`<h2 class="lbl">Work <button class="work-open" data-s="work" data-testid="open-work">Open work view</button></h2>
+    ${!linked?'<p class="work-note">Connect the work add-on in this Comet browser.</p>':
+    `<div class="work-next"><small>${nx?esc(workDate(nx.s))+" · "+esc(workTime(nx)):"Work calendar"}</small><b>${nx?esc(nx.title):esc(workCalendarMessage())}</b></div>
+    ${preview||`<p class="work-note">${b?`${Number(b.red)||0} urgent · ${Number(b.orange)||0} watch · ${Number(b.yellow)||0} low. Reload the updated add-on for details.`:"Waiting for the Copilot briefing."}</p>`}`}
+    <p class="work-note">Browser only. Personal data never goes to Copilot.</p>`;
   fit();
+}
+function workLevel(x){ return x==="urgent"?"Urgent":x==="watch"?"Watch":"Low"; }
+function workAge(p){ if(!p?.ts) return "Not connected"; const m=Math.max(0,Math.floor((Date.now()-p.ts)/60000)); return m<1?"Synced just now":`Synced ${m}m ago`; }
+function workDate(s){ const d=new Date(s);return dkey(d)===dkey(new Date())?"Today":d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",timeZone:TZ()}); }
+function workTime(x){return x.allDay?"All day":fmtTime(new Date(x.s))+"–"+fmtTime(new Date(x.e));}
+function workUpcoming(){const c=WORK?.cal;if(c?.schema!==2||c.status==="scope")return [];return(c.events||[]).filter(x=>x.title&&Date.parse(x.e)>Date.now()).sort((a,b)=>Date.parse(a.s)-Date.parse(b.s));}
+function workCalendarMessage(){
+  const c=WORK?.cal;
+  if(!c)return"Waiting for the work calendar.";
+  if(c.schema!==2)return"Reload the updated add-on to read actual meetings.";
+  if(c.status==="scope")return c.message;
+  if(Date.now()-c.ts>25*60000)return"Calendar feed is stale. Open Outlook to check sign-in.";
+  return c.status==="partial"?c.message:"No upcoming appointments in the displayed work week.";
+}
+function sceneWork(){
+  const c=WORK?.cal,b=WORK?.copilot,m=WORK?.mail,up=workUpcoming();
+  const mail=(m?.folders||[]).map(f=>`${esc(f.label)}: ${Number(f.n)||0}`).join(" · ");
+  const agenda=up.map((x,i)=>`<article class="work-appointment" data-testid="work-appointment-${i}"><div class="work-when"><b>${esc(workDate(x.s))}</b><span>${esc(workTime(x))}</span></div><div><h3>${esc(x.title)}</h3>${x.location?`<p>${esc(x.location)}</p>`:""}${x.private?'<small>Details hidden</small>':""}</div></article>`).join("");
+  const items=(b?.items||[]).map((x,i)=>`<article class="work-item" data-testid="work-priority-${i}"><span class="work-priority ${esc(x.level)}">${esc(workLevel(x.level))}</span><h3>${esc(x.title)}</h3>${x.summary?`<p>${esc(x.summary)}</p>`:""}${x.action?`<div class="work-action"><b>Next action</b><p>${esc(x.action)}</p></div>`:""}</article>`).join("");
+  const cpHref=b?.href&&/^https:\/\/m365\.cloud\.microsoft\/chat\/conversation\//.test(b.href)?b.href:"https://m365.cloud.microsoft/chat";
+  return `<div class="sc sc-work">
+    <section class="card work-agenda"><h2 class="lbl">Work calendar <span class="sub">${esc(workAge(c))}</span></h2><p class="work-source">Allbridge · ${esc(c?.range||"Current work week")}${agenda?` · ${up.length} appointments`:""}</p>
+    <div class="work-scroll">${agenda||`<div class="empty">${esc(workCalendarMessage())}</div>`}${c?.status==="partial"&&agenda?`<p class="work-note">${esc(c.message)}</p>`:""}${c&&Date.now()-c.ts>25*60000?'<p class="work-note">Calendar feed is stale. Open Outlook to check sign-in.</p>':""}</div>
+    <div class="work-bottom"><a href="https://outlook.cloud.microsoft/calendar/view/workweek#cc-lane" target="_blank" rel="noopener">Open work calendar</a><span>${mail||"Mail not connected"}</span></div></section>
+    <section class="card work-briefing"><h2 class="lbl">Briefing priorities <span class="sub">${esc(workAge(b))}</span></h2><p class="work-source">${esc(b?.title||"Your latest Copilot briefing")}</p>
+    <div class="work-scroll">${items||`<div class="empty">${b?"Reload the updated add-on to show the actual priority details.":"Waiting for the briefing tab. Keep it open in Comet."}</div>`}</div>
+    <div class="work-bottom"><a href="${esc(cpHref)}" target="_blank" rel="noopener">Read original briefing</a><span>From Copilot. Not independently verified.</span></div></section>
+    <p class="work-privacy">Work details stay in this browser. Not added to GitHub, the cloud data file, or Copilot prompts.</p>
+    </div>`;
 }
 setInterval(renderWork, 30000);
 
@@ -612,7 +651,7 @@ addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT") return; if(e.key=
 function toggleFs(){ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.(); }
 
 /* ===== v3: scenes, drawer, local tasks, progress ring ===== */
-const SCENES=[["overview","Overview",50],["today","Today",25],["sports","Sports",22],["inbox","Inbox",25],["week","Week",25],["home","Home",22],["almanac","Almanac",25],["pulse","Pulse",15]];
+const SCENES=[["overview","Overview",50],["work","Work",45],["today","Today",25],["sports","Sports",22],["inbox","Inbox",25],["week","Week",25],["home","Home",22],["almanac","Almanac",25],["pulse","Pulse",15]];
 let SCENE="overview", sceneAt=Date.now(), autoOn=store.getItem("cc_auto")!=="0", pauseUntil=0, lastSports=0;
 const GM="https://mail.google.com/mail/u/0/";
 const fmtN=n=>n==null?"n/a":Number(n).toLocaleString();
@@ -814,11 +853,11 @@ function sceneHome(){
   <section class="card"><h2 class="lbl">Birthdays <span class="sub">next 45 days</span></h2>${bdayRows((D.birthdays||[]).slice(0,8))}</section>
   <section class="card memcard"><h2 class="lbl">On this day <span class="sub">Photos</span></h2>${memHtml()}</section></div>`;
 }
-const RENDER={today:sceneToday,sports:sceneSports,inbox:sceneInbox,week:sceneWeek,home:sceneHome,almanac:sceneAlmanac,pulse:scenePulse};
+const RENDER={work:sceneWork,today:sceneToday,sports:sceneSports,inbox:sceneInbox,week:sceneWeek,home:sceneHome,almanac:sceneAlmanac,pulse:scenePulse};
 function renderScene(fresh=true){
   const ov=$("#overlay"); if(!ov) return; ov.classList.toggle("still",!fresh);
   ov.innerHTML=SCENE==="overview"?"":RENDER[SCENE]();
-  if(document.body.classList.contains("wall")) requestAnimationFrame(()=>ov.querySelectorAll(".sc>.card").forEach(c=>{
+  if(document.body.classList.contains("wall")&&SCENE!=="work") requestAnimationFrame(()=>ov.querySelectorAll(".sc>.card").forEach(c=>{
     for(let g=0; g<40 && c.scrollHeight>c.clientHeight+3; g++){
       const vis=[...c.children].filter(x=>x.style.display!=="none"); if(vis.length<=2) break;
       vis[vis.length-1].style.display="none";
@@ -852,7 +891,7 @@ addEventListener("keydown",e=>{
   else if(e.key==="ArrowLeft") setScene(SCENES[(i+SCENES.length-1)%SCENES.length][0],true);
   else if(e.key===" "){ e.preventDefault(); toggleAuto(); }
   else if(e.key==="Escape") closeDrawer();
-  else if(/^[1-8]$/.test(e.key)) setScene(SCENES[Number(e.key)-1][0],true);
+  else if(/^[1-9]$/.test(e.key)) setScene(SCENES[Number(e.key)-1][0],true);
 });
 function initV3(){
   if(!$("#drawer")){ document.body.insertAdjacentHTML("beforeend",`<div class="dbk" id="dbk"></div><aside class="drawer" id="drawer"><header><b id="dt"></b><button id="dx">Close</button></header><div id="db"></div></aside><div class="rot" id="rot"></div>`); }

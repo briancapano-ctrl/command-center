@@ -1,13 +1,13 @@
 # Work Lane add-on (Comet or Chrome)
 
-Shows three work numbers on the Command Center without sending anything anywhere:
-unread count for the folders you pick, your next meeting time today, and the red / orange / yellow counts from your latest Copilot briefing.
+Shows your actual work agenda and briefing priorities in a dedicated Work view.
+The source tabs send data one way to this browser's Command Center page. No AI calls or Computer runs are needed.
 
 ## What leaves your work pages, exactly
 - A number per folder you list, plus your own label for it (default: `Inbox unread`).
-- Meeting start and end times. No titles, no attendees.
-- From the Copilot briefing: three counts and the briefing's own date line (for example "Friday, November 6 | 7:24 PM ET").
-- Nothing else. No sender names, subjects, message text, customer names or links.
+- Calendar: appointment titles, start/end, all-day status and location from the selected Allbridge work calendar. Private appointment details are redacted. No attendees or meeting bodies.
+- Copilot: priority headings, short extracted context and next-action passages, priority counts, the briefing's own date line and a link to the original chat.
+- No email subjects, bodies, sender names or attachments. No data travels back from the dashboard into work apps.
 
 ## Where it goes
 - Into this browser's extension storage, then to the Command Center page open in the same browser window, through a page message. It is never uploaded, never written to the GitHub repo, never saved by the page.
@@ -19,7 +19,7 @@ unread count for the folders you pick, your next meeting time today, and the red
 2. Load unpacked, choose this `extension` folder.
 3. Click the add-on icon. Edit the folder list if you want more than Inbox (format: `Folder name=Label shown`, one per line), then Save.
 4. Click "Open and pin my work tabs". Sign in to Microsoft in each tab if asked.
-5. Open your Command Center page in a tab of the same browser. The Work card turns live within about a minute.
+5. Open your Command Center page in the same browser. Click Work in the scene navigation, or Open work view on Overview. In the work calendar tab, select only the Allbridge calendar. Mixed work/personal calendar selections are rejected.
 Keep the three pinned tabs open. Only these pinned tabs ever reload or navigate themselves. Your other Outlook and Copilot tabs are only read.
 
 ## How it behaves

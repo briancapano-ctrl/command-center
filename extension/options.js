@@ -11,7 +11,7 @@ $("save").onclick = async () => {
   $("ok").textContent = "Saved";
 };
 $("open").onclick = async () => {
-  for (const url of ["https://outlook.office.com/mail/#cc-lane", "https://outlook.office.com/calendar/view/day#cc-lane", "https://m365.cloud.microsoft/chat#cc-lane"]) {
+  for (const url of ["https://outlook.office.com/mail/#cc-lane", "https://outlook.office.com/calendar/view/workweek#cc-lane", "https://m365.cloud.microsoft/chat#cc-lane"]) {
     await chrome.tabs.create({ url, pinned: true, active: false });
   }
 };

@@ -12,14 +12,16 @@ async function reloadTab(id) {
   try { await chrome.tabs.get(id); await chrome.tabs.reload(id); return true; } catch (e) { return false; }   // tab was closed
 }
 
+let registration = Promise.resolve();
 chrome.runtime.onMessage.addListener((msg, sender) => {
   if (!msg || !sender.tab || !sender.tab.id) return;
-  if (msg.cc === "lane" && KEYS[msg.kind]) {
-    laneTabs().then(t => { t[msg.kind] = sender.tab.id; return chrome.storage.local.set({ cc_lane_tabs: t }); });
-  }
-  if (msg.cc === "relay") {
-    laneTabs().then(t => { t.page = sender.tab.id; return chrome.storage.local.set({ cc_lane_tabs: t }); });
-  }
+  const kind = msg.cc === "lane" && KEYS[msg.kind] ? msg.kind : msg.cc === "relay" ? "page" : null;
+  if (!kind) return;
+  // Serialize read/merge/write so tabs registering together cannot overwrite each other.
+  registration = registration.catch(() => {}).then(async () => {
+    const t = await laneTabs(); t[kind] = sender.tab.id;
+    await chrome.storage.local.set({ cc_lane_tabs: t });
+  });
 });
 
 async function arm() { await chrome.alarms.create("cc-watch", { periodInMinutes: 2 }); }
@@ -28,8 +30,8 @@ chrome.runtime.onInstalled.addListener(async () => {
   await arm();
   // Fresh code: restart only our own tabs (work tabs and the Command Center page), nothing else.
   const t = await laneTabs();
-  for (const k of Object.keys(t)) { if (!(await reloadTab(t[k]))) delete t[k]; }
-  await chrome.storage.local.set({ cc_lane_tabs: t, cc_reloads: {} });
+  await chrome.storage.local.set({ cc_reloads: {} });
+  for (const k of Object.keys(t)) await reloadTab(t[k]);
 });
 
 chrome.alarms.onAlarm.addListener(async a => {
