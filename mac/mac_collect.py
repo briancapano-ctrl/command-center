@@ -211,8 +211,9 @@ def photos():
     lib = os.path.dirname(os.path.dirname(PHOTOS_DB[0]))
     db = sqlite3.connect(snapshot(PHOTOS_DB[0]))
     md = dt.date.today().strftime("%m-%d")
-    rows = db.execute("""select ZUUID, strftime('%Y', ZDATECREATED+978307200,'unixepoch','localtime'), coalesce(ZFAVORITE,0)
-        from ZASSET where coalesce(ZTRASHEDSTATE,0)=0 and coalesce(ZHIDDEN,0)=0 and ZKIND=0
+    fav_only = "and coalesce(ZFAVORITE,0)=1" if ENV.get("CC_PHOTOS_FAVORITES", "0") == "1" else ""
+    rows = db.execute(f"""select ZUUID, strftime('%Y', ZDATECREATED+978307200,'unixepoch','localtime'), coalesce(ZFAVORITE,0)
+        from ZASSET where coalesce(ZTRASHEDSTATE,0)=0 and coalesce(ZHIDDEN,0)=0 and ZKIND=0 {fav_only}
         and strftime('%m-%d', ZDATECREATED+978307200,'unixepoch','localtime')=?
         and strftime('%Y', ZDATECREATED+978307200,'unixepoch','localtime')<strftime('%Y','now','localtime')
         order by ZFAVORITE desc, ZUUID""", (md,)).fetchall()

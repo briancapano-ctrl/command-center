@@ -712,7 +712,7 @@ function homeHtml(big){
   return `<div class="hm">
     <div class="${net[1]}"><div class="lbl">Internet</div><b>${esc(net[0])}</b><small>${n.gw_ms!=null?"router "+n.gw_ms+" ms":"ping to 1.1.1.1"}</small></div>
     <div class="${n.avail_24h!=null&&n.avail_24h<99?"warnb":""}"><div class="lbl">Uptime 24h</div><b>${esc(av)}</b><small>${n.outages_24h||0} drop${n.outages_24h===1?"":"s"}, worst ${n.worst_ms||0} ms</small></div>
-    <div class="${bk[1]}"><div class="lbl">Backup</div><b>${esc(bk[0])}</b><small>${b.ok?"Time Machine":esc((b.err||"").slice(0,40))}</small></div>
+    <div class="${bk[1]}"><div class="lbl">Backup</div><b>${esc(bk[0])}</b><small>${b.ok?"Time Machine":esc((b.err||"").replace(/,.*$/,"").slice(0,48))}</small></div>
     <div class="${d.pct_used>=90?"bad":d.pct_used>=80?"warnb":""}"><div class="lbl">Mac disk</div><b>${d.free_gb!=null?d.free_gb+" GB":"n/a"}</b><small>free, ${d.pct_used||0}% used</small></div>
     <div><div class="lbl">Mac up</div><b>${h.uptime_days!=null?h.uptime_days+"d":"n/a"}</b><small>since last restart</small></div>
     <div><div class="lbl">Checks</div><b>${n.checks_24h||0}</b><small>in 24h, every 10 min</small></div></div>`;
