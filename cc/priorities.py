@@ -154,7 +154,18 @@ def build(src, cfg):
     ch("YouTube", cfg.get("youtube_handle", ""), bool(yt), f"{yt['subs']:,} subs, {yt['videos']} videos, {yt['views_30d'] if yt['views_30d'] is not None else 'n/a'} views in 30 days" if yt else "Not connected", errors.get("youtube", ""))
     for m in cfg.get("manual_channels", []):
         channels.append({"name": m["name"], "handle": m.get("handle", ""), "state": "snap", "stat": m.get("stat", ""), "next": f"Manual entry, as of {m.get('as_of','?')}. No official feed."})
-    events_out = [{"title": e["title"], "start": e["start"], "all_day": e["all_day"], "cal": e.get("cal", "")} for e in events]
+    # ---- inbox detail for the Inbox scene and drawers
+    inbox_detail = {}
+    if g:
+        senders = [{"d": d_, "n": c_} for d_, c_ in Counter(m["domain"] for m in g["recent"] if m.get("domain")).most_common(8)]
+        inbox_detail["gmail"] = {"unread": g["unread_estimate"], "cleared": g["cleared"], "cats": g.get("cats") or {}, "senders": senders}
+    if fo and inbox:
+        top = sorted([f for f in fo if f["unread"] > 0], key=lambda f: -f["unread"])[:7]
+        inbox_detail["hotmail"] = {"unread": inbox["unread"], "total": inbox["total"], "swept": src.get("outlook_swept", 0),
+                                   "folders": [{"name": f["name"], "unread": f["unread"]} for f in top]}
+    if mac:
+        inbox_detail["texts"] = {"unread": unread_texts, "chats": mac.get("unread_chats", 0), "waiting": (mac.get("waiting") or [])[:6]}
+    events_out = [{"title": e["title"], "start": e["start"], "all_day": e["all_day"], "cal": e.get("cal", ""), "end": e.get("end")} for e in events]
     return {"generated": n.isoformat(), "meta": {"name": cfg.get("name", "Brian"), "lat": cfg.get("lat", 36.0217), "lon": cfg.get("lon", -78.4756), "tz": "America/New_York", "dim": cfg.get("night_dim", True)},
             "events": events_out, "kpis": kpis, "tasks": tasks[:9], "week": week, "teams": sports,
-            "triage": triage, "channels": channels, "errors": errors}
+            "triage": triage, "channels": channels, "inbox": inbox_detail, "errors": errors}

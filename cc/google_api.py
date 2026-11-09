@@ -55,12 +55,21 @@ def sweep_promos(tok):
     return total
 
 
-def gmail(tok, sweep=True, recent_n=25):
+def gmail(tok, sweep=True, recent_n=50):
     cleared = sweep_promos(tok) if sweep else 0
+    cats = {}
+    for key, lid in (("inbox", "INBOX"), ("primary", "CATEGORY_PERSONAL"), ("updates", "CATEGORY_UPDATES"),
+                     ("promotions", "CATEGORY_PROMOTIONS"), ("social", "CATEGORY_SOCIAL"), ("forums", "CATEGORY_FORUMS")):
+        try:
+            cats[key] = _g(tok, f"https://gmail.googleapis.com/gmail/v1/users/me/labels/{lid}").get("messagesUnread", 0)
+        except RuntimeError:
+            cats[key] = None
     q = "is:unread in:inbox"
     j = _g(tok, "https://gmail.googleapis.com/gmail/v1/users/me/messages?" +
            urllib.parse.urlencode({"q": q, "maxResults": recent_n}))
-    est = j.get("resultSizeEstimate", 0)
+    est = cats.get("inbox")
+    if est is None:
+        est = j.get("resultSizeEstimate", 0)
     recent = []
     for m in j.get("messages", []):
         d = _g(tok, f"https://gmail.googleapis.com/gmail/v1/users/me/messages/{m['id']}?format=metadata"
@@ -68,7 +77,7 @@ def gmail(tok, sweep=True, recent_n=25):
         h = {x["name"]: x["value"] for x in d.get("payload", {}).get("headers", [])}
         recent.append({"from": h.get("From", ""), "domain": domain_of(h.get("From", "")),
                        "subject": h.get("Subject", ""), "date": h.get("Date", "")})
-    return {"unread_estimate": est, "recent": recent, "cleared": cleared}
+    return {"unread_estimate": est, "recent": recent, "cleared": cleared, "cats": cats}
 
 
 def calendar(tok, days=7):
@@ -87,7 +96,8 @@ def calendar(tok, days=7):
         for e in ev.get("items", []):
             s = e.get("start", {})
             out.append({"title": e.get("summary", "(no title)"), "start": s.get("dateTime") or s.get("date"),
-                        "all_day": "date" in s, "cal": c.get("summary", "")})
+                        "all_day": "date" in s, "cal": c.get("summary", ""),
+                        "end": (e.get("end") or {}).get("dateTime")})
     out.sort(key=lambda e: e["start"] or "")
     return out
 

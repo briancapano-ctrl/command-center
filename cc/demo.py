@@ -14,9 +14,13 @@ def sample():
         "mac": {"unread_total": 6, "unread_chats": 3, "as_of": "Updated 6:05 AM", "as_of_iso": (n - dt.timedelta(minutes=14)).isoformat(),
                 "reminders": [{"title": "Call Simon Gill", "due": at(-12, 18).isoformat()}, {"title": "Schedule Starlink installation", "due": at(0, 12).isoformat()}],
                 "waiting": [{"label": "Family group", "ago": "4h"}]},
-        "gmail": {"unread_estimate": 128, "cleared": 87, "recent": [
+        "gmail": {"unread_estimate": 128, "cleared": 87, "cats": {"inbox": 128, "primary": 31, "updates": 64, "promotions": 22, "social": 11, "forums": 0}, "recent": [
+            {"from": "GitHub <noreply@github.com>", "domain": "github.com", "subject": "Run failed", "date": n.isoformat()},
+            {"from": "Google <no-reply@accounts.google.com>", "domain": "google.com", "subject": "Security alert", "date": n.isoformat()},
+            {"from": "Google <no-reply@accounts.google.com>", "domain": "google.com", "subject": "Security alert 2", "date": n.isoformat()},
+            {"from": "LinkedIn <a@linkedin.com>", "domain": "linkedin.com", "subject": "x", "date": n.isoformat()},
             {"from": "YouTube <noreply-purchases@youtube.com>", "domain": "youtube.com", "subject": "Update required: your Premium payment method", "date": n.isoformat()}]},
-        "outlook_folders": [{"name": "Inbox", "unread": 43661, "total": 60648}], "outlook_swept": 12, "outlook_unread": [],
+        "outlook_folders": [{"name": "Inbox", "unread": 43661, "total": 60648}, {"name": "Archive", "unread": 3179, "total": 3436}, {"name": "Junk Email", "unread": 922, "total": 936}, {"name": "Clutter", "unread": 140, "total": 800}], "outlook_swept": 12, "outlook_unread": [],
         "gcal": [{"title": "Dentist", "start": at(0, 15).isoformat(), "all_day": False, "cal": "Google"},
                  {"title": "Youth baseball practice", "start": at(0, 18, 30).isoformat(), "all_day": False, "cal": "Google"},
                  {"title": "Jon's birthday", "start": at(2, 0).strftime("%Y-%m-%d"), "all_day": True, "cal": "Birthdays"},

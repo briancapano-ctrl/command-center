@@ -146,6 +146,81 @@ body.wall .wall-strip{display:flex}
   body.wall .wall-strip{display:none}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+
+/* ===== v3: scenes, drawer, aurora ===== */
+body::before{content:"";position:fixed;inset:-15%;z-index:-1;pointer-events:none;will-change:transform;
+  background:radial-gradient(38% 34% at 18% 14%,var(--a1,rgba(77,227,194,.12)),transparent 70%),radial-gradient(34% 30% at 86% 84%,var(--a2,rgba(122,168,255,.10)),transparent 70%);animation:drift 50s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(4%,3%) scale(1.1)}}
+body[data-tod=morning]{--a1:rgba(255,180,84,.20);--a2:rgba(77,227,194,.10)}
+body[data-tod=day]{--a1:rgba(77,163,255,.16);--a2:rgba(77,227,194,.10)}
+body[data-tod=evening]{--a1:rgba(255,122,92,.18);--a2:rgba(150,110,255,.15)}
+body[data-tod=night]{--a1:rgba(90,100,255,.10);--a2:rgba(77,227,194,.05)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.kpi,.grid .card,.overlay>*{animation:rise .5s both}.kpis .kpi:nth-child(2){animation-delay:.05s}.kpis .kpi:nth-child(3){animation-delay:.1s}.kpis .kpi:nth-child(4){animation-delay:.15s}.kpis .kpi:nth-child(5){animation-delay:.2s}
+.clk{cursor:pointer;transition:transform .15s,border-color .2s,box-shadow .2s}.clk:hover{transform:translateY(-2px);border-color:rgba(77,227,194,.45);box-shadow:0 8px 30px -12px rgba(77,227,194,.35)}
+.hrow{display:flex;align-items:center;gap:.9rem}
+.ring{width:3.1rem;height:3.1rem;flex:none;cursor:pointer;position:relative}.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .bgc{stroke:rgba(255,255,255,.1)}.ring .fg{stroke:var(--acc);transition:stroke-dashoffset .8s}.ring b{position:absolute;inset:0;display:grid;place-items:center;font:700 .72rem var(--f)}
+.ring.cleared{filter:drop-shadow(0 0 8px rgba(77,227,194,.7))}
+.snav{display:flex;gap:.35rem;flex-wrap:wrap;margin:0 0 .9rem}
+.snav button{font:600 .76rem var(--f);color:var(--mute);background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:999px;padding:.4rem .85rem;cursor:pointer;transition:all .2s}
+.snav button:hover{color:var(--ink)}.snav button.on{color:#04110d;background:var(--acc);border-color:var(--acc)}
+.rot{position:fixed;left:0;bottom:0;height:3px;background:var(--acc);opacity:.7;width:0;z-index:30;transition:width 1s linear;pointer-events:none}
+body[data-scene]:not([data-scene=overview]) :is(.kpis,.grid,.chan-sec){display:none}
+body[data-scene=overview] .overlay{display:none}
+.overlay{min-height:0}.overlay.still>*,body.booted .kpi,body.booted .grid .card{animation:none}
+.sc{display:grid;gap:1rem;height:100%;min-height:0}
+.sc>.card{overflow:hidden;min-height:0}
+.big{font:300 clamp(2.4rem,5vw,4.2rem)/1 var(--f);letter-spacing:-.04em}
+.sc-today{grid-template-columns:1.25fr 1fr}.sc-today .side{display:grid;gap:1rem;grid-template-rows:auto 1fr;min-height:0}
+.tl{position:relative;min-height:520px}.tlin{position:absolute;inset:2.6rem .9rem .9rem 3.2rem}
+.hr{position:absolute;left:-2.6rem;right:0;border-top:1px solid var(--line);font-size:.68rem;color:var(--dim)}.hr span{position:absolute;top:-.55rem;left:0;background:transparent}
+.blk{position:absolute;left:.4rem;right:.4rem;background:linear-gradient(90deg,rgba(77,227,194,.22),rgba(122,168,255,.16));border:1px solid rgba(77,227,194,.35);border-radius:10px;padding:.3rem .6rem;overflow:hidden;display:flex;gap:.6rem;align-items:baseline}
+.blk b{font-weight:700;font-size:.9rem}.blk small{color:var(--mute);white-space:nowrap}
+.nowl{position:absolute;left:-2.6rem;right:0;border-top:2px solid var(--bad);z-index:3}.nowl span{position:absolute;right:0;top:-1.25rem;font:700 .68rem var(--f);color:var(--bad)}
+.chips{display:flex;gap:.4rem;flex-wrap:wrap;margin:.2rem 0 .4rem}.chip2{border:1px solid var(--line);background:rgba(255,255,255,.05);border-radius:999px;padding:.2rem .7rem;font-size:.8rem}
+.hourly{display:flex;gap:.2rem;justify-content:space-between}.hourly div{flex:1;text-align:center;font-size:.76rem;color:var(--mute);padding:.4rem .1rem;border-radius:10px}.hourly div:first-child{background:rgba(77,227,194,.1);color:var(--ink)}
+.hourly svg{width:1.7rem;height:1.7rem;display:block;margin:.25rem auto}.hourly b{display:block;font-size:.95rem;color:var(--ink);font-weight:600}
+.sun{display:flex;gap:1.2rem;color:var(--mute);font-size:.8rem;margin-top:.6rem}
+.sc-sports{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.gc{display:flex;flex-direction:column;justify-content:space-between;gap:.8rem;padding:1.3rem}.gc.live{border-color:rgba(255,107,94,.6);box-shadow:0 0 0 1px rgba(255,107,94,.25),0 0 50px -10px rgba(255,107,94,.45)}
+.gc .vs{display:flex;align-items:center;justify-content:space-between;gap:.6rem}.gc .tm{flex:1;text-align:center}.gc .tm img{width:clamp(56px,7vw,110px);height:clamp(56px,7vw,110px);object-fit:contain}
+.gc .tm .ab{font:700 .8rem var(--f);color:var(--mute);letter-spacing:.1em;margin-top:.3rem}.gc .mid{text-align:center}.gc .score{font:300 clamp(2rem,4vw,3.6rem)/1 var(--f)}
+.gc .when{font:600 1.05rem var(--f)}.gc .cd{color:var(--acc);font:600 .9rem var(--m)}.gc .last{color:var(--mute);font-size:.82rem}
+.sc-inbox{grid-template-columns:repeat(3,1fr)}
+.bar{display:grid;grid-template-columns:7.5rem 1fr 3.6rem;gap:.6rem;align-items:center;padding:.35rem 0;font-size:.86rem;text-decoration:none;color:var(--ink)}a.bar:hover .bl{color:var(--acc)}
+.bl{color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bt{height:.55rem;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}.bt i{display:block;height:100%;border-radius:99px;transition:width .8s}.bn{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.sc h3,.drawer h3{font:700 .68rem var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:1rem 0 .3rem}
+.sc-week{grid-template-columns:repeat(7,1fr)}.day7{padding:.8rem .8rem}.day7.today{border-color:rgba(77,227,194,.5);background:linear-gradient(180deg,rgba(77,227,194,.08),rgba(255,255,255,.02))}
+.day7 .dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}.day7 .dh b{font:700 .95rem var(--f)}.day7 .dh small{color:var(--mute);font-size:.7rem;display:flex;align-items:center;gap:.25rem}.day7 .dh svg{width:1.3rem;height:1.3rem}
+.it{padding:.4rem .5rem;border-radius:9px;background:rgba(255,255,255,.045);margin-bottom:.35rem;font-size:.82rem}.it small{display:block;color:var(--mute)}.it.game{border-left:3px solid var(--warn)}.it.ad{border-left:3px solid var(--acc2)}
+.sc-pulse{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));align-content:start}.pt{display:flex;flex-direction:column;gap:.35rem}.pt .nm{font:700 .95rem var(--f)}.pt .st{font:300 1.6rem/1.15 var(--f);letter-spacing:-.02em}.pt .nt{color:var(--dim);font-size:.74rem}
+.dbk{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s;z-index:40}.dbk.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(480px,94vw);background:#0a0e12;border-left:1px solid var(--line);transform:translateX(102%);transition:transform .3s cubic-bezier(.2,.8,.2,1);z-index:41;display:flex;flex-direction:column}
+.drawer.on{transform:none}.drawer header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem;border-bottom:1px solid var(--line)}.drawer header b{font:800 1.1rem var(--f)}
+.drawer header button{font:600 .75rem var(--f);color:var(--mute);background:transparent;border:1px solid var(--line);border-radius:999px;padding:.3rem .8rem;cursor:pointer}.drawer #db{padding:1rem 1.2rem;overflow:auto}
+.qa input{width:100%;margin:0 0 .6rem;padding:.55rem .8rem;border-radius:10px;border:1px dashed var(--line);background:rgba(255,255,255,.03);color:var(--ink);font:500 .88rem var(--f)}.qa input:focus{outline:none;border-color:var(--acc);background:rgba(77,227,194,.05)}
+.task .x{opacity:0;border:0;background:transparent;color:var(--mute);font-size:1.1rem;cursor:pointer;padding:0 .3rem;transition:opacity .15s}.task:hover .x{opacity:1}.task .x:hover{color:var(--bad)}
+body.wall .qa,body.wall .snav,body.wall .task .x{display:none}
+body.wall .top{grid-row:1}body.wall #stale{grid-row:2}body.wall .kpis{grid-row:3}body.wall .grid{grid-row:4}body.wall .overlay{grid-row:3/5}body.wall .wall-strip{grid-row:5}body.wall .health{grid-row:6}
+body.wall .snav.wallnav{display:flex;position:fixed;bottom:.55rem;left:50%;transform:translateX(-50%);margin:0;z-index:25;opacity:.0;transition:opacity .4s}body.wall:not(.idle) .snav.wallnav{opacity:1}
+body.wall .sc-today .tl{min-height:0}
+@media(max-width:980px){.sc-today,.sc-inbox,.sc-week{grid-template-columns:1fr}.sc-week .day7{min-height:0}}
+@media (orientation:portrait){body.wall .sc-today,body.wall .sc-inbox{grid-template-columns:1fr}body.wall .sc-week{grid-template-columns:repeat(2,1fr)}body.wall .sc-today{grid-template-rows:minmax(0,1.3fr) minmax(0,1fr)}}
+body.wall .snav.wallnav{opacity:.65;bottom:.4rem;gap:.45rem;align-items:center}
+body.wall .snav.wallnav button{font-size:0;width:9px;height:9px;padding:0;border-radius:50%;background:rgba(255,255,255,.25);border:0}
+body.wall .snav.wallnav button.on{background:var(--acc);width:22px;border-radius:99px}
+body.wall:not(.idle) .snav.wallnav{opacity:1}
+body.wall:not(.idle) .snav.wallnav button{font-size:.7rem;width:auto;height:auto;padding:.3rem .7rem;border-radius:999px;border:1px solid var(--line)}
+body.wall:not(.idle) .snav.wallnav #bAuto{display:inline-block !important}
+body.wall:not(.idle) .snav.wallnav button.on{color:#04110d;width:auto}
+.gc .tm img{width:clamp(64px,11vh,150px);height:clamp(64px,11vh,150px)}.gc{justify-content:space-around}
+.gc .when{font-size:clamp(1rem,1.6vw,1.5rem)}.gc .cd{font-size:clamp(.9rem,1.2vw,1.2rem)}
+.pt{padding:1.4rem}.pt .st{font-size:clamp(1.6rem,2.6vw,2.6rem)}.pt .nm{font-size:1.05rem}
+.hr{font-size:.76rem}
+@media (orientation:portrait){body.wall .sc-sports{grid-template-columns:1fr}}
+.snav #bAuto{display:none}
+.drawer .it{margin-bottom:.4rem}
 </style>
 </head>
 <body>
@@ -214,20 +289,22 @@ function shell(){
   $("#app").innerHTML = `
   <header class="top">
     <div><div class="clock mono" id="clock"></div><div class="date" id="date"></div></div>
-    <div class="hello"><h1>${esc(greet)}</h1><p id="line">${esc(line)}</p></div>
+    <div class="hello hrow"><div class="ring" id="ring" data-open="need" title="Open your list"></div><div><h1>${esc(greet)}</h1><p id="line">${esc(line)}</p></div></div>
     <div class="wx" id="wx"></div>
   </header>
   <div id="stale"></div>
+  <nav class="snav" id="snav">${navHtml()}</nav>
   <section class="kpis" id="kpis"></section>
   <div class="grid">
     <div class="col">
-      <section class="card fill"><h2 class="lbl">Needs you <span class="sub" id="prog"></span></h2><div id="tasks"></div></section>
+      <section class="card fill"><h2 class="lbl">Needs you <span class="sub" id="prog"></span></h2><form class="qa" id="qa"><input placeholder="Add something for today, press Enter" maxlength="120" autocomplete="off"></form><div id="tasks"></div></section>
     </div>
     <div class="col"><section class="card fill"><h2 class="lbl">Today and next <span class="sub" id="evsub"></span></h2><div id="events"></div></section>
       <section class="card work" id="work"></section></div>
     <div class="col"><section class="card"><h2 class="lbl">Your teams <span class="sub">live</span></h2><div id="teams"></div></section>
       <section class="card fill tri-card"><h2 class="lbl">Inbox triage</h2><table class="tri"><tbody>${D.triage.map(r=>`<tr><td>${esc(r.acct)}</td><td>${esc(r.finding)}</td></tr>`).join("")}</tbody></table></section></div>
   </div>
+  <section class="overlay" id="overlay"></section>
   <section class="wall-strip" id="strip"></section>
   <section class="chan-sec"><h2 class="lbl" style="margin:1.3rem 0 .7rem">Channels</h2><div class="chan" id="chan"></div></section>
   <div class="health" id="health"></div>
@@ -244,7 +321,7 @@ function renderKpis(){
   const hist = D.history||{};
   $("#kpis").innerHTML = D.kpis.map(k=>{
     const arr = k.key==="need"?null:hist[k.key]; const color = "#4de3c2";
-    return `<div class="card kpi"><div class="lbl">${esc(k.label)}</div><div class="v ${typeof k.num==="number"?"":"txt"}" data-k="${esc(k.key)}">${esc(k.value)}</div><div class="n">${esc(k.note)}</div>${spark(arr,color)}</div>`;
+    return `<div class="card kpi clk" data-open="${esc(k.key||"sports")}"><div class="lbl">${esc(k.label)}</div><div class="v ${typeof k.num==="number"?"":"txt"}" data-k="${esc(k.key)}">${esc(k.value)}</div><div class="n">${esc(k.note)}</div>${spark(arr,color)}</div>`;
   }).join("");
   D.kpis.forEach(k=>{
     const el = $(`.v[data-k="${k.key}"]`); const to = k.num, from = prevVals[k.key];
@@ -255,13 +332,6 @@ function renderKpis(){
   });
 }
 function today(){ return dkey(new Date()); }
-function renderTasks(){
-  const done = JSON.parse(store.getItem("done:"+today())||"{}");
-  $("#tasks").innerHTML = D.tasks.length ? D.tasks.map((x,i)=>`<label class="task ${done[x.t]?"done":""}"><input type="checkbox" data-t="${esc(x.t)}" ${done[x.t]?"checked":""}><span><div class="t">${esc(x.t)}</div><div class="w">${esc(x.w)}</div></span><span class="pill ${esc(x.p[1])}">${esc(x.p[0])}</span></label>`).join("") : '<div class="empty">All clear. Nothing needs you.</div>';
-  $("#prog").textContent = D.tasks.length ? Object.values(done).filter(Boolean).length+" of "+D.tasks.length+" done" : "";
-  document.querySelectorAll("#tasks input").forEach(b=>b.addEventListener("change",e=>{done[b.dataset.t]=e.target.checked;store.setItem("done:"+today(),JSON.stringify(done));renderTasks();}));
-  fit();
-}
 function renderEvents(){
   const now = new Date();
   const evs = (D.events||[]).filter(e=>e.start).map(e=>({...e,_d:new Date(e.all_day? e.start+"T12:00:00" : e.start)})).sort((a,b)=>a._d-b._d);
@@ -350,8 +420,13 @@ function tick(){
 async function loadWx(){
   try{
     const {lat,lon} = D.meta;
-    const j = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=auto&forecast_days=1`)).json();
+    const j = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code,sunrise,sunset&temperature_unit=fahrenheit&timezone=auto&forecast_days=7`)).json();
     WX = {t:j.current.temperature_2m, code:j.current.weather_code, hi:j.daily.temperature_2m_max[0], lo:j.daily.temperature_2m_min[0], pp:j.daily.precipitation_probability_max[0]};
+    try{ const nowIso=j.current.time; const i0=Math.max(0,j.hourly.time.findIndex(x=>x>=nowIso.slice(0,13)));
+      WX.hourly=j.hourly.time.slice(i0,i0+12).map((x,k)=>({h:Number(x.slice(11,13)),t:j.hourly.temperature_2m[i0+k],code:j.hourly.weather_code[i0+k],pp:j.hourly.precipitation_probability[i0+k]}));
+      WX.daily=j.daily.time.map((d,k)=>({d,hi:j.daily.temperature_2m_max[k],lo:j.daily.temperature_2m_min[k],code:j.daily.weather_code[k]}));
+      const f=x=>new Date(x).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}); WX.sunrise=f(j.daily.sunrise[0]); WX.sunset=f(j.daily.sunset[0]); }catch(e){}
+    if(typeof SCENE!=="undefined"&&SCENE!=="overview") renderScene();
     renderWx();
   }catch(e){}
 }
@@ -367,7 +442,7 @@ async function loadScores(){
       if(st.state==="pre" && !sameDay){ delete LIVE[t.team]; continue; }
       if(st.state==="post" && !sameDay){ delete LIVE[t.team]; continue; }
       const away = comp.competitors.find(c=>c.homeAway==="away"), home = comp.competitors.find(c=>c.homeAway==="home");
-      LIVE[t.team] = {state:st.state, detail:st.shortDetail, name:ev.shortName, score: st.state==="pre" ? "" : `${away.team.abbreviation} ${away.score}  ${home.team.abbreviation} ${home.score}`};
+      LIVE[t.team] = {state:st.state, detail:st.shortDetail, name:ev.shortName, away:{a:away.team.abbreviation,s:away.score}, home:{a:home.team.abbreviation,s:home.score}, score: st.state==="pre" ? "" : `${away.team.abbreviation} ${away.score}  ${home.team.abbreviation} ${home.score}`};
       if(st.state==="in") anyLive=true;
     }catch(e){}
   }
@@ -427,7 +502,7 @@ function shellLine(){
 
 /* ---------- modes & controls ---------- */
 function setWall(on){
-  document.body.classList.toggle("wall", on); if(D) renderTasks(); fit();
+  document.body.classList.toggle("wall", on); $("#snav")?.classList.toggle("wallnav", on); if(D) renderTasks(); fit();
   $("#bMode").textContent = on ? "Desk" : "Wall"; $("#bMode").classList.toggle("on", on);
   history.replaceState(null,"", on ? "#wall" : location.pathname + location.search);
 }
@@ -445,6 +520,213 @@ let idleT; function wakeUI(){ document.body.classList.remove("idle"); clearTimeo
 addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT") return; if(e.key==="w"||e.key==="W") setWall(!document.body.classList.contains("wall")); if(e.key==="f"||e.key==="F") toggleFs(); });
 function toggleFs(){ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.(); }
 
+/* ===== v3: scenes, drawer, local tasks, progress ring ===== */
+const SCENES=[["overview","Overview",50],["today","Today",25],["sports","Sports",22],["inbox","Inbox",25],["week","Week",25],["pulse","Pulse",15]];
+let SCENE="overview", sceneAt=Date.now(), autoOn=store.getItem("cc_auto")!=="0", pauseUntil=0, lastSports=0;
+const GM="https://mail.google.com/mail/u/0/";
+const fmtN=n=>n==null?"n/a":Number(n).toLocaleString();
+const lg=(path,abbr)=>`https://a.espncdn.com/i/teamlogos/${String(path||"").split("/")[1]||"nfl"}/500/${String(abbr||"").toLowerCase()}.png`;
+const fmtHour=h=>((h%12)||12)+(h%24<12?"a":"p");
+const minsOf=d=>hourIn(d)+Number(new Intl.DateTimeFormat("en-US",{minute:"numeric",timeZone:TZ()}).format(d))/60;
+function logo(path,abbr){return `<img src="${esc(lg(path,abbr))}" alt="" onerror="this.style.visibility='hidden'">`}
+function bars(rows){
+  const m=Math.max(1,...rows.map(r=>r.n||0));
+  return rows.map(r=>{
+    const inner=`<span class="bl">${esc(r.label)}</span><span class="bt"><i style="width:${Math.max(2,(r.n||0)/m*100)}%;background:${r.color||"var(--acc)"}"></i></span><span class="bn">${fmtN(r.n)}</span>`;
+    return r.href?`<a class="bar" href="${esc(r.href)}" target="_blank" rel="noopener">${inner}</a>`:`<div class="bar">${inner}</div>`;
+  }).join("");
+}
+/* ---- local tasks, hide, progress */
+function localTasks(){try{return JSON.parse(store.getItem("cc_local")||"[]")}catch(e){return[]}}
+function allTasks(){
+  let hid={};try{hid=JSON.parse(store.getItem("hide:"+today())||"{}")}catch(e){}
+  const loc=localTasks().map(t=>({t:t.t,w:"Added here. Saved on this device only.",p:["Mine","p-info"],rank:2,local:true}));
+  return [...loc,...D.tasks].filter(x=>!hid[x.t]);
+}
+function taskRows(list,done){
+  return list.length? list.map(x=>`<label class="task ${done[x.t]?"done":""}"><input type="checkbox" data-t="${esc(x.t)}" ${done[x.t]?"checked":""}><span><div class="t">${esc(x.t)}</div><div class="w">${esc(x.w)}</div></span><span class="pill ${esc(x.p[1])}">${esc(x.p[0])}</span><button class="x" data-hide="${esc(x.t)}" data-local="${x.local?1:0}" title="${x.local?"Remove":"Hide until tomorrow"}">&times;</button></label>`).join("")
+   : '<div class="w" style="padding:.6rem 0">All clear. Nothing needs you.</div>';
+}
+function renderTasks(){
+  let done={};try{done=JSON.parse(store.getItem("done:"+today())||"{}")}catch(e){}
+  const list=allTasks();
+  $("#tasks").innerHTML=taskRows(list,done);
+  const n=list.filter(x=>done[x.t]).length;
+  $("#prog").textContent=list.length?`${n} of ${list.length} done`:"";
+  renderRing(n,list.length);
+  if($("#drawer")?.classList.contains("on")&&$("#drawer").dataset.kind==="need") $("#db").innerHTML=taskRows(list,done);
+  fit();
+}
+function renderRing(n,total){
+  const el=$("#ring"); if(!el) return;
+  const r=18,c=2*Math.PI*r,p=total?n/total:1;
+  el.classList.toggle("cleared",total>0&&n===total);
+  el.innerHTML=`<svg viewBox="0 0 44 44"><circle class="bgc" cx="22" cy="22" r="${r}" fill="none" stroke-width="4"/><circle class="fg" cx="22" cy="22" r="${r}" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p)}"/></svg><b>${total?`${n}/${total}`:"&#10003;"}</b>`;
+}
+document.addEventListener("change",e=>{
+  const b=e.target.closest?.(".task input"); if(!b) return;
+  let done={};try{done=JSON.parse(store.getItem("done:"+today())||"{}")}catch(x){}
+  done[b.dataset.t]=b.checked; store.setItem("done:"+today(),JSON.stringify(done)); renderTasks();
+});
+document.addEventListener("click",e=>{
+  const h=e.target.closest?.("[data-hide]");
+  if(h){ e.preventDefault();
+    if(h.dataset.local==="1") store.setItem("cc_local",JSON.stringify(localTasks().filter(t=>t.t!==h.dataset.hide)));
+    else { let m={};try{m=JSON.parse(store.getItem("hide:"+today())||"{}")}catch(x){} m[h.dataset.hide]=1; store.setItem("hide:"+today(),JSON.stringify(m)); }
+    renderTasks(); return; }
+  const o=e.target.closest?.("[data-open]"); if(o){ openDetail(o.dataset.open); return; }
+  const s=e.target.closest?.("[data-s]"); if(s){ setScene(s.dataset.s,true); return; }
+  if(e.target.id==="dbk"||e.target.id==="dx") closeDrawer();
+});
+document.addEventListener("submit",e=>{
+  if(e.target.id!=="qa") return; e.preventDefault();
+  const i=e.target.querySelector("input"), v=i.value.trim(); if(!v) return;
+  store.setItem("cc_local",JSON.stringify([{t:v},...localTasks()].slice(0,30))); i.value=""; renderTasks();
+});
+/* ---- drawer */
+function openDrawer(title,html,kind){
+  $("#dt").textContent=title; $("#db").innerHTML=html; $("#drawer").dataset.kind=kind||"";
+  $("#drawer").classList.add("on"); $("#dbk").classList.add("on");
+}
+function closeDrawer(){ $("#drawer")?.classList.remove("on"); $("#dbk")?.classList.remove("on"); }
+function openDetail(k){
+  if(k==="need"){ let done={};try{done=JSON.parse(store.getItem("done:"+today())||"{}")}catch(e){} return openDrawer("Needs you",taskRows(allTasks(),done),"need"); }
+  if(k==="texts") return openDrawer("Texts",textsCard(),"texts");
+  if(k==="gmail") return openDrawer("Gmail",gmailCard(),"gmail");
+  if(k==="hotmail") return openDrawer("Hotmail",hotmailCard(),"hotmail");
+  setScene("sports",true);
+}
+/* ---- inbox builders */
+function gmailCard(){
+  const g=D.inbox?.gmail; if(!g) return '<div class="w">Gmail is not connected.</div>';
+  const c=g.cats||{};
+  const rows=[["Primary","primary","inbox","var(--acc)"],["Updates","updates","updates","var(--acc2)"],["Promotions","promotions","promotions","var(--warn)"],["Social","social","social","#b48cff"]]
+    .map(([l,k,h,col])=>({label:l,n:c[k],color:col,href:GM+"#"+(h==="inbox"?"inbox":"category/"+h)}));
+  return `<div class="big">${fmtN(g.unread)}</div><div class="w">unread in inbox${g.cleared?`, ${fmtN(g.cleared)} promos cleared this run`:""}</div>
+    <h3>By category</h3>${bars(rows)}
+    <h3>Top senders, recent unread</h3>${g.senders?.length?bars(g.senders.map(s=>({label:s.d,n:s.n,href:GM+"#search/from%3A"+encodeURIComponent(s.d)}))):'<div class="w">None</div>'}`;
+}
+function hotmailCard(){
+  const h=D.inbox?.hotmail; if(!h) return '<div class="w">Hotmail is not connected.</div>';
+  return `<div class="big">${fmtN(h.unread)}</div><div class="w">unread of ${fmtN(h.total)} in inbox${h.swept?`, ${fmtN(h.swept)} promos swept`:""}</div>
+    <h3>Folders with unread</h3>${bars((h.folders||[]).map(f=>({label:f.name,n:f.unread,color:"var(--acc2)",href:"https://outlook.live.com/mail/0/"})))}`;
+}
+function textsCard(){
+  const t=D.inbox?.texts; if(!t) return '<div class="w">Texts need the Mac mini.</div>';
+  return `<div class="big">${fmtN(t.unread)}</div><div class="w">unread in ${fmtN(t.chats)} chat${t.chats===1?"":"s"}</div>
+    <h3>Waiting</h3>${(t.waiting||[]).length?(t.waiting).map(w=>`<div class="it">${esc(w.label)}<small>${esc(w.ago||"")} ago</small></div>`).join(""):'<div class="w">Nothing waiting.</div>'}`;
+}
+/* ---- scenes */
+const COUNT=(ms)=>{ if(ms<0) return "now"; const m=Math.round(ms/60000); if(m<60) return m+" min"; const h=Math.floor(m/60); return h<48? h+"h "+(m%60)+"m" : Math.round(h/24)+" days"; };
+function sceneToday(){
+  const now=new Date(), tk=dkey(now);
+  const evs=(D.events||[]).filter(e=>e.start&&(e.all_day?e.start.slice(0,10)===tk:dkey(new Date(e.start))===tk));
+  const allday=evs.filter(e=>e.all_day);
+  const timed=evs.filter(e=>!e.all_day).map(e=>{const s=new Date(e.start);return{...e,s,e2:e.end?new Date(e.end):new Date(s.getTime()+3600000)}});
+  let h0=7,h1=21; timed.forEach(e=>{h0=Math.min(h0,Math.floor(minsOf(e.s)));h1=Math.max(h1,Math.ceil(minsOf(e.e2)))}); h0=Math.min(h0,Math.floor(minsOf(now))); h1=Math.min(24,Math.max(h1,h0+8));
+  const span=h1-h0, pct=h=>(h-h0)/span*100;
+  const lines=Array.from({length:span+1},(_,i)=>`<div class="hr" style="top:${pct(h0+i)}%"><span>${fmtHour(h0+i)}</span></div>`).join("");
+  const blocks=timed.map(e=>`<div class="blk" style="top:${pct(minsOf(e.s))}%;height:${Math.max(4,pct(minsOf(e.e2))-pct(minsOf(e.s)))}%"><b>${esc(e.title)}</b><small>${esc(fmtTime(e.s))}</small></div>`).join("");
+  const nm=minsOf(now), nl=nm>=h0&&nm<=h1?`<div class="nowl" style="top:${pct(nm)}%"><span>${esc(fmtTime(now))}</span></div>`:"";
+  const empty=!timed.length&&!allday.length?`<div class="w" style="position:absolute;left:.9rem;top:30%;right:.9rem;text-align:center;font-size:1.05rem">Nothing on the calendar today.<br>A clear runway.</div>`:"";
+  const hrs=(WX?.hourly||[]).slice(0,12).map((h,i)=>`<div>${i===0?"Now":fmtHour(h.h)}${WXI[wxInfo(h.code)[0]]}<b>${Math.round(h.t)}&deg;</b>${h.pp>=20?`<span style="color:var(--acc2)">${h.pp}%</span>`:"&nbsp;"}</div>`).join("");
+  let done={};try{done=JSON.parse(store.getItem("done:"+today())||"{}")}catch(e){}
+  const open=allTasks().filter(x=>!done[x.t]).slice(0,5);
+  return `<div class="sc sc-today">
+   <section class="card tl"><h2 class="lbl">Today <span class="sub">${esc(now.toLocaleDateString([],{weekday:"long",month:"long",day:"numeric",timeZone:TZ()}))}</span></h2>
+     ${allday.length?`<div class="chips">${allday.map(e=>`<span class="chip2">${esc(e.title)}</span>`).join("")}</div>`:""}
+     <div class="tlin">${lines}${blocks}${nl}${empty}</div></section>
+   <div class="side"><section class="card"><h2 class="lbl">Next 12 hours <span class="sub">${WX?`${Math.round(WX.t)}&deg; now`:""}</span></h2>${hrs?`<div class="hourly">${hrs}</div>`:'<div class="w">Loading forecast</div>'}
+     ${WX?.sunrise?`<div class="sun"><span>Sunrise ${esc(WX.sunrise)}</span><span>Sunset ${esc(WX.sunset)}</span></div>`:""}</section>
+     <section class="card"><h2 class="lbl">Still open <span class="sub">${open.length} shown</span></h2>${open.length?open.map(x=>`<div class="it">${esc(x.t)}<small>${esc(x.w)}</small></div>`).join(""):'<div class="w">All clear.</div>'}</section></div></div>`;
+}
+function sceneSports(){
+  const cards=(D.teams||[]).map(t=>{
+    const L=LIVE[t.team], lt=(t.last||[])[0], nx=(t.next||[])[0];
+    const me=lg(t.path,t.abbr);
+    let away,home,mid,status="",cls="";
+    if(L&&L.away){
+      away=L.away;home=L.home;
+      if(L.state==="pre"){mid=`<div class="when">${esc(L.detail||"")}</div>`;status=nx?`<div class="cd">in ${esc(COUNT(new Date(nx.when)-Date.now()))}</div>`:""}
+      else {mid=`<div class="score">${esc(away.s)} - ${esc(home.s)}</div>`; status=L.state==="in"?`<div class="cd" style="color:var(--bad)">LIVE &middot; ${esc(L.detail||"")}</div>`:`<div class="cd">Final</div>`; if(L.state==="in")cls="live";}
+    } else if(nx){
+      const parts=String(nx.name||"").split(/\s+(?:@|at|vs\.?)\s+/i); away={a:parts[0]}; home={a:parts[1]||t.abbr};
+      mid=`<div class="when">${esc(new Date(nx.when).toLocaleString([],{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZone:TZ()}))}</div>`;
+      status=`<div class="cd">in ${esc(COUNT(new Date(nx.when)-Date.now()))}</div>`;
+    } else { away={a:t.abbr}; home={a:""}; mid='<div class="when">No game scheduled</div>'; }
+    const lastTxt=lt?"Last: "+Object.entries(lt.score||{}).map(([a,b])=>a+" "+b).join(", "):"";
+    const side=x=>`<div class="tm">${x.a?logo(t.path,x.a):""}<div class="ab">${esc(x.a||"")}</div></div>`;
+    return `<section class="card gc ${cls}"><h2 class="lbl">${esc(t.team)}</h2><div class="vs">${side(away)}<div class="mid">${mid}${status}</div>${side(home)}</div><div class="last">${esc(lastTxt)}</div></section>`;
+  }).join("");
+  return `<div class="sc sc-sports">${cards||'<section class="card"><div class="w">No teams configured.</div></section>'}</div>`;
+}
+function sceneInbox(){
+  return `<div class="sc sc-inbox"><section class="card"><h2 class="lbl">Gmail <span class="sub">briancapano@gmail.com</span></h2>${gmailCard()}</section>
+  <section class="card"><h2 class="lbl">Hotmail <span class="sub">personal</span></h2>${hotmailCard()}</section>
+  <section class="card"><h2 class="lbl">Texts <span class="sub">iMessage</span></h2>${textsCard()}</section></div>`;
+}
+function sceneWeek(){
+  const now=new Date(), base=Date.parse(dkey(now)+"T12:00:00");
+  const days=Array.from({length:7},(_,i)=>{const d=new Date(base+i*86400000);return{k:dkey(d),d}});
+  const wx={};(WX?.daily||[]).forEach(w=>wx[w.d]=w);
+  const cols=days.map((x,i)=>{
+    const ev=(D.events||[]).filter(e=>e.start&&(e.all_day?e.start.slice(0,10)===x.k:dkey(new Date(e.start))===x.k)).sort((a,b)=>(b.all_day?1:0)-(a.all_day?1:0)||new Date(a.start)-new Date(b.start));
+    const gm=(D.teams||[]).flatMap(t=>(t.next||[]).filter(n=>dkey(new Date(n.when))===x.k).map(n=>({t:t.team,n})));
+    const w=wx[x.k];
+    return `<section class="card day7 ${i===0?"today":""}"><div class="dh"><b>${i===0?"Today":x.d.toLocaleDateString([],{weekday:"short",timeZone:"UTC"})} <span style="color:var(--mute);font-weight:500">${x.d.getUTCDate()}</span></b>${w?`<small>${WXI[wxInfo(w.code)[0]]}${Math.round(w.hi)}&deg;/${Math.round(w.lo)}&deg;</small>`:""}</div>
+      ${ev.map(e=>`<div class="it ${e.all_day?"ad":""}">${esc(e.title)}<small>${e.all_day?"All day":esc(fmtTime(new Date(e.start)))}</small></div>`).join("")}
+      ${gm.map(g=>`<div class="it game">${esc(g.t)}<small>${esc(g.n.name)} &middot; ${esc(fmtTime(new Date(g.n.when)))}</small></div>`).join("")}
+      ${!ev.length&&!gm.length?'<div class="w" style="color:var(--dim)">Open</div>':""}</section>`;
+  }).join("");
+  return `<div class="sc sc-week">${cols}</div>`;
+}
+function scenePulse(){
+  const dc={live:"var(--acc)",snap:"var(--warn)",off:"var(--dim)"};
+  const ch=(D.channels||[]).map(c=>`<section class="card pt"><div class="nm"><span class="dot" style="background:${dc[c.state]||"var(--acc)"};display:inline-block;width:.5rem;height:.5rem;border-radius:50%;margin-right:.45rem"></span>${esc(c.name)}</div><div class="st">${esc(c.stat||"")}</div><div class="nt">${esc([c.handle,c.state==="snap"?"manual entry":c.state==="off"?"not connected":"",c.next].filter(Boolean).join(" \u00b7 "))}</div></section>`).join("");
+  const now=new Date();
+  const src=(D.sources||[]).map(s=>{const age=s.updated?(now-new Date(s.updated))/60000:null;return `<span class="chip2" style="border-color:${s.ok?"rgba(77,227,194,.4)":"rgba(255,107,94,.5)"}">${s.ok?"&#9679;":"&#9888;"} ${esc(s.label)} ${s.ok&&age!==null?esc(rel(age*60000))+" ago":"offline"}</span>`}).join("");
+  return `<div class="sc sc-pulse">${ch}<section class="card" style="grid-column:1/-1"><h2 class="lbl">Data sources</h2><div class="chips">${src}</div></section></div>`;
+}
+const RENDER={today:sceneToday,sports:sceneSports,inbox:sceneInbox,week:sceneWeek,pulse:scenePulse};
+function renderScene(fresh=true){
+  const ov=$("#overlay"); if(!ov) return; ov.classList.toggle("still",!fresh);
+  ov.innerHTML=SCENE==="overview"?"":RENDER[SCENE]();
+  document.querySelectorAll("#snav button[data-s]").forEach(b=>b.classList.toggle("on",b.dataset.s===SCENE));
+}
+function setScene(id,user){
+  SCENE=id; sceneAt=Date.now(); if(user) pauseUntil=Date.now()+5*60000; if(id==="sports") lastSports=Date.now();
+  document.body.dataset.scene=id; renderScene(); fit();
+}
+function autoTick(){
+  const b=document.body, rot=$("#rot"); if(!rot) return;
+  b.dataset.tod=(h=>h<5?"night":h<11?"morning":h<17?"day":h<21?"evening":"night")(hourIn(new Date()));
+  if(!b.classList.contains("wall")||!autoOn||Date.now()<pauseUntil){ rot.style.width="0"; return; }
+  const live=Object.values(LIVE).some(l=>l.state==="in"), cur=SCENES.find(s=>s[0]===SCENE)||SCENES[0];
+  const dur=(SCENE==="sports"&&live?45:cur[2])*1000, el=Date.now()-sceneAt;
+  rot.style.width=Math.min(100,el/dur*100)+"%";
+  if(el>=dur){
+    const i=SCENES.findIndex(s=>s[0]===SCENE);
+    setScene(live&&SCENE!=="sports"&&Date.now()-lastSports>100000?"sports":SCENES[(i+1)%SCENES.length][0]);
+  }
+}
+function navHtml(){ return SCENES.map(s=>`<button data-s="${s[0]}">${s[1]}</button>`).join("")+`<button id="bAuto" class="${autoOn?"on":""}" title="Auto-rotate scenes on the wall display (Space)">Auto</button>`; }
+function toggleAuto(){ autoOn=!autoOn; store.setItem("cc_auto",autoOn?"1":"0"); sceneAt=Date.now(); $("#bAuto")?.classList.toggle("on",autoOn); }
+addEventListener("click",e=>{ if(e.target.id==="bAuto") toggleAuto(); });
+addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT") return;
+  const i=SCENES.findIndex(s=>s[0]===SCENE);
+  if(e.key==="ArrowRight") setScene(SCENES[(i+1)%SCENES.length][0],true);
+  else if(e.key==="ArrowLeft") setScene(SCENES[(i+SCENES.length-1)%SCENES.length][0],true);
+  else if(e.key===" "){ e.preventDefault(); toggleAuto(); }
+  else if(e.key==="Escape") closeDrawer();
+  else if(/^[1-6]$/.test(e.key)) setScene(SCENES[Number(e.key)-1][0],true);
+});
+function initV3(){
+  if(!$("#drawer")){ document.body.insertAdjacentHTML("beforeend",`<div class="dbk" id="dbk"></div><aside class="drawer" id="drawer"><header><b id="dt"></b><button id="dx">Close</button></header><div id="db"></div></aside><div class="rot" id="rot"></div>`); }
+  setInterval(autoTick,1000); setInterval(()=>{ if(SCENE!=="overview"&&!$("#drawer").classList.contains("on")) renderScene(false); },30000);
+  setScene(SCENE); setTimeout(()=>document.body.classList.add("booted"),1800);
+}
+
 async function start(model){
   D = model;
   $("#lock").hidden = true; $("#app").hidden = false; $("#ctl").hidden = false;
@@ -453,7 +735,7 @@ async function start(model){
   $("#bMode").onclick = ()=>setWall(!document.body.classList.contains("wall"));
   $("#bFull").onclick = toggleFs; $("#bAwake").onclick = ()=>{ store.setItem("awake", wake?"0":"1"); toggleAwake(); };
   $("#bLock").onclick = ()=>{ store.removeItem("cc_pw"); location.reload(); };
-  wakeUI(); loadWx(); loadScores();
+  initV3(); wakeUI(); loadWx(); loadScores();
   setInterval(tick, 1000); setInterval(()=>{renderEvents();renderHealth();shellLine();}, 30000);
   setInterval(loadWx, 900000); setInterval(refreshData, 90000);
   // gentle drift protects panels from burn-in
