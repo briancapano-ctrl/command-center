@@ -70,7 +70,7 @@
       red: items.filter(x => x.level === "urgent").length,
       orange: items.filter(x => x.level === "watch").length,
       yellow: items.filter(x => x.level === "low").length,
-      href: /^https:\/\/m365\.cloud\.microsoft\/chat\/conversation\//.test(href || "") ? href.split("#")[0] : ""
+      href: /^https:\/\/(?:m365|copilot)\.cloud\.microsoft\/chat\/conversation\//.test(href || "") ? href.split("#")[0] : ""
     };
   }
   globalThis.CCWorkParse = { calendarLabel, calendar, briefing };

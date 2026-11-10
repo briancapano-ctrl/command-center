@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Command Center Work Lane",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Browser-local work agenda and Copilot briefing priorities for your Command Center. One-way, no personal data sent to work apps.",
   "permissions": [
     "storage",
@@ -19,7 +19,8 @@
         "https://outlook.office.com/*",
         "https://outlook.cloud.microsoft/*",
         "https://outlook.office365.com/*",
-        "https://m365.cloud.microsoft/chat*"
+        "https://m365.cloud.microsoft/chat*",
+        "https://copilot.cloud.microsoft/chat*"
       ],
       "js": [
         "lane_flag.js"
@@ -39,7 +40,8 @@
     },
     {
       "matches": [
-        "https://m365.cloud.microsoft/chat*"
+        "https://m365.cloud.microsoft/chat*",
+        "https://copilot.cloud.microsoft/chat*"
       ],
       "js": [
         "work_copilot.js"

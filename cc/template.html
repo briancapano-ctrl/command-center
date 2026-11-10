@@ -664,7 +664,7 @@ function sceneWork(){
   const items=shown.map(({x,i})=>{ const done=hid.includes(x.title), isNew=bk.fresh.includes(x.title);
     return `<article class="work-item${done?" handled":""}" data-testid="work-priority-${i}"><span class="work-priority ${esc(x.level)}">${esc(workLevel(x.level))}</span>${isNew?'<span class="work-new">New</span>':""}<h3>${esc(x.title)}</h3>${x.summary?`<p>${esc(x.summary)}</p>`:""}${x.action?`<div class="work-action"><b>Next action</b><p>${esc(x.action)}</p></div>`:""}<button class="work-handle" data-wh="${esc(x.title)}" data-testid="work-handle-${i}">${done?"Undo handled":"Mark handled"}</button></article>`}).join("")
     + (hid.length?`<button class="work-handle work-toggle" data-wtoggle="1">${WORK_SHOWALL?"Hide":"Show"} ${hid.length} handled</button>`:"");
-  const cpHref=b?.href&&/^https:\/\/m365\.cloud\.microsoft\/chat\/conversation\//.test(b.href)?b.href:"https://m365.cloud.microsoft/chat";
+  const cpHref=b?.href&&/^https:\/\/(?:m365|copilot)\.cloud\.microsoft\/chat\/conversation\//.test(b.href)?b.href:"https://m365.cloud.microsoft/chat";
   return `<div class="sc sc-work">
     <section class="card work-agenda"><h2 class="lbl">Work calendar <span class="sub">${esc(workAge(c))}</span></h2>${workHealthHtml()}<p class="work-source">Allbridge · ${esc(c?.range||"Current work week")}${agenda?` · ${up.length} appointments`:""}</p>
     <div class="work-scroll">${agenda||`<div class="empty">${esc(workCalendarMessage())}</div>`}${c?.status==="partial"&&agenda?`<p class="work-note">${esc(c.message)}</p>`:""}${c&&Date.now()-c.ts>25*60000?'<p class="work-note">Calendar feed is stale. Open Outlook to check sign-in.</p>':""}</div>
