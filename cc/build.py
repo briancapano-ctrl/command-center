@@ -130,6 +130,33 @@ def collect(cfg, pw):
             os.makedirs(os.path.dirname(MS_STATE), exist_ok=True)
             json.dump(render.encrypt({"refresh": new_refresh}, pw), open(MS_STATE, "w"))
             src["outlook_folders"] = safe("outlook", lambda: M.folders(tok), err)
+            KEEP = os.path.join(ROOT, "state", "keeper.json")
+            if "--demo" not in sys.argv and not os.path.exists(os.path.join(ROOT, "state", "delete_request.json")):
+                def _keeper():
+                    st = json.load(open(KEEP)) if os.path.exists(KEEP) else {"active": False, "cursor": None, "last_run": None, "total": 0, "by_domain": {}}
+                    tot = sum(f.get("bytes") or 0 for f in (src.get("outlook_folders") or []) if "/" not in f["name"])
+                    pct = tot / 15e9 * 100 if tot else 0
+                    n = now()
+                    last = dt.datetime.fromisoformat(st["last_run"]) if st.get("last_run") else None
+                    if pct >= 85:
+                        st["active"] = True
+                    elif st["active"] and 0 < pct < 75:
+                        st["active"], st["cursor"] = False, None
+                    if st["active"] or last is None or (n - last).days >= 7:
+                        start = st["cursor"] or (n - dt.timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%SZ")
+                        done, nxt = M.delete_approved(tok, start, 240)
+                        for d, c in done.items():
+                            st["by_domain"][d] = st["by_domain"].get(d, 0) + c
+                        st["total"] = sum(st["by_domain"].values())
+                        st["cursor"] = nxt
+                        if nxt is None:
+                            st["active"] = False
+                            st["last_run"] = n.isoformat()
+                        json.dump(st, open(KEEP, "w"))
+                        if done:
+                            src["outlook_folders"] = M.folders(tok)
+                    src["keeper"] = {"total": st.get("total", 0), "last_run": st.get("last_run"), "active": st.get("active", False)}
+                safe("outlook_keeper", _keeper, err)
             DREQ = os.path.join(ROOT, "state", "delete_request.json")
             if os.path.exists(DREQ) and "--demo" not in sys.argv:
                 LOG = os.path.join(ROOT, "state", "delete_log.json")

@@ -166,7 +166,9 @@ def build(src, cfg):
             top = sorted([f for f in fo if f.get("bytes")], key=lambda f: -f["bytes"])
             tot = sum(f["bytes"] for f in top if "/" not in f["name"])
             size = (f" Mailbox about {tot/1e9:.1f} GB (of 15 GB shared with OneDrive); largest: " + ", ".join(f"{f['name']} {f['bytes']/1e9:.1f} GB" for f in top[:3]) + ".") if tot else ""
-            triage.append({"acct": "Hotmail", "finding": f"Inbox: {inbox['unread']:,} unread of {inbox['total']:,}. Swept today: {src.get('outlook_swept', 0)}.{size}", "action": "Approved promo senders are archived each run."})
+            _k = src.get("keeper") or {}
+            kp = f" Keeper has deleted {_k['total']:,} approved-sender messages so far." if _k.get("total") else ""
+            triage.append({"acct": "Hotmail", "finding": f"Inbox: {inbox['unread']:,} unread of {inbox['total']:,}. Swept today: {src.get('outlook_swept', 0)}.{size}{kp}", "action": "Approved promo senders are archived each run."})
     if not triage:
         triage.append({"acct": "All", "finding": "No mail sources connected yet.", "action": "Finish the setup steps in the README."})
 
