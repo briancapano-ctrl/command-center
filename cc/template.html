@@ -148,6 +148,7 @@ body[data-scene=work]:not(.wall) .hello h1{font-size:1.5rem}body[data-scene=work
 .health span{display:inline-flex;align-items:center;gap:.4rem}
 body:not(.wall) .health .hsum{display:none}
 body.wall .health>span:not(.hsum){display:none}
+.stale.crit{background:var(--neg-bg);color:var(--neg-ink)}
 .stale{background:var(--warn-bg);color:var(--warn-ink);border-radius:14px;padding:.6rem .9rem;margin-bottom:.8rem;font-weight:500}
 .foot{margin-top:1.4rem;color:var(--muted);font-size:.76rem;line-height:1.6}
 .foot a{color:var(--ink2)}
@@ -271,6 +272,9 @@ body[data-scene=overview] .overlay{display:none}
 .tl{position:relative;min-height:520px}.tlin{position:absolute;inset:2.8rem 1rem 1rem 3.3rem}
 .hr{position:absolute;left:-2.7rem;right:0;border-top:1px solid var(--rule);font-size:.76rem;color:var(--muted)}.hr span{position:absolute;top:-.6rem;left:0}
 .blk{position:absolute;left:.4rem;right:.4rem;background:color-mix(in srgb,var(--accent) 16%,var(--surface));border-left:3px solid var(--accent);border-radius:8px;padding:.3rem .65rem;overflow:hidden;display:flex;gap:.6rem;align-items:baseline}
+.blk{min-height:1.8rem;padding-top:.15rem;padding-bottom:.15rem;align-items:center;white-space:nowrap}
+.blk.work{background:color-mix(in srgb,var(--acc2) 16%,var(--surface));border-left-color:var(--acc2)}
+.tlin.two .blk{right:52%}.tlin.two .blk.work{left:50%;right:.4rem}
 .blk b{font-weight:600;font-size:.92rem}.blk small{color:var(--ink2);white-space:nowrap}
 .nowl{position:absolute;left:-2.7rem;right:0;border-top:2px solid var(--negative);z-index:3}.nowl span{position:absolute;right:0;top:-1.3rem;font:600 .74rem var(--sans);color:var(--negative)}
 .chips{display:flex;gap:.4rem;flex-wrap:wrap;margin:.2rem 0 .4rem}.chip2{background:var(--raised);border-radius:999px;padding:.25rem .75rem;font-size:.82rem}
@@ -530,7 +534,8 @@ function renderHealth(){
   const sum = nbad.length ? `<span class="hsum"><span class="dot bad"></span>${esc(nbad.map(s=>s.label).join(", "))} not updating</span>` : `<span class="hsum"><span class="dot"></span>All ${ages.length} sources fresh, oldest ${esc(rel(oldest*60000))}</span>`;
   $("#health").innerHTML = sum + items.join("");
   const g = new Date(D.generated), a=(now-g)/60000;
-  $("#stale").innerHTML = a>90 ? `<div class="stale">Data is ${esc(rel(a*60000))} old. The cloud job may have stopped.</div>` : "";
+  const st=D.storage, stHtml = st && st.pct>=90 ? `<div class="stale ${st.pct>=97?"crit":""}">Hotmail storage is ${st.pct}% full (${st.used_gb} of ${st.cap_gb} GB, shared with OneDrive). New mail stops arriving when it fills.</div>` : "";
+  $("#stale").innerHTML = stHtml + (a>90 ? `<div class="stale">Data is ${esc(rel(a*60000))} old. The cloud job may have stopped.</div>` : "");
 }
 function renderWx(){
   if(!WX){ $("#wx").innerHTML=""; return; }
@@ -593,7 +598,7 @@ let WORK = null, WORK_AT = 0;
 window.addEventListener("message", e => {
   if (e.source !== window || !e.data || e.data.source !== "cc-work-bridge" || e.data.v !== 1) return;
   WORK = e.data.work || null; WORK_AT = Date.now(); renderWork();
-  if(typeof SCENE !== "undefined" && SCENE === "work") renderScene(false);
+  if(typeof SCENE !== "undefined" && ["work","today","week"].includes(SCENE)) renderScene(false);
 });
 function renderWork(){
   const el = $("#work"); if(!el) return;
@@ -641,6 +646,7 @@ function workAge(p){ if(!p?.ts) return "Not connected"; const m=Math.max(0,Math.
 function workDate(s){ const d=new Date(s);return dkey(d)===dkey(new Date())?"Today":d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",timeZone:TZ()}); }
 function workTime(x){return x.allDay?"All day":fmtTime(new Date(x.s))+"–"+fmtTime(new Date(x.e));}
 function workUpcoming(){const c=WORK?.cal;if(c?.schema!==2||c.status==="scope")return [];return(c.events||[]).filter(x=>x.title&&Date.parse(x.e)>Date.now()).sort((a,b)=>Date.parse(a.s)-Date.parse(b.s));}
+function workAll(){const c=WORK?.cal;if(c?.schema!==2||c.status==="scope")return [];return(c.events||[]).filter(x=>x.title&&x.s);}
 function workCalendarMessage(){
   const c=WORK?.cal;
   if(!c)return"Waiting for the work calendar.";
@@ -827,12 +833,13 @@ const COUNT=(ms)=>{ if(ms<0) return "now"; const m=Math.round(ms/60000); if(m<60
 function sceneToday(){
   const now=new Date(), tk=dkey(now);
   const evs=(D.events||[]).filter(e=>e.start&&(e.all_day?e.start.slice(0,10)===tk:dkey(new Date(e.start))===tk));
-  const allday=evs.filter(e=>e.all_day);
-  const timed=evs.filter(e=>!e.all_day).map(e=>{const s=new Date(e.start);return{...e,s,e2:e.end?new Date(e.end):new Date(s.getTime()+3600000)}});
+  const wk=(typeof workAll==="function"?workAll():[]).filter(x=>dkey(new Date(x.s))===tk).map(x=>({title:x.title,start:x.s,end:x.e,all_day:!!x.allDay,work:true}));
+  const allday=[...evs,...wk].filter(e=>e.all_day);
+  const timed=[...evs,...wk].filter(e=>!e.all_day).map(e=>{const s=new Date(e.start);return{...e,s,e2:e.end?new Date(e.end):new Date(s.getTime()+3600000)}});
   let h0=7,h1=21; timed.forEach(e=>{h0=Math.min(h0,Math.floor(minsOf(e.s)));h1=Math.max(h1,Math.ceil(minsOf(e.e2)))}); h0=Math.min(h0,Math.floor(minsOf(now))); h1=Math.min(24,Math.max(h1,h0+8));
   const span=h1-h0, pct=h=>(h-h0)/span*100;
   const lines=Array.from({length:span+1},(_,i)=>`<div class="hr" style="top:${pct(h0+i)}%"><span>${fmtHour(h0+i)}</span></div>`).join("");
-  const blocks=timed.map(e=>`<div class="blk" style="top:${pct(minsOf(e.s))}%;height:${Math.max(4,pct(minsOf(e.e2))-pct(minsOf(e.s)))}%"><b>${esc(e.title)}</b><small>${esc(fmtTime(e.s))}</small></div>`).join("");
+  const blocks=timed.map(e=>`<div class="blk${e.work?" work":""}" style="top:${pct(minsOf(e.s))}%;height:${Math.max(4,pct(minsOf(e.e2))-pct(minsOf(e.s)))}%"><b>${esc(e.title)}</b><small>${e.work?"Work · ":""}${esc(fmtTime(e.s))}</small></div>`).join("");
   const nm=minsOf(now), nl=nm>=h0&&nm<=h1?`<div class="nowl" style="top:${pct(nm)}%"><span>${esc(fmtTime(now))}</span></div>`:"";
   const empty=!timed.length&&!allday.length?`<div class="w" style="position:absolute;left:.9rem;top:30%;right:.9rem;text-align:center;font-size:1.05rem">Nothing on the calendar today.<br>A clear runway.</div>`:"";
   const hrs=(WX?.hourly||[]).slice(0,12).map((h,i)=>`<div>${i===0?"Now":fmtHour(h.h)}${WXI[wxInfo(h.code)[0]]}<b>${Math.round(h.t)}&deg;</b>${h.pp>=20?`<span style="color:var(--acc2)">${h.pp}%</span>`:"&nbsp;"}</div>`).join("");
@@ -840,8 +847,8 @@ function sceneToday(){
   const open=allTasks().filter(x=>!done[x.t]).slice(0,5);
   return `<div class="sc sc-today">
    <section class="card tl"><h2 class="lbl">Today <span class="sub">${esc(now.toLocaleDateString([],{weekday:"long",month:"long",day:"numeric",timeZone:TZ()}))}</span></h2>
-     ${allday.length?`<div class="chips">${allday.map(e=>`<span class="chip2">${esc(e.title)}</span>`).join("")}</div>`:""}
-     <div class="tlin">${lines}${blocks}${nl}${empty}</div></section>
+     ${allday.length?`<div class="chips">${allday.map(e=>`<span class="chip2">${e.work?"Work · ":""}${esc(e.title)}</span>`).join("")}</div>`:""}
+     <div class="tlin${timed.some(e=>e.work)&&timed.some(e=>!e.work)?" two":""}">${lines}${blocks}${nl}${empty}</div></section>
    <div class="side"><section class="card"><h2 class="lbl">Next 12 hours <span class="sub">${WX?`${Math.round(WX.t)}&deg; now`:""}</span></h2>${hrs?`<div class="hourly">${hrs}</div>`:'<div class="w">Loading forecast</div>'}
      ${WX?.sunrise?`<div class="sun"><span>Sunrise ${esc(WX.sunrise)}</span><span>Sunset ${esc(WX.sunset)}</span></div>`:""}</section>
      <section class="card"><h2 class="lbl">Still open <span class="sub">${open.length} shown</span></h2>${open.length?open.map(x=>`<div class="it">${esc(x.t)}<small>${esc(x.w)}</small></div>`).join(""):'<div class="w">All clear.</div>'}</section></div></div>`;
@@ -876,11 +883,12 @@ function sceneWeek(){
   const days=Array.from({length:7},(_,i)=>{const d=new Date(base+i*86400000);return{k:dkey(d),d}});
   const wx={};(WX?.daily||[]).forEach(w=>wx[w.d]=w);
   const cols=days.map((x,i)=>{
-    const ev=(D.events||[]).filter(e=>e.start&&(e.all_day?e.start.slice(0,10)===x.k:dkey(new Date(e.start))===x.k)).sort((a,b)=>(b.all_day?1:0)-(a.all_day?1:0)||new Date(a.start)-new Date(b.start));
+    const wkEv=(typeof workAll==="function"?workAll():[]).filter(w=>dkey(new Date(w.s))===x.k).map(w=>({title:w.title,start:w.s,all_day:!!w.allDay,work:true}));
+    const ev=[...(D.events||[]),...wkEv].filter(e=>e.start&&(e.all_day?e.start.slice(0,10)===x.k:dkey(new Date(e.start))===x.k)).sort((a,b)=>(b.all_day?1:0)-(a.all_day?1:0)||new Date(a.start)-new Date(b.start));
     const gm=(D.teams||[]).flatMap(t=>(t.next||[]).filter(n=>dkey(new Date(n.when))===x.k).map(n=>({t:t.team,n})));
     const w=wx[x.k];
     return `<section class="card day7 ${i===0?"today":""}"><div class="dh"><b>${i===0?"Today":x.d.toLocaleDateString([],{weekday:"short",timeZone:"UTC"})} <span style="color:var(--mute);font-weight:500">${x.d.getUTCDate()}</span></b>${w?`<small>${WXI[wxInfo(w.code)[0]]}${Math.round(w.hi)}&deg;/${Math.round(w.lo)}&deg;</small>`:""}</div>
-      ${ev.map(e=>`<div class="it ${e.all_day?"ad":""}">${esc(e.title)}<small>${e.all_day?"All day":esc(fmtTime(new Date(e.start)))}</small></div>`).join("")}
+      ${ev.map(e=>`<div class="it ${e.all_day?"ad":""}">${esc(e.title)}<small>${e.work?"Work · ":""}${e.all_day?"All day":esc(fmtTime(new Date(e.start)))}</small></div>`).join("")}
       ${gm.map(g=>`<div class="it game">${esc(g.t)}<small>${esc(g.n.name)} &middot; ${esc(fmtTime(new Date(g.n.when)))}</small></div>`).join("")}
       ${!ev.length&&!gm.length?'<div class="w" style="color:var(--dim)">Open</div>':""}</section>`;
   }).join("");

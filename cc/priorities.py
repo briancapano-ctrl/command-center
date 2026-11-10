@@ -173,6 +173,11 @@ def build(src, cfg):
     # ---- KPIs
     unread_texts = mac.get("unread_total")
     need = len([t for t in tasks if t["rank"] <= 3])
+    storage = None
+    _fo = src.get("outlook_folders") or []
+    _tot = sum(f.get("bytes") or 0 for f in _fo if "/" not in f["name"])
+    if _tot:
+        storage = {"used_gb": round(_tot / 1e9, 1), "cap_gb": 15, "pct": round(_tot / 15e9 * 100)}
     kpis = [
         {"key": "need", "label": "Needs you", "num": need, "value": str(need), "note": "reminders, replies, dates"},
         {"key": "texts", "label": "Unread texts", "num": unread_texts, "value": f"{unread_texts:,}" if unread_texts is not None else "n/a", "note": f"{mac.get('unread_chats', 0)} chats" if mac else "Mac not reporting"},
@@ -219,4 +224,4 @@ def build(src, cfg):
     return {"generated": n.isoformat(), "meta": {"name": cfg.get("name", "Brian"), "lat": cfg.get("lat", 36.0217), "lon": cfg.get("lon", -78.4756), "tz": "America/New_York", "dim": cfg.get("night_dim", True)},
             "events": events_out, "kpis": kpis, "tasks": tasks[:9], "week": week, "teams": sports,
             "triage": triage, "channels": channels, "inbox": inbox_detail,
-            "birthdays": bdays[:8], "home": home or None, "memories": memories, "errors": errors}
+            "birthdays": bdays[:8], "home": home or None, "memories": memories, "errors": errors, "storage": storage}

@@ -28,7 +28,7 @@ def sample():
             {"from": "Google <no-reply@accounts.google.com>", "domain": "google.com", "subject": "Security alert 2", "date": n.isoformat()},
             {"from": "LinkedIn <a@linkedin.com>", "domain": "linkedin.com", "subject": "x", "date": n.isoformat()},
             {"from": "YouTube <noreply-purchases@youtube.com>", "domain": "youtube.com", "subject": "Update required: your Premium payment method", "date": n.isoformat()}]},
-        "outlook_folders": [{"name": "Inbox", "unread": 43661, "total": 60648}, {"name": "Archive", "unread": 3179, "total": 3436}, {"name": "Junk Email", "unread": 922, "total": 936}, {"name": "Clutter", "unread": 140, "total": 800}], "outlook_swept": 12, "outlook_unread": [],
+        "outlook_folders": [{"name": "Inbox", "unread": 43661, "total": 60648, "bytes": 10400000000}, {"name": "Archive", "unread": 3179, "total": 3436, "bytes": 3200000000}, {"name": "Junk Email", "unread": 922, "total": 936}, {"name": "Clutter", "unread": 140, "total": 800}], "outlook_swept": 12, "outlook_unread": [],
         "gcal": [{"title": "Dentist", "start": at(0, 15).isoformat(), "all_day": False, "cal": "Google"},
                  {"title": "Youth baseball practice", "start": at(0, 18, 30).isoformat(), "all_day": False, "cal": "Google"},
                  {"title": "Jon's birthday", "start": at(2, 0).strftime("%Y-%m-%d"), "all_day": True, "cal": "Birthdays"},
