@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Runs on the Mac mini. Reads texts, reminders, Apple Calendar, birthdays, photo memories and home health locally, encrypts the result, pushes it to your GitHub repo.
 Python 3.9 standard library plus the macOS `openssl` and `sqlite` already installed. Nothing leaves the Mac unencrypted."""
-import base64, datetime as dt, glob, json, os, re, shutil, sqlite3, subprocess, sys, tempfile
+import atexit, base64, datetime as dt, glob, json, os, re, shutil, sqlite3, subprocess, sys, tempfile
 
 HOME = os.path.expanduser("~")
 CONF = os.path.join(HOME, ".config", "command-center", "env")
@@ -34,9 +34,14 @@ def load_env():
     return env
 
 
+_TMPS = []
+atexit.register(lambda: [shutil.rmtree(t, ignore_errors=True) for t in _TMPS])
+
+
 def snapshot(path):
-    """Copy a live SQLite DB (and WAL) so we never lock Messages or Reminders."""
+    """Copy a live SQLite DB (and WAL) so we never lock Messages or Reminders. The copy is removed when the run ends."""
     tmp = tempfile.mkdtemp()
+    _TMPS.append(tmp)
     dst = os.path.join(tmp, "db.sqlite")
     shutil.copy(path, dst)
     for ext in ("-wal", "-shm"):
@@ -221,6 +226,7 @@ def photos():
         return {"count": 0, "years": [], "thumbs": []}
     years = sorted({int(y) for _, y, _ in rows if y})
     thumbs, tmp = [], tempfile.mkdtemp()
+    _TMPS.append(tmp)
     for uuid, y, fav in rows:
         if len(thumbs) >= 3:
             break
