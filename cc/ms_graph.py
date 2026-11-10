@@ -102,14 +102,14 @@ def sweep_backlog(tok, promo_domains, cursor, pages=20):
     return swept, cursor
 
 
-def audit(tok, budget_s=540):
+def audit(tok, budget_s=540, full=False):
     """Read-only size audit of messages with attachments (the bulk of mailbox size). Returns an aggregate report."""
     import time
     t0 = time.time()
     rep = {"folders": {}, "note": "messages with attachments only; time-capped"}
-    for fid in ("inbox", "archive", "sentitems", "deleteditems", "junkemail"):
+    for fid in (("inbox",) if full else ("inbox", "archive", "sentitems", "deleteditems", "junkemail")):
         agg, big, years, n, total, pages, done = {}, [], {}, 0, 0, 0, False
-        q = (f"/me/mailFolders/{fid}/messages?$filter=hasAttachments eq true&$top=100&$select=id,from,subject,receivedDateTime"
+        q = (f"/me/mailFolders/{fid}/messages?{'' if full else '$filter=hasAttachments eq true&'}$top=100&$select=id,from,subject,receivedDateTime,isRead"
              "&$expand=singleValueExtendedProperties($filter=id eq 'Integer 0xe08')")
         url = G + urllib.parse.quote(q, safe="/?$&=,:()'")
         while url and time.time() - t0 < budget_s:
@@ -127,7 +127,7 @@ def audit(tok, budget_s=540):
                 sz = next((int(p["value"]) for p in m.get("singleValueExtendedProperties", []) if str(p.get("value", "")).isdigit()), 0)
                 addr = ((m.get("from") or {}).get("emailAddress") or {}).get("address", "")
                 d = domain_of(addr) or addr
-                a = agg.setdefault(d, [0, 0]); a[0] += sz; a[1] += 1
+                a = agg.setdefault(d, [0, 0, 0]); a[0] += sz; a[1] += 1; a[2] += 0 if m.get("isRead") else 1
                 y = (m.get("receivedDateTime") or "")[:4]; years[y] = years.get(y, 0) + sz
                 n += 1; total += sz
                 big.append((sz, m.get("receivedDateTime", "")[:10], addr, (m.get("subject") or "")[:70], m["id"]))
@@ -135,7 +135,7 @@ def audit(tok, budget_s=540):
             url = j.get("@odata.nextLink")
             done = not url
         rep["folders"][fid] = {"complete": done, "pages": pages, "messages_with_attachments": n, "bytes": total,
-                               "top_senders": sorted(([d, v[0], v[1]] for d, v in agg.items()), key=lambda x: -x[1])[:25],
+                               "top_senders": sorted(([d, v[0], v[1], v[2]] for d, v in agg.items()), key=lambda x: -x[1])[:70],
                                "by_year": dict(sorted(years.items())), "largest": [list(b) for b in big]}
     return rep
 
