@@ -130,6 +130,12 @@ def collect(cfg, pw):
             os.makedirs(os.path.dirname(MS_STATE), exist_ok=True)
             json.dump(render.encrypt({"refresh": new_refresh}, pw), open(MS_STATE, "w"))
             src["outlook_folders"] = safe("outlook", lambda: M.folders(tok), err)
+            REQ = os.path.join(ROOT, "state", "audit_request.json")
+            if os.path.exists(REQ) and "--demo" not in sys.argv:
+                rep = safe("outlook_audit", lambda: M.audit(tok), err)
+                if rep:
+                    json.dump(render.encrypt(rep, pw), open(os.path.join(ROOT, "state", "audit.enc.json"), "w"))
+                    os.remove(REQ)
             msgs = safe("outlook", lambda: M.inbox_unread(tok), err) or []
             src["outlook_swept"] = 0
             if cfg.get("outlook_promo_domains") and msgs:

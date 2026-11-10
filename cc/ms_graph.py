@@ -102,6 +102,43 @@ def sweep_backlog(tok, promo_domains, cursor, pages=20):
     return swept, cursor
 
 
+def audit(tok, budget_s=540):
+    """Read-only size audit of messages with attachments (the bulk of mailbox size). Returns an aggregate report."""
+    import time
+    t0 = time.time()
+    rep = {"folders": {}, "note": "messages with attachments only; time-capped"}
+    for fid in ("inbox", "archive", "sentitems", "deleteditems", "junkemail"):
+        agg, big, years, n, total, pages, done = {}, [], {}, 0, 0, 0, False
+        q = (f"/me/mailFolders/{fid}/messages?$filter=hasAttachments eq true&$top=100&$select=id,from,subject,receivedDateTime"
+             "&$expand=singleValueExtendedProperties($filter=id eq 'Integer 0xe08')")
+        url = G + urllib.parse.quote(q, safe="/?$&=,:()'")
+        while url and time.time() - t0 < budget_s:
+            j = None
+            for _ in range(3):
+                try:
+                    j = http("GET", url, headers={"Authorization": f"Bearer {tok}"})
+                    break
+                except Exception:
+                    time.sleep(2)
+            if j is None:
+                break
+            pages += 1
+            for m in j.get("value", []):
+                sz = next((int(p["value"]) for p in m.get("singleValueExtendedProperties", []) if str(p.get("value", "")).isdigit()), 0)
+                addr = ((m.get("from") or {}).get("emailAddress") or {}).get("address", "")
+                d = domain_of(addr) or addr
+                a = agg.setdefault(d, [0, 0]); a[0] += sz; a[1] += 1
+                y = (m.get("receivedDateTime") or "")[:4]; years[y] = years.get(y, 0) + sz
+                n += 1; total += sz
+                big.append((sz, m.get("receivedDateTime", "")[:10], addr, (m.get("subject") or "")[:70], m["id"]))
+            big = sorted(big, reverse=True)[:40]
+            url = j.get("@odata.nextLink")
+            done = not url
+        rep["folders"][fid] = {"complete": done, "pages": pages, "messages_with_attachments": n, "bytes": total,
+                               "top_senders": sorted(([d, v[0], v[1]] for d, v in agg.items()), key=lambda x: -x[1])[:25],
+                               "by_year": dict(sorted(years.items())), "largest": [list(b) for b in big]}
+    return rep
+
 def calendar(tok, days=7):
     t0 = now()
     t1 = t0 + dt.timedelta(days=days)
