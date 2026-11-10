@@ -41,11 +41,19 @@
     const account = "bcapano@allbridge.com";
     const groups = [...document.querySelectorAll('button[title^="Hide account"]')];
     const selected = groups.filter(h => h.parentElement?.parentElement?.querySelector('button[role="option"][aria-selected="true"]'));
-    const scoped = selected.length === 1 && selected[0].title.includes(account);
+    // When Outlook collapses the calendar list (narrow window), fall back to the last confirmed selection for up to 7 days.
+    let scoped;
+    if (groups.length) {
+      scoped = selected.length === 1 && selected[0].title.includes(account);
+      try { scoped ? localStorage.setItem("cc_scope_ok", String(Date.now())) : localStorage.removeItem("cc_scope_ok"); } catch (e) {}
+    } else {
+      let ok = 0; try { ok = Number(localStorage.getItem("cc_scope_ok")) || 0; } catch (e) {}
+      scoped = Date.now() - ok < 7 * 86400000;
+    }
     const status = [...document.querySelectorAll('[aria-live]')].map(e => e.textContent).find(x => /Loaded \d+ events in/i.test(x || ""));
     if (!status || !document.querySelector('main,[role="main"]')) return;
     if (!scoped) {
-      put({ cc_cal: { ts: Date.now(), events: [], status: "scope", message: "Select only the Allbridge calendar in the work tab.", account, schema: 2 } });
+      put({ cc_cal: { ts: Date.now(), events: [], status: "scope", message: "Open the calendar list once (menu icon) with only the Allbridge calendar ticked.", account, schema: 2 } });
       return;
     }
     const events = CCWorkParse.calendar(document);
