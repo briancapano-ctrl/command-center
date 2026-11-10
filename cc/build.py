@@ -130,6 +130,21 @@ def collect(cfg, pw):
             os.makedirs(os.path.dirname(MS_STATE), exist_ok=True)
             json.dump(render.encrypt({"refresh": new_refresh}, pw), open(MS_STATE, "w"))
             src["outlook_folders"] = safe("outlook", lambda: M.folders(tok), err)
+            DREQ = os.path.join(ROOT, "state", "delete_request.json")
+            if os.path.exists(DREQ) and "--demo" not in sys.argv:
+                LOG = os.path.join(ROOT, "state", "delete_log.json")
+                lg = json.load(open(LOG)) if os.path.exists(LOG) else {"cursor": None, "by_domain": {}}
+                res = safe("outlook_delete", lambda: M.delete_approved(tok, lg.get("cursor")), err)
+                if res:
+                    done, nxt = res
+                    for d, n in done.items():
+                        lg["by_domain"][d] = lg["by_domain"].get(d, 0) + n
+                    lg["cursor"] = nxt
+                    lg["total"] = sum(lg["by_domain"].values())
+                    json.dump(lg, open(LOG, "w"))
+                    if nxt is None:
+                        os.remove(DREQ)
+                    src["outlook_folders"] = safe("outlook", lambda: M.folders(tok), err)
             REQ = os.path.join(ROOT, "state", "audit_request.json")
             if os.path.exists(REQ) and "--demo" not in sys.argv:
                 full = json.load(open(REQ)).get("mode") == "full"

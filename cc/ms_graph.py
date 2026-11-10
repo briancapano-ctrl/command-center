@@ -139,6 +139,58 @@ def audit(tok, budget_s=540, full=False):
                                "by_year": dict(sorted(years.items())), "largest": [list(b) for b in big]}
     return rep
 
+DELETE_DOMAINS = (
+    "em1.mint.intuit.com", "mint.com", "d.email.draftkings.com", "auth.draftkings.com", "creativemarket.com",
+    "email.dailywire.com", "mailer.dailywire.com", "news.washingtonexaminer.com", "theepochtimes.com", "smwsa.com",
+    "pixelfilmstudios.com", "email.consumerreports.org", "ee.mgmresorts.com", "brandedbills.com", "email-marriott.com",
+    "email.chipotle.com", "shrunkenhead.com", "mixtiles.com", "e.dji.com", "em.homegoods.com", "e-mail.gopro.com",
+    "mail.petsmart.com", "47brand.com", "e.wine.com", "info.hollywoodfeed.com", "email.sel.sony.com",
+    "info.chamberlain.com", "uber.com", "email.informeddelivery.usps.com", "usps.com", "mail.coinbase.com",
+    "hotelsmag.net", "hotelsmag.com")
+
+
+def delete_approved(tok, cursor, budget_s=1500):
+    """User-approved permanent deletion (Nov 10, 2026): UNREAD inbox mail from the listed sender domains only.
+    Scans newest to oldest by received date. Returns (deleted_by_domain, next_cursor); cursor None means finished."""
+    import time
+    t0 = time.time()
+    done = {}
+    while time.time() - t0 < budget_s:
+        q = "/me/mailFolders/inbox/messages?$top=100&$orderby=receivedDateTime desc&$select=id,from,isRead,receivedDateTime"
+        if cursor:
+            q += "&$filter=receivedDateTime lt " + cursor
+        j = None
+        for _ in range(3):
+            try:
+                j = _g(tok, q); break
+            except Exception:
+                time.sleep(2)
+        if j is None:
+            return done, cursor
+        vals = j.get("value", [])
+        if not vals:
+            return done, None
+        hit = []
+        for m in vals:
+            if m.get("isRead"):
+                continue
+            dom = domain_of(((m.get("from") or {}).get("emailAddress") or {}).get("address", ""))
+            if not dom or any(x in dom for x in PROTECTED):
+                continue
+            if any(dom == d or dom.endswith("." + d) for d in DELETE_DOMAINS):
+                hit.append((m["id"], dom))
+        for i in range(0, len(hit), 20):
+            chunk = hit[i:i + 20]
+            http("POST", G + "/$batch", headers={"Authorization": f"Bearer {tok}"},
+                 body={"requests": [{"id": str(k), "method": "POST", "url": f"/me/messages/{mid}/permanentDelete"} for k, (mid, _) in enumerate(chunk)]})
+            for _, dom in chunk:
+                done[dom] = done.get(dom, 0) + 1
+        cursor = vals[-1].get("receivedDateTime")
+        if len(vals) < 100:
+            return done, None
+    return done, cursor
+
+
 def calendar(tok, days=7):
     t0 = now()
     t1 = t0 + dt.timedelta(days=days)
