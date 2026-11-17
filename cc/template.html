@@ -16,28 +16,28 @@
 <style>
 /* ===== Home: a decorated room that changes with the season, the holidays and the light ===== */
 :root{
-  --ground:#f6f4ef;--surface:#ece8df;--raised:#f9f7f3;--ink:#22211d;--ink2:#3d3b35;--muted:#5d5a52;--faint:#6b6860;
+  --ground:#f4f1ec;--surface:#ffffff;--raised:#faf9f6;--ink:#1f1e1a;--ink2:#38362f;--muted:#5a574f;--faint:#69665e;
   --rule:rgba(34,33,29,.09);--border:rgba(34,33,29,.12);--accent:#4f5e2c;--trim:#5f6b45;--frame:#4a3a2a;--mat:#f3efe6;
-  --negative:#b42318;--neg-bg:#f6dfda;--neg-ink:#7a1d14;--warn-bg:#f5e8d2;--warn-ink:#83400d;--neu-bg:rgba(34,33,29,.07);--pos:#2e6b3a;
+  --negative:#b42318;--neg-bg:#fde4df;--neg-ink:#8a1c10;--warn-bg:#fdecc8;--warn-ink:#7a3a05;--neu-bg:rgba(34,33,29,.06);--pos:#2e6b3a;
   --serif:"Instrument Serif",Georgia,"Times New Roman",serif;--sans:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --acc:var(--accent);--acc2:var(--ink2);--warn:var(--warn-ink);--bad:var(--negative);--ok:var(--pos);--mute:var(--muted);--dim:var(--faint);
   --line:var(--border);--card:var(--surface);--f:var(--sans);--m:var(--sans);
-  --r:22px;--gap:.8rem;--gh:64px;
+  --r:22px;--gap:.8rem;--gh:64px;--shadow:0 1px 2px rgba(48,40,22,.05),0 14px 30px -18px rgba(48,40,22,.28);--edge:rgba(48,40,22,.07);
 }
 html[data-light=night]{
-  --ground:#131311;--surface:#1d1c1a;--raised:#272623;--ink:#f0eee8;--ink2:#d6d3cb;--muted:#b3b0a8;--faint:#a19e96;
-  --rule:rgba(240,238,232,.08);--border:rgba(240,238,232,.12);--mat:#d9d4c8;
+  --ground:#171b23;--surface:#212733;--raised:#2b3240;--ink:#f4f2ec;--ink2:#dcdde2;--muted:#b4b8c2;--faint:#9ea4b0;
+  --rule:rgba(255,255,255,.09);--border:rgba(255,255,255,.12);--mat:#d9d4c8;--shadow:0 1px 2px rgba(0,0,0,.25),0 14px 30px -18px rgba(0,0,0,.7);--edge:rgba(255,255,255,.07);
   --negative:#ec7b6a;--neg-bg:#3a1f1b;--neg-ink:#f3a598;--warn-bg:#3a2c18;--warn-ink:#e9b877;--neu-bg:rgba(240,238,232,.08);--pos:#8fc79a;
 }
 *{box-sizing:border-box;margin:0}
 html{font-size:16px;background:var(--ground);transition:background-color 1.6s ease}
-body{min-height:100vh;color:var(--ink);background:var(--ground);font:400 .95rem/1.5 var(--sans);font-variant-numeric:tabular-nums lining-nums;
+body{min-height:100vh;color:var(--ink);background:radial-gradient(1100px 520px at 8% -8%,color-mix(in srgb,var(--accent) 9%,transparent),transparent 62%),radial-gradient(900px 480px at 100% 0%,color-mix(in srgb,var(--accent) 5%,transparent),transparent 60%),var(--ground);background-attachment:fixed;font:400 .95rem/1.5 var(--sans);font-variant-numeric:tabular-nums lining-nums;
   -webkit-font-smoothing:antialiased;transition:background-color 1.6s ease,color 1.6s ease}
-body.night{filter:brightness(.72)}
+body.night{filter:brightness(.92)}
 a{color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .lbl{font:500 .82rem/1.2 var(--sans);color:var(--muted)}
-.card{position:relative;background:var(--surface);border-radius:var(--r);padding:1.1rem 1.25rem;overflow:hidden;transition:background-color 1.6s ease}
+.card{position:relative;background:var(--surface);border-radius:var(--r);padding:1.1rem 1.25rem;overflow:hidden;box-shadow:var(--shadow);outline:1px solid var(--edge);outline-offset:-1px;transition:background-color 1.6s ease,box-shadow .3s ease,transform .3s ease}
 .card>h2,.card>h2.lbl{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;margin-bottom:.75rem;font:600 .9rem/1.2 var(--sans);color:var(--ink)}
 .card>h2 .sub{font:400 .78rem var(--sans);color:var(--muted)}
 .wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:calc(var(--gh) + .6rem) 1.25rem 3rem}
@@ -75,7 +75,7 @@ body.wall .ctl{top:auto;bottom:.6rem;right:.8rem}
 .kpi .v.txt{font-size:clamp(1.5rem,2.1vw,2rem);line-height:1.1;margin:.6rem 0 .35rem}
 .kpi .n{color:var(--muted);font-size:.8rem}
 .kpi svg.sp{display:none}
-.clk{cursor:pointer;transition:background-color .2s}.clk:hover{background:var(--raised)}
+.clk{cursor:pointer;transition:background-color .2s,transform .2s,box-shadow .2s}.clk:hover{background:var(--raised);transform:translateY(-2px)}
 
 /* main grid */
 .grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,.95fr);gap:var(--gap);align-items:start}
@@ -266,7 +266,7 @@ body[data-scene=overview] .overlay{display:none}
 .sc>.card.tl{min-height:520px}
 .work-health{margin:.2rem 0 .6rem;background:var(--warn-bg);color:var(--warn-ink);border-radius:12px;padding:.5rem .8rem;font-size:.8rem;line-height:1.45}
 .work-warn{color:var(--warn-ink)}
-@media(max-width:480px){.ctl{gap:.25rem;margin-top:1.6rem}.ctl button{padding:.35rem .6rem;font-size:.72rem}#window{width:min(100%,300px)}}
+@media(max-width:480px){.ctl{gap:.25rem;flex-wrap:wrap;justify-content:flex-start;margin:2.6rem .8rem .6rem;position:relative;right:auto;top:auto;z-index:20}.ctl button{padding:.35rem .6rem;font-size:.72rem}#window{width:min(100%,300px)}}
 .big{font:400 clamp(2.6rem,5vw,4.4rem)/1 var(--serif);letter-spacing:-.01em}
 .sc-today{grid-template-columns:1.25fr 1fr}.sc-today .side{display:grid;gap:var(--gap);grid-template-rows:auto 1fr;min-height:0}
 .tl{position:relative;min-height:520px}.tlin{position:absolute;inset:2.8rem 1rem 1rem 3.3rem}
@@ -500,7 +500,7 @@ function fit(){ cancelAnimationFrame(fitQ); fitQ=requestAnimationFrame(()=>{
   const items = c => [...c.querySelectorAll("#tasks>*, #events>*, #teams>*, .tri tr, #work .wrow, #bdays .bd, #home .hm>*")];
   document.querySelectorAll(".grid .col").forEach(col=>{
     const cards=[...col.querySelectorAll(".card")];
-    cards.forEach(c=>{ items(c).forEach(i=>i.style.display=""); if(c.classList.contains("tri-card")) c.style.display=""; });
+    cards.forEach(c=>{ items(c).forEach(i=>i.style.display=""); if(c.classList.contains("tri-card")||c.dataset.autohide) { c.style.display=""; delete c.dataset.autohide; } });
     if(!document.body.classList.contains("wall")) return;
     const over = c => c.scrollHeight > c.clientHeight+1;
     for(let g=0; g<200; g++){
@@ -510,6 +510,8 @@ function fit(){ cancelAnimationFrame(fitQ); fitQ=requestAnimationFrame(()=>{
       let vis = items(target).filter(i=>i.style.display!=="none"); vis[vis.length-1].style.display="none";
       vis = items(target).filter(i=>i.style.display!=="none"); while(vis.length>1 && vis[vis.length-1].classList.contains("day")){ vis[vis.length-1].style.display="none"; vis.pop(); }
     }
+    /* a card squeezed down to its heading alone is hidden instead of showing an empty sliver */
+    cards.forEach(c=>{ const all=items(c); if(all.length && !all.some(i=>i.style.display!=="none" && !i.classList.contains("day")) && c.clientHeight<90){ c.style.display="none"; c.dataset.autohide="1"; } });
   });
 });}
 window.addEventListener("resize", fit);
@@ -1041,7 +1043,7 @@ const THEMES = {
   july4:{name:"Independence Day",day:{ground:"#f5f6f7",surface:"#e8ecf0",raised:"#f9fafb",accent:"#27466e"},nightAccent:"#9cb8de",trim:"#2e4566",frame:"#f1ece6",
     curtain:["gingham","#b5303a","#f5f6f7"],garland:"bunting",fx:"fireflies",sill:["flag","lemonade","candle"],trees:"summer",art:["hassam-flags","hiroshige-fireworks"]}
 };
-const NIGHT_ROOM = {ground:"#131311",surface:"#1d1c1a",raised:"#272623"};
+const NIGHT_ROOM = {ground:"#171b23",surface:"#212733",raised:"#2b3240"};
 const TEAMLOOK = {Eagles:{c:["#004c54","#a5acaf"],w:"FLY EAGLES FLY",ink:"#fff"},Phillies:{c:["#e81828","#284898"],w:"RING THE BELL",ink:"#fff"},Flyers:{c:["#f74902","#1d1d1b"],w:"LET'S GO FLYERS",ink:"#fff"}};
 
 function decorNow(){ const a=QS.get("at"); const d=a?new Date(a):null; return d&&!isNaN(d)?d:new Date(); }
@@ -1118,13 +1120,20 @@ function birthdayToday(){ const md=ymd(decorNow()).slice(5); return (D?.birthday
 function rng(seed){ let s=seed>>>0||1; return ()=>((s=Math.imul(s^s>>>15,1|s)+0x6D2B79F5|0,(s^s>>>13)>>>0)%100000)/100000; }
 
 let DECOR={};
+function hexRgb(h){h=h.replace("#","");return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16))}
+function rgbHex(a){return "#"+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,"0")).join("")}
+function mixHex(a,b,t){const x=hexRgb(a),y=hexRgb(b);return rgbHex(x.map((v,i)=>v+(y[i]-v)*t))}
+/* Day rooms: white cards on a lightly tinted wall, so the page reads bright and clean. */
+function brighten(d){const g=mixHex(d.surface,"#ffffff",.42);return{ground:g,surface:"#ffffff",raised:mixHex(g,"#ffffff",.55)}}
+/* Accent: a bit more saturated, kept dark enough for text contrast on white. */
+function vivid(hex){const [r,g,b]=hexRgb(hex),m=(r+g+b)/3,k=1.28,c=[r,g,b].map(v=>m+(v-m)*k);const L=(0.2126*c[0]+0.7152*c[1]+0.0722*c[2])/255;const f=L>0.42?0.42/L:1;return rgbHex(c.map(v=>v*f))}
 function applyDecor(){
   const now=decorNow(), id=themeFor(now), th=THEMES[id], li=lightInfo(now);
   const root=document.documentElement, night=li.dark;
   root.dataset.theme=id; root.dataset.light=night?"night":"day";
-  const room=night?NIGHT_ROOM:th.day;
+  const room=night?NIGHT_ROOM:brighten(th.day);
   root.style.setProperty("--ground",room.ground); root.style.setProperty("--surface",room.surface); root.style.setProperty("--raised",room.raised);
-  root.style.setProperty("--accent",night?th.nightAccent:th.day.accent); root.style.setProperty("--trim",th.trim); root.style.setProperty("--frame",th.frame);
+  root.style.setProperty("--accent",night?th.nightAccent:vivid(th.day.accent)); root.style.setProperty("--trim",th.trim); root.style.setProperty("--frame",th.frame);
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content",room.ground);
   const g=gameToday(now), b=birthdayToday();
   const major=["christmas","thanksgiving","newyear","july4"].includes(id);

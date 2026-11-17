@@ -11,7 +11,7 @@ ENV = {}
 
 
 def skip_lists():
-    return {x.strip().lower() for x in ENV.get("CC_SKIP_LISTS", "To do").split(",") if x.strip()}
+    return {x.strip().lower() for x in ENV.get("CC_SKIP_LISTS", "To do,Tasks").split(",") if x.strip()}
 
 
 def work_re():
