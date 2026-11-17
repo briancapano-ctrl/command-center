@@ -8,6 +8,7 @@ CONF = os.path.join(HOME, ".config", "command-center", "env")
 APPLE_EPOCH = 978307200
 DAYS = 30  # only count unread texts newer than this, so ancient unread spam does not inflate the number
 ENV = {}
+MAX_COPY_MB = 300  # largest live database the collector will ever copy
 
 
 def skip_lists():
@@ -40,6 +41,8 @@ atexit.register(lambda: [shutil.rmtree(t, ignore_errors=True) for t in _TMPS])
 
 def snapshot(path):
     """Copy a live SQLite DB (and WAL) so we never lock Messages or Reminders. The copy is removed when the run ends."""
+    if os.path.getsize(path) > MAX_COPY_MB * 1048576:   # never write a multi-GB copy every 10 minutes (it wears the SSD and stalls the Mac)
+        raise RuntimeError("refusing to copy a large live database: " + os.path.basename(path))
     tmp = tempfile.mkdtemp()
     _TMPS.append(tmp)
     dst = os.path.join(tmp, "db.sqlite")
@@ -50,15 +53,19 @@ def snapshot(path):
     return dst
 
 
-def connect_ro(path):
-    """Open a big live SQLite DB (Messages, about 1.7 GB) read-only in place instead of copying it every run.
-    WAL databases allow readers next to the writer. Falls back to the old copy if the direct read fails."""
-    try:
-        db = sqlite3.connect("file:" + urllib.parse.quote(path) + "?mode=ro", uri=True, timeout=5)
-        db.execute("select 1 from sqlite_master limit 1").fetchone()
-        return db
-    except Exception:
-        return sqlite3.connect(snapshot(path))
+def connect_ro(path, immutable_ok=False):
+    """Open a big live SQLite DB (Messages about 1.7 GB, Photos about 1.7 GB) read-only in place instead of copying it every run.
+    WAL databases allow readers next to the writer. immutable_ok adds a lock-free read for data that rarely changes (Photos).
+    The old copy is the last resort and is refused for anything large."""
+    uri = "file:" + urllib.parse.quote(path)
+    for q in ("?mode=ro",) + (("?immutable=1",) if immutable_ok else ()):
+        try:
+            db = sqlite3.connect(uri + q, uri=True, timeout=5)
+            db.execute("select 1 from sqlite_master limit 1").fetchone()
+            return db
+        except Exception:
+            pass
+    return sqlite3.connect(snapshot(path))
 
 
 def last10(s):
@@ -222,11 +229,35 @@ def birthdays():
 
 
 def photos():
-    """'On this day' memories from the Photos library: a count, the years, and up to three small thumbnails."""
+    """'On this day' memories, computed once per day (the answer cannot change within a day) and cached."""
     if not PHOTOS_DB:
         return None
+    today = dt.date.today().isoformat()
+    cache = os.path.join(HOME, ".config", "command-center", "photos_cache.json")
+    c = None
+    try:
+        c = json.load(open(cache))
+        if c.get("day") == today:
+            return c["data"]
+    except Exception:
+        c = None
+    try:
+        data = _photos_scan()
+    except Exception:
+        if c and c.get("data"):
+            return c["data"]   # yesterday's answer beats an error
+        raise
+    try:
+        json.dump({"day": today, "data": data}, open(cache, "w"))
+    except Exception:
+        pass
+    return data
+
+
+def _photos_scan():
+    """'On this day' memories from the Photos library: a count, the years, and up to three small thumbnails."""
     lib = os.path.dirname(os.path.dirname(PHOTOS_DB[0]))
-    db = sqlite3.connect(snapshot(PHOTOS_DB[0]))
+    db = connect_ro(PHOTOS_DB[0], True)
     md = dt.date.today().strftime("%m-%d")
     fav_only = "and coalesce(ZFAVORITE,0)=1" if ENV.get("CC_PHOTOS_FAVORITES", "0") == "1" else ""
     rows = db.execute(f"""select ZUUID, strftime('%Y', ZDATECREATED+978307200,'unixepoch','localtime'), coalesce(ZFAVORITE,0)

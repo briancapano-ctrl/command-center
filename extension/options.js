@@ -1,3 +1,5 @@
+// Opening this page with #reload restarts the add-on (used after an update, so no one has to hunt for the reload button).
+if (location.hash === "#reload") { chrome.runtime.reload(); }
 const $ = id => document.getElementById(id);
 chrome.storage.local.get("cc_cfg").then(({ cc_cfg }) => {
   const f = (cc_cfg && cc_cfg.folders) || [{ match: "Inbox", label: "Inbox unread" }];
