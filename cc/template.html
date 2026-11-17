@@ -640,7 +640,7 @@ function workHealth(){
   if(!WORK) return ["The work add-on is not reporting. Open this page in the browser that has the add-on."];
   const m=t=>t?Math.round((Date.now()-t)/60000):null, out=[];
   const chk=(o,lim,name,fix)=>{ const a=o?m(o.ts):null; if(a===null) out.push(`${name}: not connected. ${fix}`); else if(a>lim) out.push(`${name}: last update ${a} minutes ago. ${fix}`); };
-  chk(WORK.cal,25,"Work calendar","Keep the Outlook calendar tab open.");
+  chk(WORK.cal,30,"Work calendar","It comes from the Mac mini. Check that the Mac is on and Apple Calendar is syncing your Allbridge account.");
   chk(WORK.mail,25,"Work mail","Keep the Outlook mail tab open.");
   chk(WORK.copilot,75,"Briefing","Keep the Latest Daily Briefing tab open.");
   return out;
@@ -658,7 +658,7 @@ function workCalendarMessage(){
   if(!c)return"Waiting for the work calendar.";
   if(c.schema!==2)return"Reload the updated add-on to read actual meetings.";
   if(c.status==="scope")return c.message;
-  if(Date.now()-c.ts>25*60000)return"Calendar feed is stale. Open Outlook to check sign-in.";
+  if(Date.now()-c.ts>30*60000)return"Calendar feed is stale. Check that the Mac mini is on.";
   return c.status==="partial"?c.message:"No upcoming appointments in the displayed work week.";
 }
 function sceneWork(){
@@ -673,12 +673,12 @@ function sceneWork(){
   const cpHref=b?.href&&/^https:\/\/(?:m365|copilot)\.cloud\.microsoft\/chat\/conversation\//.test(b.href)?b.href:"https://m365.cloud.microsoft/chat";
   return `<div class="sc sc-work">
     <section class="card work-agenda"><h2 class="lbl">Work calendar <span class="sub">${esc(workAge(c))}</span></h2>${workHealthHtml()}<p class="work-source">Allbridge · ${esc(c?.range||"Current work week")}${agenda?` · ${up.length} appointments`:""}</p>
-    <div class="work-scroll">${agenda||`<div class="empty">${esc(workCalendarMessage())}</div>`}${c?.status==="partial"&&agenda?`<p class="work-note">${esc(c.message)}</p>`:""}${c&&Date.now()-c.ts>25*60000?'<p class="work-note">Calendar feed is stale. Open Outlook to check sign-in.</p>':""}</div>
-    <div class="work-bottom"><a href="https://outlook.cloud.microsoft/calendar/view/workweek#cc-lane" target="_blank" rel="noopener">Open work calendar</a><span>${mail||"Mail not connected"}</span></div></section>
+    <div class="work-scroll">${agenda||`<div class="empty">${esc(workCalendarMessage())}</div>`}${c?.status==="partial"&&agenda?`<p class="work-note">${esc(c.message)}</p>`:""}${c&&Date.now()-c.ts>30*60000?'<p class="work-note">Calendar feed is stale. Check that the Mac mini is on.</p>':""}</div>
+    <div class="work-bottom"><a href="https://outlook.cloud.microsoft/calendar/view/workweek" target="_blank" rel="noopener">Open work calendar</a><span>${mail||"Mail not connected"}</span></div></section>
     <section class="card work-briefing"><h2 class="lbl">Briefing priorities <span class="sub">${esc(workAge(b))}</span></h2><p class="work-source">${esc(b?.title||"Your latest Copilot briefing")}</p>
     <div class="work-scroll">${items||`<div class="empty">${b?"Reload the updated add-on to show the actual priority details.":"Waiting for the briefing tab. Keep it open in the same browser."}</div>`}</div>
     <div class="work-bottom"><a href="${esc(cpHref)}" target="_blank" rel="noopener">Read original briefing</a><span>From Copilot. Not independently verified.</span></div></section>
-    <p class="work-privacy">Work details stay in this browser. Not added to GitHub, the cloud data file, or Copilot prompts.</p>
+    <p class="work-privacy">Work details stay on the Mac mini and in this browser. Not added to GitHub, the cloud data file, or Copilot prompts.</p>
     </div>`;
 }
 setInterval(renderWork, 30000);

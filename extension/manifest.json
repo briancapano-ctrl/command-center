@@ -1,12 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Command Center Work Lane",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Browser-local work agenda and Copilot briefing priorities for your Command Center. One-way, no personal data sent to work apps.",
   "permissions": [
     "storage",
     "tabs",
-    "alarms"
+    "alarms",
+    "nativeMessaging"
   ],
   "options_page": "options.html",
   "action": {

@@ -413,9 +413,80 @@ def push(env, blob):
                 raise
 
 
+WORK_LOCAL = os.path.join(HOME, "CommandCenter", "work_local.json")
+EXT_ID = "plhacmcjdmghcfilnjknledephfgilce"
+HOST_NAME = "com.commandcenter.work"
+HOST_PY = os.path.join(HOME, "CommandCenter", "work_host.py")
+HOST_SRC = """#!/usr/bin/python3
+# Chrome native-messaging host for the Command Center Work Lane add-on.
+# Hands the add-on the work meetings the Mac collector saved locally. Read-only; no network; nothing else.
+import json, os, struct, sys
+raw = sys.stdin.buffer.read(4)
+if len(raw) == 4:
+    sys.stdin.buffer.read(struct.unpack("<I", raw)[0])
+try:
+    data = open(os.path.expanduser("~/CommandCenter/work_local.json"), "rb").read()
+    json.loads(data)
+except Exception:
+    data = b'{"error": "no work data yet"}'
+if len(data) > 900000:
+    data = b'{"error": "work data too large"}'
+sys.stdout.buffer.write(struct.pack("<I", len(data)) + data)
+sys.stdout.buffer.flush()
+"""
+
+
+def install_native_host():
+    """Keeps the add-on's local bridge installed (idempotent). The add-on reads work meetings from here, so no Outlook calendar tab is needed."""
+    if not os.path.exists(HOST_PY) or open(HOST_PY).read() != HOST_SRC:
+        open(HOST_PY, "w").write(HOST_SRC)
+    os.chmod(HOST_PY, 0o755)
+    d = os.path.join(HOME, "Library", "Application Support", "Google", "Chrome", "NativeMessagingHosts")
+    os.makedirs(d, exist_ok=True)
+    man = json.dumps({"name": HOST_NAME, "description": "Command Center work meetings (local only)", "path": HOST_PY,
+                      "type": "stdio", "allowed_origins": ["chrome-extension://%s/" % EXT_ID]}, indent=1)
+    f = os.path.join(d, HOST_NAME + ".json")
+    if not os.path.exists(f) or open(f).read() != man:
+        open(f, "w").write(man)
+
+
+def work_local():
+    """Work (Exchange) meetings from Apple Calendar for today and the next 7 days. Written to a file on this Mac only (never pushed);
+    the Chrome add-on picks it up through the local bridge above."""
+    rows = _cal_rows(8, lambda cal, store: "exchange" in store.lower())
+    start_today = dt.datetime.now().astimezone().replace(hour=0, minute=0, second=0, microsecond=0)
+    utc = lambda d: d.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    out, seen = [], set()
+    for st, en, title, all_day, cal, store, loc in rows:
+        s = dt.datetime.fromtimestamp(st + APPLE_EPOCH).astimezone()
+        e = dt.datetime.fromtimestamp((en or st) + APPLE_EPOCH).astimezone()
+        if all_day and e <= s:
+            e = s + dt.timedelta(days=1)
+        if e <= start_today:
+            continue
+        key = (utc(s), title)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({"s": utc(s), "e": utc(e), "title": (title or "")[:200], "location": (loc or "")[:120], "private": False, "allDay": bool(all_day)})
+    out.sort(key=lambda x: x["s"])
+    data = {"ts": int(dt.datetime.now().timestamp() * 1000), "account": "bcapano@allbridge.com", "range": "Today and the next 7 days", "events": out[:120]}
+    tmp = WORK_LOCAL + ".tmp"
+    with open(tmp, "w") as fh:
+        json.dump(data, fh)
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, WORK_LOCAL)
+    return len(out)
+
+
 def main():
     env = load_env()
     ENV.update(env)
+    for fn in (install_native_host, work_local):   # work meetings stay on this Mac; failures never block the personal feed
+        try:
+            fn()
+        except Exception as e:
+            print("work lane:", fn.__name__, type(e).__name__, str(e)[:120])
     now = dt.datetime.now().astimezone()
     snap = {"as_of": "Updated " + now.strftime("%-I:%M %p"), "as_of_iso": now.isoformat()}
     for key, fn in (("imessage", imessage), ("reminders", reminders), ("calendar", calendar), ("birthdays", birthdays), ("photos", photos), ("home", home)):
