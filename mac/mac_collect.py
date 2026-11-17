@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Runs on the Mac mini. Reads texts, reminders, Apple Calendar, birthdays, photo memories and home health locally, encrypts the result, pushes it to your GitHub repo.
 Python 3.9 standard library plus the macOS `openssl` and `sqlite` already installed. Nothing leaves the Mac unencrypted."""
-import atexit, base64, datetime as dt, glob, json, os, re, shutil, sqlite3, subprocess, sys, tempfile
+import atexit, urllib.parse, base64, datetime as dt, glob, json, os, re, shutil, sqlite3, subprocess, sys, tempfile
 
 HOME = os.path.expanduser("~")
 CONF = os.path.join(HOME, ".config", "command-center", "env")
@@ -50,6 +50,17 @@ def snapshot(path):
     return dst
 
 
+def connect_ro(path):
+    """Open a big live SQLite DB (Messages, about 1.7 GB) read-only in place instead of copying it every run.
+    WAL databases allow readers next to the writer. Falls back to the old copy if the direct read fails."""
+    try:
+        db = sqlite3.connect("file:" + urllib.parse.quote(path) + "?mode=ro", uri=True, timeout=5)
+        db.execute("select 1 from sqlite_master limit 1").fetchone()
+        return db
+    except Exception:
+        return sqlite3.connect(snapshot(path))
+
+
 def last10(s):
     d = re.sub(r"\D", "", s or "")
     return d[-10:] if len(d) >= 10 else ""
@@ -92,7 +103,7 @@ def decode_body(text, blob):
 
 
 def imessage():
-    db = sqlite3.connect(snapshot(os.path.join(HOME, "Library/Messages/chat.db")))
+    db = connect_ro(os.path.join(HOME, "Library/Messages/chat.db"))
     names = contacts()
     cutoff = (dt.datetime.now().timestamp() - DAYS * 86400 - APPLE_EPOCH) * 1e9
     rows = db.execute("""

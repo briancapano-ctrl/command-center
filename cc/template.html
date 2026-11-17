@@ -535,7 +535,9 @@ function renderHealth(){
   const sum = nbad.length ? `<span class="hsum"><span class="dot bad"></span>${esc(nbad.map(s=>s.label).join(", "))} not updating</span>` : `<span class="hsum"><span class="dot"></span>All ${ages.length} sources fresh, oldest ${esc(rel(oldest*60000))}</span>`;
   $("#health").innerHTML = sum + items.join("");
   const g = new Date(D.generated), a=(now-g)/60000;
-  const st=D.storage, stHtml = st && st.pct>=90 ? `<div class="stale ${st.pct>=97?"crit":""}">Hotmail storage is ${st.pct}% full (${st.used_gb} of ${st.cap_gb} GB, shared with OneDrive). New mail stops arriving when it fills.</div>` : "";
+  const mac=(D.sources||[]).find(x=>x.key==="mac"), macAge=mac&&mac.updated?(now-new Date(mac.updated))/60000:null;
+  const macHtml = mac && (!mac.ok || (macAge!==null && macAge>90)) ? `<div class="stale">The Mac mini has not reported ${macAge!==null?"for "+esc(rel(macAge*60000)):"yet"}. Texts, reminders, calendar and home health are paused until it does.</div>` : "";
+  const st=D.storage, stHtml = macHtml + (st && st.pct>=90 ? `<div class="stale ${st.pct>=97?"crit":""}">Hotmail storage is ${st.pct}% full (${st.used_gb} of ${st.cap_gb} GB, shared with OneDrive). New mail stops arriving when it fills.</div>` : "");
   $("#stale").innerHTML = stHtml + (a>90 ? `<div class="stale">Data is ${esc(rel(a*60000))} old. The cloud job may have stopped.</div>` : "");
 }
 function renderWx(){
