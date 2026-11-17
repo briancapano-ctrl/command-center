@@ -101,3 +101,22 @@ test("Background pins its tabs, adopts a pinned one after restart, and reopens a
   expect(updates).toContainEqual([9, { pinned: true }]);
   expect(store.cc_lane_urls.copilot).toContain("#cc-lane");
 });
+
+test("Background closes a pop-up window opened by a work tab, and only those", async () => {
+  const store = { cc_lane_tabs: { cal: 7 } };
+  const events = {}, removed = [];
+  const chrome = {
+    storage: { local: { get: async keys => structuredClone(Object.fromEntries((typeof keys === "string" ? [keys] : keys).map(k => [k, store[k]]))), set: async val => Object.assign(store, structuredClone(val)) } },
+    tabs: { get: async id => ({ id, url: "https://outlook.cloud.microsoft/calendar/" }), onCreated: { addListener: f => events.created = f } },
+    windows: { get: async id => ({ id, type: id === 50 ? "popup" : "normal" }), remove: async id => removed.push(id), onCreated: { addListener: () => {} } },
+    runtime: { onMessage: { addListener: () => {} }, onStartup: { addListener: () => {} }, onInstalled: { addListener: () => {} } },
+    alarms: { create: async () => {}, onAlarm: { addListener: () => {} } }
+  };
+  const context = { chrome, Date, Promise };
+  vm.createContext(context);
+  vm.runInContext(fs.readFileSync(require("path").join(__dirname, "../extension/background.js"), "utf8"), context);
+  await events.created({ id: 1, windowId: 50, openerTabId: 7 });    // popup from the calendar work tab: closed
+  await events.created({ id: 2, windowId: 51, openerTabId: 7 });    // normal window from a work tab: kept
+  await events.created({ id: 3, windowId: 50, openerTabId: 99 });   // popup from some other tab: kept
+  expect(removed).toEqual([50]);
+});

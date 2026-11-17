@@ -76,3 +76,15 @@ chrome.alarms.onAlarm.addListener(async a => {
   }
   if (changed) await chrome.storage.local.set({ cc_reloads: reloads, cc_lane_tabs: tabs });
 });
+
+// Outlook's calendar tab keeps opening a stray about:blank pop-up window every few minutes, which flashes on screen and steals focus.
+// Close a pop-up window only when one of this add-on's own work tabs opened it; every other tab and window is left alone.
+if (chrome.tabs.onCreated) chrome.tabs.onCreated.addListener(async t => {
+  if (!t.openerTabId || !chrome.windows || !chrome.windows.get) return;
+  const tabs = await laneTabs();
+  if (!LANE_KINDS.some(k => tabs[k] === t.openerTabId)) return;
+  try {
+    const w = await chrome.windows.get(t.windowId);
+    if (w.type === "popup") await chrome.windows.remove(t.windowId);
+  } catch (e) { /* already gone */ }
+});
