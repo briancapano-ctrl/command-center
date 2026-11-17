@@ -1,8 +1,17 @@
 // Watchdog. Knows which tabs are the add-on's own work tabs (they report in when they load) and only ever touches those.
 // Every 2 minutes it checks how old each number is; if a work tab stopped updating, it reloads that one tab.
 // After the add-on itself is reloaded or updated, it refreshes its own tabs so the new code starts right away.
+// It also pins its own tabs (a pinned tab has no close button) and quietly reopens one, pinned, if it is ever closed.
 const LIMITS = { mail: 6, cal: 6, copilot: 30 };   // minutes before a tab is considered stuck
 const KEYS = { mail: "cc_mail", cal: "cc_cal", copilot: "cc_copilot" };
+const PATTERNS = {   // which pinned tab is which, used to adopt a tab after a browser restart instead of opening a duplicate
+  mail: /^https:\/\/outlook\.(office\.com|cloud\.microsoft|office365\.com)\/mail/,
+  cal: /^https:\/\/outlook\.(office\.com|cloud\.microsoft|office365\.com)\/calendar/,
+  copilot: /^https:\/\/(copilot|m365)\.cloud\.microsoft\/chat/,
+  page: /^https:\/\/briancapano-ctrl\.github\.io\/command-center/
+};
+const LANE_KINDS = ["mail", "cal", "copilot"];
+const withFlag = (u, kind) => LANE_KINDS.includes(kind) && !/cc-lane/.test(u) ? u.split("#")[0] + "#cc-lane" : u;
 
 async function laneTabs() {
   const { cc_lane_tabs } = await chrome.storage.local.get("cc_lane_tabs");
@@ -20,7 +29,10 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
   // Serialize read/merge/write so tabs registering together cannot overwrite each other.
   registration = registration.catch(() => {}).then(async () => {
     const t = await laneTabs(); t[kind] = sender.tab.id;
-    await chrome.storage.local.set({ cc_lane_tabs: t });
+    const { cc_lane_urls } = await chrome.storage.local.get("cc_lane_urls");
+    const urls = cc_lane_urls || {}; if (sender.tab.url) urls[kind] = withFlag(sender.tab.url, kind);
+    await chrome.storage.local.set({ cc_lane_tabs: t, cc_lane_urls: urls });
+    try { if (!sender.tab.pinned) await chrome.tabs.update(sender.tab.id, { pinned: true }); } catch (e) { /* tab closed meanwhile */ }
   });
 });
 
@@ -34,11 +46,27 @@ chrome.runtime.onInstalled.addListener(async () => {
   for (const k of Object.keys(t)) await reloadTab(t[k]);
 });
 
+// If one of our tabs is gone, adopt a matching pinned tab (after a browser restart) or reopen it pinned in the background.
+async function heal(tabs, urls, reloads) {
+  let changed = false;
+  for (const kind of Object.keys(PATTERNS)) {
+    if (!urls[kind]) continue;   // never seen this one report, so nothing to restore
+    let alive = false;
+    if (tabs[kind]) { try { await chrome.tabs.get(tabs[kind]); alive = true; } catch (e) { /* closed or stale id */ } }
+    if (alive) continue;
+    const pinned = (await chrome.tabs.query({ pinned: true })).find(t => PATTERNS[kind].test(t.url || t.pendingUrl || ""));
+    if (pinned) { tabs[kind] = pinned.id; try { await chrome.tabs.reload(pinned.id); } catch (e) { /* ignore */ } }
+    else { try { const n = await chrome.tabs.create({ url: urls[kind], pinned: true, active: false }); tabs[kind] = n.id; } catch (e) { continue; } }
+    reloads[kind] = Date.now(); changed = true;   // fresh tab: give it a full window before the stuck-tab check
+  }
+  return changed;
+}
+
 chrome.alarms.onAlarm.addListener(async a => {
   if (a.name !== "cc-watch") return;
-  const st = await chrome.storage.local.get(["cc_mail", "cc_cal", "cc_copilot", "cc_reloads", "cc_lane_tabs"]);
+  const st = await chrome.storage.local.get(["cc_mail", "cc_cal", "cc_copilot", "cc_reloads", "cc_lane_tabs", "cc_lane_urls"]);
   const tabs = st.cc_lane_tabs || {}, reloads = st.cc_reloads || {};
-  let changed = false;
+  let changed = await heal(tabs, st.cc_lane_urls || {}, reloads);
   for (const kind of Object.keys(LIMITS)) {
     const age = (Date.now() - ((st[KEYS[kind]] && st[KEYS[kind]].ts) || 0)) / 60000;
     if (age < LIMITS[kind] || !tabs[kind]) continue;

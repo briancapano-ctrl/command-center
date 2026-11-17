@@ -71,3 +71,33 @@ test("Background reloads a stale registered tab only and rate limits retries", a
   expect(store.cc_lane_tabs.mail).toBe(222);
   expect(store.cc_lane_tabs.cal).toBe(333);
 });
+
+test("Background pins its tabs, adopts a pinned one after restart, and reopens a closed one", async () => {
+  const store = { cc_lane_tabs: { mail: 1, cal: 2 }, cc_lane_urls: { mail: "https://outlook.cloud.microsoft/mail/#cc-lane", cal: "https://outlook.cloud.microsoft/calendar/view/workweek#cc-lane" }, cc_mail: { ts: Date.now() }, cc_cal: { ts: Date.now() }, cc_copilot: { ts: Date.now() } };
+  const events = {}, created = [], reloads = [], updates = [];
+  const chrome = {
+    storage: { local: { get: async keys => structuredClone(Object.fromEntries((typeof keys === "string" ? [keys] : keys).map(k => [k, store[k]]))), set: async val => Object.assign(store, structuredClone(val)) } },
+    tabs: {
+      get: async id => { if (id === 1 || id === 2) throw new Error("gone"); return { id }; },
+      reload: async id => reloads.push(id),
+      update: async (id, p) => updates.push([id, p]),
+      query: async () => [{ id: 50, url: "https://outlook.cloud.microsoft/mail/inbox", pinned: true }],
+      create: async o => { created.push(o); return { id: 60 + created.length }; }
+    },
+    runtime: { onMessage: { addListener: f => events.message = f }, onStartup: { addListener: f => events.start = f }, onInstalled: { addListener: f => events.install = f } },
+    alarms: { create: async () => {}, onAlarm: { addListener: f => events.alarm = f } }
+  };
+  const context = { chrome, Date, Promise };
+  vm.createContext(context);
+  vm.runInContext(fs.readFileSync(require("path").join(__dirname, "../extension/background.js"), "utf8"), context);
+  await events.alarm({ name: "cc-watch" });
+  expect(store.cc_lane_tabs.mail).toBe(50);           // adopted the pinned Outlook mail tab
+  expect(reloads).toContain(50);
+  expect(created).toHaveLength(1);                    // calendar was missing: reopened once, pinned, in the background
+  expect(created[0]).toMatchObject({ pinned: true, active: false });
+  expect(created[0].url).toContain("/calendar/");
+  events.message({ cc: "lane", kind: "copilot" }, { tab: { id: 9, url: "https://copilot.cloud.microsoft/chat/conversation/x", pinned: false } });
+  await vm.runInContext("registration", context);
+  expect(updates).toContainEqual([9, { pinned: true }]);
+  expect(store.cc_lane_urls.copilot).toContain("#cc-lane");
+});
