@@ -182,7 +182,8 @@ def _iso(apple_ts, all_day):
 
 def calendar():
     """iCloud / local calendars from Calendar.app. Skips the holiday feed, mail-detected items and anything already covered."""
-    ok = lambda cal, store: cal.lower() not in SKIP_CALS and store.lower() not in ("other", "reminders", "subscribed calendars")
+    skip_stores = {x.strip().lower() for x in ENV.get("CC_SKIP_STORES", "Exchange").split(",") if x.strip()}  # the work (Exchange) account stays out of the personal feed
+    ok = lambda cal, store: cal.lower() not in SKIP_CALS and store.lower() not in ("other", "reminders", "subscribed calendars") and store.lower() not in skip_stores
     out, seen = [], set()
     for st, en, title, all_day, cal, store, loc in _cal_rows(14, ok):
         key = (title, round(st))

@@ -272,6 +272,7 @@ body[data-scene=overview] .overlay{display:none}
 .tl{position:relative;min-height:520px}.tlin{position:absolute;inset:2.8rem 1rem 1rem 3.3rem}
 .hr{position:absolute;left:-2.7rem;right:0;border-top:1px solid var(--rule);font-size:.76rem;color:var(--muted)}.hr span{position:absolute;top:-.6rem;left:0}
 .blk{position:absolute;left:.4rem;right:.4rem;background:color-mix(in srgb,var(--accent) 16%,var(--surface));border-left:3px solid var(--accent);border-radius:8px;padding:.3rem .65rem;overflow:hidden;display:flex;gap:.6rem;align-items:baseline}
+.task.late7{border-left:3px solid var(--neg-ink);padding-left:.6rem}.task.late7 .w{color:var(--neg-ink);font-weight:600}
 .blk{min-height:1.8rem;padding-top:.15rem;padding-bottom:.15rem;align-items:center;white-space:nowrap}
 .blk.work{background:color-mix(in srgb,var(--acc2) 16%,var(--surface));border-left-color:var(--acc2)}
 .tlin.two .blk{right:52%}.tlin.two .blk.work{left:50%;right:.4rem}
@@ -646,6 +647,7 @@ function workAge(p){ if(!p?.ts) return "Not connected"; const m=Math.max(0,Math.
 function workDate(s){ const d=new Date(s);return dkey(d)===dkey(new Date())?"Today":d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",timeZone:TZ()}); }
 function workTime(x){return x.allDay?"All day":fmtTime(new Date(x.s))+"–"+fmtTime(new Date(x.e));}
 function workUpcoming(){const c=WORK?.cal;if(c?.schema!==2||c.status==="scope")return [];return(c.events||[]).filter(x=>x.title&&Date.parse(x.e)>Date.now()).sort((a,b)=>Date.parse(a.s)-Date.parse(b.s));}
+function dropWorkDupes(list){ const w=(typeof workAll==="function"?workAll():[]); if(!w.length) return list; const k=x=>String(x.title||"").trim().toLowerCase()+"|"+(Date.parse(x.start||x.s)||0); const set=new Set(w.map(k)); return list.filter(e=>e.work||!set.has(k({title:e.title,start:e.start}))); }
 function workAll(){const c=WORK?.cal;if(c?.schema!==2||c.status==="scope")return [];return(c.events||[]).filter(x=>x.title&&x.s);}
 function workCalendarMessage(){
   const c=WORK?.cal;
@@ -694,6 +696,9 @@ function briefLine(){
       if(nx) t+=`, first up ${fmtTime(new Date(nx.s))}`;
       if(mine.length) t+=`, ${mine.length} personal`;
       t+=".";
+      try{ let dn={};try{dn=JSON.parse(store.getItem("done:"+today())||"{}")}catch(e){}
+        const od=(typeof allTasks==="function"?allTasks():[]).filter(x=>x.p&&x.p[0]==="Overdue"&&!dn[x.t]).length;
+        if(od) t+=` ${od} overdue.`; }catch(e){}
       if(clash) t+=` Heads up: ${clash.p.t} overlaps a work meeting at ${fmtTime(new Date(clash.w.s))}.`;
       return t;
     }
@@ -756,7 +761,7 @@ function allTasks(){
   return [...loc,...D.tasks].filter(x=>!hid[x.t]);
 }
 function taskRows(list,done){
-  return list.length? list.map(x=>`<label class="task ${done[x.t]?"done":""}"><input type="checkbox" data-t="${esc(x.t)}" ${done[x.t]?"checked":""}><span><div class="t">${esc(x.t)}</div><div class="w">${esc(x.w)}</div></span><span class="pill ${esc(x.p[1])}">${esc(x.p[0])}</span><button class="x" data-hide="${esc(x.t)}" data-local="${x.local?1:0}" title="${x.local?"Remove":"Hide until tomorrow"}">&times;</button></label>`).join("")
+  return list.length? list.map(x=>`<label class="task ${done[x.t]?"done":""}${(x.p&&x.p[0]==="Overdue"&&Number((/(\d+) days? overdue/.exec(x.w||"")||[])[1]||0)>=7)?" late7":""}"><input type="checkbox" data-t="${esc(x.t)}" ${done[x.t]?"checked":""}><span><div class="t">${esc(x.t)}</div><div class="w">${esc(x.w)}</div></span><span class="pill ${esc(x.p[1])}">${esc(x.p[0])}</span><button class="x" data-hide="${esc(x.t)}" data-local="${x.local?1:0}" title="${x.local?"Remove":"Hide until tomorrow"}">&times;</button></label>`).join("")
    : '<div class="w" style="padding:.6rem 0">All clear. Nothing needs you.</div>';
 }
 function renderTasks(){
@@ -832,7 +837,7 @@ function textsCard(){
 const COUNT=(ms)=>{ if(ms<0) return "now"; const m=Math.round(ms/60000); if(m<60) return m+" min"; const h=Math.floor(m/60); return h<48? h+"h "+(m%60)+"m" : Math.round(h/24)+" days"; };
 function sceneToday(){
   const now=new Date(), tk=dkey(now);
-  const evs=(D.events||[]).filter(e=>e.start&&(e.all_day?e.start.slice(0,10)===tk:dkey(new Date(e.start))===tk));
+  const evs=dropWorkDupes(D.events||[]).filter(e=>e.start&&(e.all_day?e.start.slice(0,10)===tk:dkey(new Date(e.start))===tk));
   const wk=(typeof workAll==="function"?workAll():[]).filter(x=>dkey(new Date(x.s))===tk).map(x=>({title:x.title,start:x.s,end:x.e,all_day:!!x.allDay,work:true}));
   const allday=[...evs,...wk].filter(e=>e.all_day);
   const timed=[...evs,...wk].filter(e=>!e.all_day).map(e=>{const s=new Date(e.start);return{...e,s,e2:e.end?new Date(e.end):new Date(s.getTime()+3600000)}});
@@ -884,7 +889,7 @@ function sceneWeek(){
   const wx={};(WX?.daily||[]).forEach(w=>wx[w.d]=w);
   const cols=days.map((x,i)=>{
     const wkEv=(typeof workAll==="function"?workAll():[]).filter(w=>dkey(new Date(w.s))===x.k).map(w=>({title:w.title,start:w.s,all_day:!!w.allDay,work:true}));
-    const ev=[...(D.events||[]),...wkEv].filter(e=>e.start&&(e.all_day?e.start.slice(0,10)===x.k:dkey(new Date(e.start))===x.k)).sort((a,b)=>(b.all_day?1:0)-(a.all_day?1:0)||new Date(a.start)-new Date(b.start));
+    const ev=[...dropWorkDupes(D.events||[]),...wkEv].filter(e=>e.start&&(e.all_day?e.start.slice(0,10)===x.k:dkey(new Date(e.start))===x.k)).sort((a,b)=>(b.all_day?1:0)-(a.all_day?1:0)||new Date(a.start)-new Date(b.start));
     const gm=(D.teams||[]).flatMap(t=>(t.next||[]).filter(n=>dkey(new Date(n.when))===x.k).map(n=>({t:t.team,n})));
     const w=wx[x.k];
     return `<section class="card day7 ${i===0?"today":""}"><div class="dh"><b>${i===0?"Today":x.d.toLocaleDateString([],{weekday:"short",timeZone:"UTC"})} <span style="color:var(--mute);font-weight:500">${x.d.getUTCDate()}</span></b>${w?`<small>${WXI[wxInfo(w.code)[0]]}${Math.round(w.hi)}&deg;/${Math.round(w.lo)}&deg;</small>`:""}</div>
