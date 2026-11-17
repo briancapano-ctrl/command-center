@@ -611,7 +611,7 @@ function renderWork(){
   const linked=!!(b||c||WORK?.mail);
   const hd=workBriefState(b).handled, preview=(b?.items||[]).filter(x=>!hd.includes(x.title)).slice(0,2).map(x=>`<div class="work-peek"><span class="work-priority ${esc(x.level)}">${esc(workLevel(x.level))}</span><span>${esc(x.title)}</span></div>`).join("");
   el.innerHTML=`<h2 class="lbl">Work <button class="work-open" data-s="work" data-testid="open-work">Open work view</button></h2>
-    ${!linked?'<p class="work-note">Connect the work add-on in this Comet browser.</p>':
+    ${!linked?'<p class="work-note">Connect the work add-on in this browser.</p>':
     `<div class="work-next"><small>${nx?esc(workDate(nx.s))+" · "+esc(workTime(nx)):"Work calendar"}</small><b>${nx?esc(nx.title):esc(workCalendarMessage())}</b></div>
     ${preview||`<p class="work-note">${b?`${Number(b.red)||0} urgent · ${Number(b.orange)||0} watch · ${Number(b.yellow)||0} low. Reload the updated add-on for details.`:"Waiting for the Copilot briefing."}</p>`}`}
     ${workHealth().length?`<p class="work-note work-warn">${esc(workHealth()[0])}</p>`:""}<p class="work-note">Browser only. Personal data never goes to Copilot.</p>`;
@@ -637,7 +637,7 @@ document.addEventListener("click",e=>{
   renderWork(); if(SCENE==="work") renderScene(false);
 });
 function workHealth(){
-  if(!WORK) return ["The work add-on is not reporting. Open this page in Comet with the add-on on."];
+  if(!WORK) return ["The work add-on is not reporting. Open this page in the browser that has the add-on."];
   const m=t=>t?Math.round((Date.now()-t)/60000):null, out=[];
   const chk=(o,lim,name,fix)=>{ const a=o?m(o.ts):null; if(a===null) out.push(`${name}: not connected. ${fix}`); else if(a>lim) out.push(`${name}: last update ${a} minutes ago. ${fix}`); };
   chk(WORK.cal,25,"Work calendar","Keep the Outlook calendar tab open.");
@@ -676,7 +676,7 @@ function sceneWork(){
     <div class="work-scroll">${agenda||`<div class="empty">${esc(workCalendarMessage())}</div>`}${c?.status==="partial"&&agenda?`<p class="work-note">${esc(c.message)}</p>`:""}${c&&Date.now()-c.ts>25*60000?'<p class="work-note">Calendar feed is stale. Open Outlook to check sign-in.</p>':""}</div>
     <div class="work-bottom"><a href="https://outlook.cloud.microsoft/calendar/view/workweek#cc-lane" target="_blank" rel="noopener">Open work calendar</a><span>${mail||"Mail not connected"}</span></div></section>
     <section class="card work-briefing"><h2 class="lbl">Briefing priorities <span class="sub">${esc(workAge(b))}</span></h2><p class="work-source">${esc(b?.title||"Your latest Copilot briefing")}</p>
-    <div class="work-scroll">${items||`<div class="empty">${b?"Reload the updated add-on to show the actual priority details.":"Waiting for the briefing tab. Keep it open in Comet."}</div>`}</div>
+    <div class="work-scroll">${items||`<div class="empty">${b?"Reload the updated add-on to show the actual priority details.":"Waiting for the briefing tab. Keep it open in the same browser."}</div>`}</div>
     <div class="work-bottom"><a href="${esc(cpHref)}" target="_blank" rel="noopener">Read original briefing</a><span>From Copilot. Not independently verified.</span></div></section>
     <p class="work-privacy">Work details stay in this browser. Not added to GitHub, the cloud data file, or Copilot prompts.</p>
     </div>`;
