@@ -417,7 +417,7 @@ WORK_LOCAL = os.path.join(HOME, "CommandCenter", "work_local.json")
 EXT_ID = "plhacmcjdmghcfilnjknledephfgilce"
 HOST_NAME = "com.commandcenter.work"
 HOST_PY = os.path.join(HOME, "CommandCenter", "work_host.py")
-HOST_SRC = """#!/usr/bin/python3
+HOST_SRC = "#!" + os.path.realpath(sys.executable) + "\n" + """\
 # Chrome native-messaging host for the Command Center Work Lane add-on.
 # Hands the add-on the work meetings the Mac collector saved locally. Read-only; no network; nothing else.
 import json, os, struct, sys
