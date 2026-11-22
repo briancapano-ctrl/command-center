@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="command-center" content="1">
-<meta name="theme-color" content="#edf2fb">
+<meta name="theme-color" content="#0d201c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
@@ -728,6 +728,346 @@ body.wall .kpi .v.txt{font-size:clamp(1.5rem,4vh,3.2rem)}
   body.wall .kpi .v{font-size:clamp(1.6rem,4.1vw,3.6rem)}body.wall .kpi .v.txt{font-size:clamp(1.1rem,2.6vw,2.3rem)}body.wall .kpi::after{width:3.6em;height:3.6em}}
 @media (orientation:landscape) and (max-height:820px){body.wall #home{display:none}}
 @media(max-width:480px){.kpi .v{font-size:2.4rem}.clock{font-size:3.6rem}.kpis .kpi:last-child:nth-child(odd){grid-column:1/-1}}
+
+/* ===== v8: Hub. A dark frame with a scenic header, an icon rail and warm cards ===== */
+:root{
+  --card:#f8f3ea;--card2:#efe7da;--fink:#f4efe6;--fmute:rgba(244,239,230,.72);--amber:#e8892b;--amber2:#f4b860;
+  --railbg:rgba(255,255,255,.055);--railink:rgba(244,239,230,.76);--railedge:rgba(255,255,255,.09);
+  --ok:#1f9d5c;--warn:#d98a1a;--bad:#d8443a;
+  --ink:#1b2420;--ink2:#35413b;--muted:#59635d;--faint:#6c7670;--rule:rgba(27,36,32,.1);--neu-bg:#ebe3d5;--border:rgba(27,36,32,.14);
+  --railw:94px;--ra:auto;
+  --shadow:0 1px 0 rgba(255,255,255,.55) inset,0 20px 42px -24px rgba(0,0,0,.7);
+}
+html[data-look=bright]{
+  --card:#ffffff;--card2:#f2f5fb;--fink:#0b1324;--fmute:#536074;--railbg:rgba(255,255,255,.8);--railink:#334155;--railedge:rgba(15,23,42,.06);
+  --ink:#0b1324;--ink2:#273248;--muted:#536074;--faint:#677185;--rule:rgba(15,23,42,.08);--neu-bg:#eef2f8;--border:rgba(15,23,42,.12);
+  --shadow:0 1px 2px rgba(15,23,42,.05),0 14px 34px -16px rgba(37,56,120,.30);
+}
+html:not([data-look=bright]){background:#0a1714}
+html:not([data-look=bright]) body{
+  background:
+    radial-gradient(70vw 60vh at -12% -18%,rgba(232,137,43,.22),transparent 60%),
+    radial-gradient(60vw 60vh at 112% 112%,rgba(34,165,101,.17),transparent 62%),
+    radial-gradient(46vw 40vh at 62% -12%,rgba(125,211,252,.08),transparent 60%),
+    linear-gradient(160deg,#11291f,#0c1d19 55%,#091613);
+  background-attachment:fixed}
+#app[hidden]{display:none!important}
+#garland{display:none!important}
+.kpis{display:none!important}
+
+/* cards: warm cream in Hub, white in Bright */
+.card{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.card.kd{background:linear-gradient(180deg,color-mix(in srgb,var(--k1) 9%,var(--card)) 0,var(--card) 7.5rem)}
+.drawer{background:var(--card);color:var(--ink)}
+#lock{background:var(--card);color:var(--ink)}
+.qa input{background:color-mix(in srgb,var(--ink) 3%,var(--card))}
+.av{box-shadow:0 0 0 2px var(--card)}
+.k-brief{--k1:#d97706;--k2:#f59e0b;--kt:#b45309;--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 6h10.5M10 12h10.5M10 18h10.5'/%3E%3Cpath d='M3.5 6l1.2 1.2L7 5M3.5 12l1.2 1.2L7 11M3.5 18l1.2 1.2L7 17'/%3E%3C/svg%3E")}
+.t-ok{--tc:var(--ok)}.t-warn{--tc:var(--warn)}.t-bad{--tc:var(--bad)}.t-mute{--tc:#9aa3a0}.t-info{--tc:#2f6fd6}.t-live{--tc:#dc2626}
+
+/* frame-level text */
+html:not([data-look=bright]) .health{color:var(--fmute)}
+html:not([data-look=bright]) .health .hsum{color:var(--fink)}
+html:not([data-look=bright]) .foot,html:not([data-look=bright]) .foot a{color:var(--fmute)}
+html:not([data-look=bright]) .chan-sec>h2{color:var(--fink)}
+html:not([data-look=bright]) .ctl button{background:rgba(255,255,255,.1);color:var(--fink);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+html:not([data-look=bright]) .ctl button:hover{background:rgba(255,255,255,.2);color:#fff}
+html:not([data-look=bright]) .ctl button.on{background:var(--amber);color:#1b1206}
+html:not([data-look=bright]) .wall-strip.tk{background:#10241f;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),0 10px 30px -12px rgba(0,0,0,.6)}
+html:not([data-look=bright]) .tk-i{color:rgba(244,239,230,.8)}
+html:not([data-look=bright]) .tk-i b{color:#fff}
+html:not([data-look=bright]) .tk-k{background:rgba(255,255,255,.14);color:#fff}
+html:not([data-look=bright]) .tk-brand{background:linear-gradient(135deg,#e8892b,#c2410c)}
+.rot{background:linear-gradient(90deg,#e8892b,#f4b860)}
+
+/* layout: rail + content */
+.wrap{display:grid;grid-template-columns:var(--railw) minmax(0,1fr);column-gap:1.1rem;row-gap:0;align-items:start;max-width:1880px;padding-top:3.4rem}
+.wrap>*{grid-column:2;min-width:0}
+.wrap>.rail{grid-column:1;grid-row:1/span 30;align-self:start;position:sticky;top:3.4rem;max-height:calc(100vh - 4.4rem);overflow-y:auto;scrollbar-width:none}
+.rail{display:flex;flex-direction:column;align-items:stretch;gap:.3rem;padding:.75rem .45rem;background:var(--railbg);border-radius:26px;box-shadow:inset 0 0 0 1px var(--railedge)}
+.rail .rl-brand{display:grid;place-items:center;height:3rem;margin-bottom:.35rem;color:var(--amber2)}
+.rail .rl-brand .ic{width:1.9rem;height:1.9rem}
+.rail button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;padding:.6rem .2rem .55rem;border:1.5px solid transparent;border-radius:16px;background:transparent;color:var(--railink);font:700 .7rem/1.1 var(--sans);letter-spacing:.01em;cursor:pointer;transition:background-color .2s,color .2s,border-color .2s,box-shadow .2s}
+.rail button .ic{width:1.45rem;height:1.45rem;flex:none}
+.rail button:hover{background:rgba(255,255,255,.08);color:var(--fink)}
+.rail button.on{color:#fff;background:linear-gradient(180deg,rgba(232,137,43,.32),rgba(232,137,43,.12));border-color:rgba(244,184,96,.9);box-shadow:0 10px 26px -10px rgba(232,137,43,.85)}
+.rail button.on .ic{color:var(--amber2)}
+.rail .rl-p{position:absolute;left:24%;right:24%;bottom:.2rem;height:2px;border-radius:2px;background:var(--amber2);transform-origin:left center;transform:scaleX(var(--p,0));opacity:0;transition:transform 1s linear}
+.rail button.on .rl-p{opacity:.95}
+.rail #bAuto{margin-top:auto}
+.rail #bAuto .ip,.rail #bAuto.on .ia{display:none}
+.rail #bAuto.on .ip{display:block}
+.rail #bAuto.on{color:var(--amber2)}
+html[data-look=bright] .rail button:hover{background:rgba(15,23,42,.05);color:var(--ink)}
+html[data-look=bright] .rail button.on{color:#7c2d12;background:linear-gradient(180deg,#fff1e0,#ffe2c2);border-color:#f0a35a}
+html[data-look=bright] .rail button.on .ic,html[data-look=bright] .rail .rl-brand,html[data-look=bright] .rail #bAuto.on{color:#c2410c}
+
+/* header: scenic banner */
+.top.hb{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:1.5rem;padding:1.1rem 1.5rem;margin:0 0 1rem;border-radius:26px;color:#fff;min-height:7.4rem;
+  background:linear-gradient(90deg,rgba(5,16,13,.82) 0%,rgba(5,16,13,.45) 36%,rgba(5,16,13,.16) 62%,rgba(5,16,13,.7) 100%),var(--banner,none) center 58%/cover no-repeat,#173a31;
+  box-shadow:0 22px 44px -24px rgba(0,0,0,.75),inset 0 0 0 1px rgba(255,255,255,.08)}
+html[data-banner=night] .top.hb{background-position:0 0,center 72%,0 0}
+html[data-banner=golden] .top.hb{background-position:0 0,center 64%,0 0}
+.hb-brand{display:flex;align-items:center;gap:.75rem;padding-right:1.4rem;border-right:1px solid rgba(255,255,255,.2)}
+.hb-brand .ic{width:2.3rem;height:2.3rem;color:var(--amber2);flex:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.45))}
+.hb-brand b{display:block;font:800 1.3rem/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:#fff;white-space:nowrap}
+.hb-brand small{display:block;margin-top:.38rem;font:700 .64rem/1 var(--sans);letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.8);white-space:nowrap}
+.top.hb .hello{min-width:0}
+.top.hb .hello h1{font:800 clamp(1.5rem,2.2vw,2.3rem)/1.05 var(--display);letter-spacing:-.02em;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.4)}
+.top.hb .hello p{margin-top:.35rem;max-width:72ch;font:600 .95rem/1.4 var(--sans);color:rgba(255,255,255,.92);text-shadow:0 1px 8px rgba(0,0,0,.5);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hb-chips{display:flex;gap:.45rem;flex-wrap:nowrap}
+.chip8{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(8,20,17,.45);color:#fff;font:800 .9rem/1 var(--sans);white-space:nowrap;cursor:pointer;transition:background-color .2s}
+.chip8:hover{background:rgba(8,20,17,.65)}
+.chip8:not([data-open]){cursor:default}
+.chip8 .ic{width:1.05rem;height:1.05rem;color:var(--amber2);flex:none}
+.chip8.ok .ic{color:#6ee7a8}.chip8.warn .ic{color:#fcd34d}.chip8.bad{background:rgba(216,68,58,.7)}
+.hb-time{text-align:right;padding-left:1.3rem;border-left:1px solid rgba(255,255,255,.2)}
+.top.hb .clock{font:800 2.9rem/.9 var(--display);letter-spacing:-.04em;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.4)}
+.top.hb .clock small{color:var(--amber2);font-size:.36em}
+.top.hb .date{margin-top:.4rem;font:700 .7rem/1.2 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.88);white-space:nowrap}
+
+/* overview grid */
+.grid.g8{grid-template-columns:repeat(4,minmax(0,1fr));align-items:start}
+.g8 .col{align-content:start}
+
+/* hero photo */
+.hero{padding:0;min-height:16rem;background:#203a33;color:#fff;cursor:pointer}
+.hero .hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:kb8 50s ease-in-out infinite alternate}
+.hero .hero-img.art{object-position:center 35%}
+@keyframes kb8{from{transform:scale(1.02)}to{transform:scale(1.12) translate(-1.5%,-1%)}}
+@media (prefers-reduced-motion:reduce){.hero .hero-img{animation:none}}
+.hero .hero-sh{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 38%,rgba(0,0,0,.74))}
+.hero .hero-tx{position:absolute;left:1.15em;right:1.15em;bottom:1em;display:flex;flex-direction:column;gap:.2em}
+.hero-k{display:inline-flex;align-items:center;gap:.45em;font:800 .72em/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--amber2)}
+.hero-k .ic{width:1.25em;height:1.25em}
+.hero-tx b{font:800 2.3em/1 var(--display);letter-spacing:-.03em;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hero-tx small{font:600 .86em/1.3 var(--sans);color:rgba(255,255,255,.88)}
+.hero-th{position:absolute;top:.9em;right:.9em;display:flex;gap:.45em}
+.hero-th img{width:4.4em;height:4.4em;object-fit:cover;border-radius:.8em;box-shadow:0 0 0 2px rgba(255,255,255,.9),0 8px 18px -6px rgba(0,0,0,.6)}
+.clk.hero:hover,.clk.wx8:hover,#home.clk:hover{transform:none}
+
+/* home health gauges */
+#home{cursor:pointer}
+.ggs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5em}
+.gg{position:relative;display:flex;flex-direction:column;align-items:center;gap:.2em;min-width:0}
+.gg svg{display:block;width:100%;max-width:7.4em;aspect-ratio:1}
+.gg-bg,.gg-fg{fill:none;stroke-width:9;stroke-linecap:round}
+.gg-bg{stroke:color-mix(in srgb,var(--ink) 10%,transparent)}
+.gg-fg{stroke:var(--tc)}
+.gg-in{position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:7.4em;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.12em}
+.gg-in .ic{width:1.1em;height:1.1em;color:var(--tc)}
+.gg-in b{font:800 1.02em/1 var(--display);letter-spacing:-.02em;color:var(--ink);white-space:nowrap}
+.gg>small{font:700 .68em/1.15 var(--sans);color:var(--muted);text-align:center;white-space:nowrap;margin-top:-.5em}
+.hl8{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45em;margin-top:.65em}
+.hl8>div{display:flex;align-items:center;gap:.5em;min-width:0;padding:.5em .65em;border-radius:14px;background:color-mix(in srgb,var(--tc) 11%,var(--card))}
+.hl8 .ic{width:1.2em;height:1.2em;color:var(--tc);flex:none}
+.hl8 span{min-width:0}
+.hl8 small{display:block;font:800 .6em/1.1 var(--sans);color:var(--muted);text-transform:uppercase;letter-spacing:.09em}
+.hl8 b{display:block;font:800 .86em/1.25 var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* weather */
+.wx8{color:#fff;padding:1em 1.15em;cursor:pointer;
+  background:radial-gradient(120% 90% at 100% 0%,rgba(255,255,255,.22),transparent 55%),linear-gradient(150deg,var(--w1,#0284c7),var(--w2,#1d4ed8));
+  box-shadow:0 22px 40px -22px color-mix(in srgb,var(--w2,#1d4ed8) 85%,#000)}
+.wx8[data-wx=sun]{--w1:#0ea5e9;--w2:#1d4ed8}
+.wx8[data-wx=cloud]{--w1:#4f7096;--w2:#2c4767}
+.wx8[data-wx=rain]{--w1:#2257b5;--w2:#1b365d}
+.wx8[data-wx=snow]{--w1:#0e7490;--w2:#4338ca}
+.wx8[data-wx=storm]{--w1:#5b21b6;--w2:#1e1b4b}
+.wx8[data-wx=fog]{--w1:#64748b;--w2:#334155}
+.wx8.nt{--w1:#27235e;--w2:#14123a}
+#wx{height:100%;display:flex;flex-direction:column;gap:.55em}
+.w8-top{display:flex;align-items:center;justify-content:space-between;gap:.6em}
+.w8-top span{display:inline-flex;align-items:center;gap:.45em;font:800 .74em/1 var(--sans);letter-spacing:.14em;text-transform:uppercase}
+.w8-top .ic{width:1.25em;height:1.25em;color:#fde68a}
+.w8-top small{font:600 .76em var(--sans);color:rgba(255,255,255,.85);white-space:nowrap}
+.w8-main{display:flex;align-items:center;gap:1em;min-height:0}
+.w8-arc{position:relative;flex:none;width:8.6em;height:8.6em}
+.w8-arc svg{display:block;width:100%;height:100%}
+.w8-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.w8-in b{font:800 2.5em/1 var(--display);letter-spacing:-.04em}
+.w8-in small{margin-top:.25em;max-width:6.5em;font:700 .72em/1.15 var(--sans);color:rgba(255,255,255,.9);text-align:center}
+.w8-side{flex:1;min-width:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5em .7em;align-content:center}
+.w8-ico{grid-column:1/-1;display:block;width:2.4em;height:2.4em;color:#fff}
+.wx8[data-wx=sun]:not(.nt) .w8-ico{color:#fde68a}
+.w8-ico svg{display:block;width:100%;height:100%}
+.w8-side small{display:block;font:800 .6em/1.1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.78)}
+.w8-side b{font:800 1.2em/1.15 var(--display)}
+.w8-sun{display:flex;gap:1.1em;font:700 .76em var(--sans);color:rgba(255,255,255,.92)}
+.w8-sun span{display:inline-flex;align-items:center;gap:.35em}.w8-sun .ic{width:1.2em;height:1.2em;color:#fde68a}
+.w8-days{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4em;margin-top:auto}
+.w8-days>div{display:flex;flex-direction:column;align-items:center;gap:.12em;padding:.4em .3em;border-radius:12px;background:rgba(255,255,255,.14);font:700 .74em/1.1 var(--sans)}
+.w8-days i{display:block;width:1.5em;height:1.5em}.w8-days i svg{display:block;width:100%;height:100%}
+.w8-days b{font:800 1.05em/1 var(--display)}.w8-days small{color:rgba(255,255,255,.72);font-size:.9em}
+.w8-days b+small::before{content:"/ "}
+.w8-days>div{display:grid;grid-template-columns:auto auto;grid-template-areas:"d d" "i i" "h l";justify-items:center;column-gap:.3em}
+.w8-days>div>span{grid-area:d}.w8-days>div>i{grid-area:i}.w8-days>div>b{grid-area:h;justify-self:end}.w8-days>div>small{grid-area:l;justify-self:start}
+
+/* game day */
+.gd{padding:0;display:flex;flex-direction:column}
+.gd-hero{position:relative;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;color:#fff;padding:.9em 1.1em 1em;cursor:pointer;
+  background:radial-gradient(120% 120% at 100% 0%,rgba(255,255,255,.22),transparent 52%),linear-gradient(150deg,color-mix(in srgb,var(--team,#0f766e) 80%,#fff),var(--team,#0f766e) 52%,color-mix(in srgb,var(--team,#0f766e) 68%,#000))}
+.gd-top{display:flex;justify-content:space-between;align-items:center;gap:.6em;font:700 .76em/1.1 var(--sans);color:rgba(255,255,255,.92)}
+.gd-k{display:inline-flex;align-items:center;gap:.4em;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#ffe2b8}
+.gd-k .ic{width:1.25em;height:1.25em}
+.gd-hero .vs{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:.6em;margin-top:.7em}
+.gd-hero .tm{display:flex;flex-direction:column;align-items:center;gap:.3em}
+.gd-hero .lg{display:grid;place-items:center;width:3.7em;height:3.7em;border-radius:50%;background:#fff;box-shadow:0 10px 20px -10px rgba(0,0,0,.7)}
+.gd-hero .lg img{width:74%;height:74%;object-fit:contain}
+.gd-hero .ab{font:800 .8em var(--sans);letter-spacing:.08em}
+.gd-hero .mid{text-align:center;min-width:0}
+.gd-hero .when{font:800 1.12em/1.15 var(--display);letter-spacing:-.01em}
+.gd-hero .score{font:800 2em/1 var(--display);white-space:nowrap}
+.gd-hero .cd{display:inline-block;margin-top:.4em;padding:.22em .65em;border-radius:99px;background:rgba(255,255,255,.2);font:800 .72em/1.2 var(--sans);white-space:nowrap}
+.gd-hero .cd.lv{background:#dc2626}
+.gd-hero.live{box-shadow:inset 0 0 0 3px rgba(220,38,38,.9)}
+.gd-meta{display:flex;align-items:center;justify-content:center;gap:.4em;margin-top:.65em;font:600 .74em/1.2 var(--sans);color:rgba(255,255,255,.9);white-space:nowrap;overflow:hidden}
+.gd-meta .ic{width:1.15em;height:1.15em;flex:none}
+.gd-hero .sit{margin-top:.45em;text-align:center;font:700 .76em var(--sans)}
+.gd-hero .wp{display:grid;grid-template-columns:auto 1fr auto;gap:.5em;align-items:center;margin-top:.45em;font:700 .7em var(--sans)}
+.gd-hero .wp .bt{height:.42em;border-radius:99px;background:rgba(255,255,255,.25);overflow:hidden}.gd-hero .wp .bt i{display:block;height:100%;background:#fff}
+#teams{display:flex;flex-direction:column;gap:.15em;padding:.5em .9em .65em}
+#teams:empty{display:none}
+#teams .gm{display:flex;align-items:center;gap:.65em;padding:.35em .1em;border-top:1px solid var(--rule)}
+#teams .gm:first-child{border-top:0}
+#teams .gm .tlg{flex:none;width:2.1em;height:2.1em;padding:.25em;border-radius:50%;background:#fff;object-fit:contain;box-shadow:0 0 0 2px var(--team)}
+#teams .gm>div{min-width:0}
+#teams .gm b{display:block;font:800 .9em/1.2 var(--sans);color:var(--ink)}
+#teams .gm .rec{font-weight:700;color:var(--team)}
+#teams .gm small{display:block;font:600 .76em/1.3 var(--sans);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* family and brief */
+#fam h3{margin:.7em 0 .3em;font:800 .7em/1.2 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--kt)}
+#fam>h2{cursor:pointer}
+#fam .rc{display:flex;align-items:center;gap:.6em;padding:.3em 0}
+#fam .rc .rn{font-weight:700}#fam .rc .rd{margin-left:auto;font:700 .8em var(--sans);color:var(--muted)}
+.bl8{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.bl8 li{display:flex;align-items:flex-start;gap:.6em;padding:.45em 0;border-top:1px solid var(--rule);font:600 .88em/1.35 var(--sans);color:var(--ink2)}
+.bl8 li:first-child{border-top:0;padding-top:.1em}
+.bl8 li .ic{flex:none;width:1.55em;height:1.55em;padding:.3em;border-radius:.55em;color:#fff;background:var(--tc)}
+.bl8 li span{padding-top:.1em}
+.bl8 li.t-warn span,.bl8 li.t-bad span,.bl8 li.t-live span{color:var(--ink);font-weight:700}
+
+/* wall display */
+body.wall{--railw:5.3em;--ra:31vh}
+body.wall .wrap{grid-template-columns:var(--railw) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto auto;column-gap:1vw;row-gap:1.15vh;padding:1.1vh 1.1vw .9vh .9vw;max-width:none}
+body.wall .wrap>.rail{grid-column:1;grid-row:1/-1;align-self:stretch;position:relative;top:auto;max-height:none;overflow:hidden}
+body.wall .top{grid-column:2;grid-row:1;margin:0}
+body.wall #stale{grid-column:2;grid-row:2}
+body.wall #stale:empty{margin-top:-1.15vh}
+body.wall .grid,body.wall .overlay{grid-column:2;grid-row:3}
+body.wall .wall-strip{grid-column:2;grid-row:4}
+body.wall .health{grid-column:2;grid-row:5;margin:0}
+body.wall .ctl{top:auto!important;bottom:.45rem!important;right:1rem}
+body.wall .rail{padding:.7em .4em;gap:.25em;border-radius:22px}
+body.wall .rail .rl-brand{height:2.5em;margin-bottom:.15em}
+body.wall .rail .rl-brand .ic{width:1.7em;height:1.7em}
+body.wall .rail button{font-size:.6em;padding:.8em .2em .75em;gap:.4em;border-radius:1.25em}
+body.wall .rail button .ic{width:2.3em;height:2.3em}
+body.wall .top.hb{padding:.85em 1.4em;gap:1.4em;border-radius:24px;min-height:0}
+body.wall .hb-brand{gap:.7em;padding-right:1.3em}
+body.wall .hb-brand .ic{width:2.1em;height:2.1em}
+body.wall .hb-brand b{font-size:1.22em}
+body.wall .hb-brand small{font-size:.58em}
+body.wall .top.hb .hello h1{font-size:1.7em}
+body.wall .top.hb .hello p{font-size:.84em}
+body.wall .chip8{font-size:.84em;padding:.55em .8em;border-radius:.85em;gap:.45em}
+body.wall .chip8 .ic{width:1.15em;height:1.15em}
+body.wall .hb-time{padding-left:1.2em}
+body.wall .top.hb .clock{font-size:2.6em}
+body.wall .top.hb .date{font-size:.62em;margin-top:.45em}
+body.wall .grid.g8{grid-template-columns:minmax(0,1.12fr) minmax(0,1.08fr) minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:1vw;height:100%;min-height:0}
+body.wall .g8 .col,body.wall .g8 .col:last-child{grid-template-columns:minmax(0,1fr);grid-template-rows:var(--ra) minmax(0,1fr) auto;gap:1.15vh;height:100%;min-height:0;overflow:hidden}
+body.wall .g8 .col>.card{min-height:0;overflow:hidden;height:auto}
+body.wall .g8 #home{display:block}
+body.wall .g8 #bdays{display:none}
+body.wall .hero{min-height:0}
+body.wall .w8-arc{width:auto;height:100%;max-height:9.6em;aspect-ratio:1}
+body.wall .w8-main{flex:1 1 0}
+body.wall .health{max-width:calc(100% - 520px)}
+@media (orientation:portrait){
+  body.wall{--ra:16vh}
+  body.wall .wrap{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto auto auto;padding:1vh 2vw;row-gap:1vh}
+  body.wall .wrap>.rail{grid-column:1;grid-row:5;flex-direction:row;justify-content:space-between;padding:.35em .5em;gap:.2em;border-radius:20px}
+  body.wall .rail .rl-brand{display:none}
+  body.wall .rail button{flex:1 1 0;min-width:0;font-size:.52em;padding:.6em .1em .65em}
+  body.wall .rail #bAuto{margin-top:0}
+  body.wall .top,body.wall #stale,body.wall .grid,body.wall .overlay,body.wall .wall-strip,body.wall .health{grid-column:1}
+  body.wall .health{grid-row:6}
+  body.wall .top.hb{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"clock chips time" "hello hello hello";row-gap:.8em}
+  body.wall .hb-chips{grid-area:chips;justify-self:center;flex-wrap:wrap;justify-content:center}
+  body.wall .hb-time{grid-area:time}
+  body.wall .grid.g8{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:1vh 2vw}
+  body.wall .g8 .col:last-child .card{height:auto}
+}
+
+/* desk widths */
+@media (max-width:1240px){.grid.g8{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:980px){.top.hb{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand time" "hello hello" "chips chips";gap:.9rem}
+  .hb-brand{grid-area:brand;border:0;padding:0}.hb-time{grid-area:time;border:0;padding:0}.top.hb .hello{grid-area:hello}.hb-chips{grid-area:chips;flex-wrap:wrap}}
+@media (max-width:760px){
+  .wrap{grid-template-columns:minmax(0,1fr);padding:.8rem .8rem 2rem}
+  .wrap>*{grid-column:1}
+  .wrap>.rail{grid-column:1;grid-row:auto;position:static;max-height:none;flex-direction:row;overflow-x:auto;padding:.4rem;margin-bottom:.8rem}
+  .rail .rl-brand,.rail #bAuto{display:none}
+  .rail button{flex:0 0 auto;min-width:4.5rem}
+  .grid.g8{grid-template-columns:minmax(0,1fr)}
+  .hb-chips .chip8{font-size:.82rem;padding:.45rem .6rem}
+}
+
+/* v8 fixes: wall scaling, sports logos, portrait header */
+body.wall .wrap{align-items:stretch}
+body.wall .gc .tm .lg{width:clamp(72px,min(15vh,6.5vw),280px)}
+body.wall .gc.live .tm .lg{width:clamp(64px,min(11vh,5.2vw),220px)}
+body.wall .gc .gh .score{font-size:clamp(2.2rem,min(8vh,3.4vw),6rem)}
+body.wall .g8 .card>h2{font-size:.98em;margin-bottom:.7em}
+body.wall .g8 .card>h2 .sub{font-size:.68em}
+body.wall .g8 .task{grid-template-columns:1.1em minmax(0,1fr) auto auto;gap:.6em;padding:.5em 0}
+body.wall .g8 .task input{font-size:inherit;width:1.05em;height:1.05em;margin-top:.12em}
+body.wall .g8 .task .t{font-size:.88em}
+body.wall .g8 .task .w{font-size:.7em}
+body.wall .g8 .pill{font-size:.6em}
+body.wall .g8 .ev{grid-template-columns:4.6em minmax(0,1fr) auto;gap:.6em;padding:.45em 0}
+body.wall .g8 .ev .when{font-size:.72em}
+body.wall .g8 .ev .what{font-size:.88em}
+body.wall .g8 .ev .in{font-size:.64em}
+body.wall .g8 .day{font-size:.6em}
+body.wall .g8 .cdn{grid-template-columns:2.7em minmax(0,1fr);gap:.7em;padding:.42em 0}
+body.wall .g8 .cdn .n{font-size:1.08em;width:2.5em;height:2.5em;border-radius:.75em}
+body.wall .g8 .cdn .n small{font-size:.4em}
+body.wall .g8 .cdn b{font-size:.84em}
+body.wall .g8 .cdn span{font-size:.68em}
+body.wall .g8 #fam .rc{font-size:.8em}
+body.wall .g8 .bl8 li{font-size:.82em}
+.rail button{padding:.5rem .2rem .48rem}
+.rail .rl-brand{height:2.6rem}
+@media (orientation:portrait){
+  body.wall .gc .tm .lg{width:clamp(84px,min(10vh,22vw),260px)}
+  body.wall .gc.live .tm .lg{width:clamp(76px,min(9vh,20vw),220px)}
+  body.wall .gc .gh .score{font-size:clamp(2.4rem,min(5.5vh,9vw),6rem)}
+  body.wall .g8 #work{display:none}
+  body.wall .top.hb{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"clock clock time" "hello chips chips";row-gap:.9em}
+  body.wall .hb-chips{justify-self:end;align-self:end;flex-wrap:nowrap}
+}
+
+body:not(.wall) .g8 .task{grid-template-columns:1.25rem minmax(0,1fr) auto}
+body:not(.wall) .g8 .task .pill{grid-column:2;grid-row:2;justify-self:start;margin-top:.15rem}
+body:not(.wall) .g8 .task .x{grid-column:3;grid-row:1}
+
+.gd-hero .wp,.gd-hero .wp span{color:rgba(255,255,255,.94)}
+
+@media (max-width:560px){
+  .top.hb{padding:1rem 1.1rem;border-radius:22px}
+  .hb-brand .ic{width:1.9rem;height:1.9rem}
+  .hb-brand b{font-size:1rem;letter-spacing:.08em}
+  .hb-brand small{letter-spacing:.2em}
+  .top.hb .clock{font-size:2.1rem}
+  .top.hb .date{display:none}
+}
+
+body:not(.wall) .gc .gb{min-height:auto}
+body:not(.wall) .gc .gh{flex:0 0 auto}
+
 </style>
 </head>
 <body>
@@ -741,6 +1081,7 @@ body.wall .kpi .v.txt{font-size:clamp(1.5rem,4vh,3.2rem)}
   <button id="bFull" title="Fullscreen (F)">Fullscreen</button>
   <button id="bAwake" title="Keep the screen on">Keep awake</button>
   <button id="bDecor" title="Change the decor (D)">Decor: Auto</button>
+  <button id="bLook" title="Switch between the Hub and Bright looks (L)">Look: Hub</button>
   <button id="bLock" title="Forget passphrase">Lock</button>
 </div>
 <div id="app" class="wrap" hidden></div>
@@ -753,6 +1094,7 @@ const $ = (s,r=document)=>r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const store = (()=>{try{localStorage.setItem("t","1");localStorage.removeItem("t");return localStorage}catch(e){const m={};return{getItem:k=>m[k]??null,setItem:(k,v)=>{m[k]=v},removeItem:k=>{delete m[k]}}}})();
+document.documentElement.dataset.look = store.getItem("cc_look")==="bright" ? "bright" : "hub";
 
 /* ---------- crypto ---------- */
 async function decryptBlob(blob, pass){
@@ -798,32 +1140,43 @@ function shell(){
   const line = "";
   const stale = (D.sources||[]).filter(s=>!s.ok);
   $("#app").innerHTML = `
-  <header class="top">
-    <div><div class="clock" id="clock"></div><div class="date" id="date"></div></div>
+  <nav class="rail" id="snav" aria-label="Scenes">${navHtml()}</nav>
+  <header class="top hb">
+    <div class="hb-brand">${ic("home")}<div><b>Capano Home</b><small>Youngsville, NC</small></div></div>
     <div class="hello"><h1>${esc(greet)}.</h1><p id="line">${esc(line)}</p></div>
-    <div class="win"><div class="wxt" id="wx" role="group" aria-label="Weather"></div></div>
+    <div class="hb-chips" id="chips"></div>
+    <div class="hb-time"><div class="clock" id="clock"></div><div class="date" id="date"></div></div>
   </header>
   <div id="stale"></div>
-  <nav class="snav" id="snav">${navHtml()}</nav>
   <section class="kpis" id="kpis"></section>
-  <div class="grid">
+  <div class="grid g8">
     <div class="col">
+      <section class="card hero clk" id="hero"></section>
       <section class="card kd k-need fill"><h2 class="lbl">Needs you <span class="sub"><span id="prog"></span> <span class="ring" id="ring" data-open="need" title="Open your list"></span></span></h2><form class="qa" id="qa"><input placeholder="Add something for today, press Enter" maxlength="120" autocomplete="off"></form><div id="tasks"></div></section>
-      <section class="card kd k-home" id="home"></section>
     </div>
-    <div class="col"><section class="card kd k-today fill"><h2 class="lbl">Today and next <span class="sub" id="evsub"></span></h2><div id="events"></div></section>
-      <section class="card kd k-work work" id="work"></section></div>
-    <div class="col"><section class="card kd k-sports"><h2 class="lbl">Your teams <span class="sub">live</span></h2><div id="teams"></div></section>
-      <section class="card kd k-art print fill" id="print"></section>
-      <section class="card kd k-family" id="bdays"></section><section class="card kd k-alm desk-only" id="almanac"></section><section class="card kd k-photo fill" id="mem"></section>
-      <section class="card kd k-inbox fill tri-card"><h2 class="lbl">Inbox triage</h2><table class="tri"><tbody>${D.triage.map(r=>`<tr><td>${esc(r.acct)}</td><td>${esc(r.finding)}</td></tr>`).join("")}</tbody></table></section></div>
+    <div class="col">
+      <section class="card kd k-home clk" id="home"></section>
+      <section class="card kd k-today fill"><h2 class="lbl">Today and next <span class="sub" id="evsub"></span></h2><div id="events"></div></section>
+      <section class="card kd k-work work" id="work"></section>
+    </div>
+    <div class="col">
+      <section class="card wx8 clk" id="wxcard"><div id="wx"></div></section>
+      <section class="card kd k-family fill" id="fam"></section>
+      <section class="card kd k-alm desk-only" id="almanac"></section>
+      <section class="card kd k-inbox fill tri-card"><h2 class="lbl">Inbox triage</h2><table class="tri"><tbody>${D.triage.map(r=>`<tr><td>${esc(r.acct)}</td><td>${esc(r.finding)}</td></tr>`).join("")}</tbody></table></section>
+    </div>
+    <div class="col">
+      <section class="card gd" id="game"><div id="gamehero"></div><div id="teams"></div></section>
+      <section class="card kd k-brief fill" id="brief"></section>
+      <section class="card kd k-family desk-only" id="bdays"></section>
+    </div>
   </div>
   <section class="overlay" id="overlay"></section>
   <section class="wall-strip" id="strip"></section>
   <section class="chan-sec"><h2 class="lbl" style="margin:1.3rem 0 .7rem">Channels</h2><div class="chan" id="chan"></div></section>
   <div class="health" id="health"></div>
-  <p class="foot">Runs on GitHub and the Mac mini. No AI credits. Press W for wall mode, F for fullscreen, D to change the decor, arrow keys for scenes.<br><span id="credit"></span></p>`;
-  renderKpis(); renderTasks(); renderEvents(); renderTeams(); renderChannels(); renderStrip(); renderWork(); renderHome(); renderBdays(); renderMem(); tick(); renderWx(); applyDecor(); shellLine();
+  <p class="foot">Runs on GitHub and the Mac mini. No AI credits. Press W for wall mode, F for fullscreen, D to change the decor, L to switch the look, arrow keys for scenes.<br><span id="credit"></span></p>`;
+  renderKpis(); renderTasks(); renderEvents(); renderTeams(); renderChannels(); renderStrip(); renderWork(); renderHome(); renderBdays(); renderFam(); renderBrief(); tick(); renderWx(); applyDecor(); shellLine();
 }
 function nextEvent(){
   const now = new Date();
@@ -845,6 +1198,7 @@ function renderKpis(){
     }
     if(typeof to==="number") prevVals[k.key]=to;
   });
+  renderChips();
 }
 function today(){ return dkey(new Date()); }
 function renderEvents(){
@@ -882,7 +1236,7 @@ function gameHtml(t){
 /* wall mode: hide trailing rows that do not fit, so nothing is ever cut in half */
 let fitQ=0;
 function fit(){ cancelAnimationFrame(fitQ); fitQ=requestAnimationFrame(()=>{
-  const items = c => [...c.querySelectorAll("#tasks>*, #events>*, #teams>*, .tri tr, #work .wrow, #bdays .bd, #home .hm>*")];
+  const items = c => [...c.querySelectorAll("#tasks>*, #events>*, #teams>*, .tri tr, #work .wrow, #bdays .bd, #home .hm>*, #fam .cdn, #fam h3, #fam .rc, #brief li")];
   document.querySelectorAll(".grid .col").forEach(col=>{
     const cards=[...col.querySelectorAll(".card")];
     cards.forEach(c=>{ items(c).forEach(i=>i.style.display=""); if(c.classList.contains("tri-card")||c.dataset.autohide) { c.style.display=""; delete c.dataset.autohide; } });
@@ -905,7 +1259,177 @@ function fit(){ cancelAnimationFrame(fitQ); fitQ=requestAnimationFrame(()=>{
   });
 });}
 window.addEventListener("resize", fit);
-function renderTeams(){ $("#teams").innerHTML = (D.teams||[]).map(gameHtml).join("") || '<div class="empty">Schedules unavailable.</div>'; fit(); }
+/* ===== v8: Hub. Icon rail, scenic header, gauges, photo hero, game card, daily brief ===== */
+const IC={
+  grid:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/>',
+  home:'<path d="M3.5 10.5L12 3.5l8.5 7v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M9.5 21.5v-7h5v7"/>',
+  briefcase:'<rect x="2.5" y="7" width="19" height="13.5" rx="2.5"/><path d="M16 20.5V5.5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v15"/>',
+  calendar:'<rect x="3.5" y="4.5" width="17" height="16" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3.5 10h17"/>',
+  trophy:'<path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.5 4.5M17 6h2.5A2.5 2.5 0 0 1 17 10.5"/><path d="M12 14v3.5M8 21h8M9.5 17.5h5V21h-5z"/>',
+  news:'<path d="M4 21.5h15a2.5 2.5 0 0 0 2.5-2.5V4.5a1 1 0 0 0-1-1H8.5a1 1 0 0 0-1 1V19a2.5 2.5 0 0 1-2.5 2.5zm0 0A2.5 2.5 0 0 1 1.5 19v-8.5h6"/><path d="M11 7.5h7M11 11.5h7M11 15.5h4.5"/>',
+  heart:'<path d="M19.5 13.5C21 12 22 10.4 22 8.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .6-4.5 2-1.5-1.4-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 1.9 1 3.5 2.5 5L12 21z"/>',
+  inbox:'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/>',
+  week:'<rect x="3.5" y="4.5" width="17" height="16" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3.5 10h17M8 14h.01M12 14h.01M16 14h.01M8 17.5h.01M12 17.5h.01"/>',
+  server:'<rect x="2.5" y="3.5" width="19" height="7" rx="2"/><rect x="2.5" y="13.5" width="19" height="7" rx="2"/><path d="M6.5 7h.01M6.5 17h.01M10.5 7h7M10.5 17h7"/>',
+  moon:'<path d="M12 3a6.5 6.5 0 0 0 9 9 9 9 0 1 1-9-9z"/>',
+  activity:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  play:'<path d="M7 4.5v15l12-7.5z"/>',
+  pause:'<path d="M8 5v14M16 5v14"/>',
+  wifi:'<path d="M5 12.6a10 10 0 0 1 14 0M1.5 9a15 15 0 0 1 21 0M8.6 16.1a5 5 0 0 1 6.8 0"/><path d="M12 20h.01"/>',
+  message:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2.5 21.5z"/>',
+  mail:'<rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="M21.5 7.5l-9.5 6-9.5-6"/>',
+  check:'<path d="M20 6.5L9 17.5l-5-5"/>',
+  alert:'<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15.5l-4.5-4.5L6 21.5"/>',
+  thermo:'<path d="M14 14.8V4.5a2 2 0 0 0-4 0v10.3a4 4 0 1 0 4 0z"/>',
+  disk:'<circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="2.5"/>',
+  clock:'<circle cx="12" cy="12" r="9.5"/><path d="M12 7v5l3 2"/>',
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  power:'<path d="M12 2.5v9M18.4 6.6a9 9 0 1 1-12.8 0"/>',
+  tv:'<rect x="2.5" y="7" width="19" height="13.5" rx="2.5"/><path d="M16.5 2.5L12 7 7.5 2.5"/>',
+  sunrise:'<path d="M17 18a5 5 0 0 0-10 0M12 2v7M4.2 10.2l1.4 1.4M1 18h2M21 18h2M18.4 11.6l1.4-1.4M23 22H1M8 6l4-4 4 4"/>',
+  sunset:'<path d="M17 18a5 5 0 0 0-10 0M12 9V2M4.2 10.2l1.4 1.4M1 18h2M21 18h2M18.4 11.6l1.4-1.4M23 22H1M16 5l-4 4-4-4"/>',
+  drop:'<path d="M12 2.7l5.7 5.7a8 8 0 1 1-11.3 0z"/>',
+  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>'
+};
+const ic=(n,cls)=>`<svg class="ic${cls?" "+cls:""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]||""}</svg>`;
+const SICON={overview:"grid",work:"briefcase",today:"calendar",sports:"trophy",news:"news",people:"heart",inbox:"inbox",week:"week",home:"server",almanac:"moon",pulse:"activity"};
+function setLook(l){ l=l==="bright"?"bright":"hub"; document.documentElement.dataset.look=l; store.setItem("cc_look",l); const b=$("#bLook"); if(b) b.textContent="Look: "+(l==="bright"?"Bright":"Hub"); if(D) applyDecor(); }
+
+/* header status chips */
+function renderChips(){
+  const el=$("#chips"); if(!el||!D) return;
+  const k=Object.fromEntries((D.kpis||[]).filter(x=>x.key).map(x=>[x.key,x])), n=(D.home||{}).net||{};
+  const chip=(icon,val,label,open,cls)=>`<button class="chip8${cls?" "+cls:""}"${open?` data-open="${open}"`:""} title="${esc(label)}" aria-label="${esc(label+": "+val)}">${ic(icon)}<b>${esc(val)}</b></button>`;
+  el.innerHTML=[
+    n.ms!=null||n.up===false?chip("wifi",n.up===false?"Offline":n.ms+" ms","Internet",null,n.up===false?"bad":n.ms>80?"warn":"ok"):"",
+    k.texts?chip("message",k.texts.value,"Texts","texts",""):"",
+    k.gmail?chip("mail",k.gmail.value,"Gmail","gmail",""):"",
+    k.hotmail?chip("inbox",k.hotmail.value,"Hotmail","hotmail",""):"",
+    WX?chip("thermo",Math.round(WX.t)+"°","Outside",null,""):""
+  ].join("");
+}
+
+/* hero: a photo from this day, or the print on the wall */
+function renderHero(){
+  const el=$("#hero"); if(!el||!D) return;
+  const m=D.memories, th=(m&&m.thumbs)||[];
+  if(th.length){
+    const a=th[0], yrs=m.years||[], span=yrs.length?(yrs[0]===yrs[yrs.length-1]?yrs[0]:`${yrs[0]} to ${yrs[yrs.length-1]}`):a.year;
+    const sig="m"+m.count+":"+th.map(t=>t.year+String(t.b64).length).join(",");
+    if(el.dataset.sig===sig) return; el.dataset.sig=sig; el.dataset.s="people";
+    el.innerHTML=`<img class="hero-img" src="data:image/jpeg;base64,${a.b64}" alt="Photo taken on this day in ${esc(a.year)}"><div class="hero-sh"></div>
+      <div class="hero-tx"><span class="hero-k">${ic("image")}On this day</span><b>${esc(a.year)}</b><small>${m.count} photo${m.count===1?"":"s"} from ${esc(span)}</small></div>
+      ${th.length>1?`<div class="hero-th">${th.slice(1,3).map(t=>`<img src="data:image/jpeg;base64,${t.b64}" alt="">`).join("")}</div>`:""}`;
+  } else {
+    const id=DECOR&&DECOR.art, a=id&&ART[id]; if(!a) return;
+    const sig="a"+id; if(el.dataset.sig===sig) return; el.dataset.sig=sig; el.dataset.s="almanac";
+    el.innerHTML=`<img class="hero-img art" src="art/${esc(id)}.jpg" alt="${esc(a.t)}"><div class="hero-sh"></div><div class="hero-tx"><span class="hero-k">${ic("image")}On the wall</span><b>${esc(a.t)}</b><small>${esc(a.a)}, ${esc(a.y)}</small></div>`;
+  }
+}
+
+/* home health gauges */
+function gauge(pct,val,label,icon,tone){
+  const r=40,c=2*Math.PI*r,arc=c*.75,p=Math.max(0,Math.min(100,Number(pct)||0))/100;
+  return `<div class="gg t-${tone}"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="gg-bg" cx="50" cy="50" r="${r}" stroke-dasharray="${arc.toFixed(1)} ${c.toFixed(1)}" transform="rotate(135 50 50)"/><circle class="gg-fg" cx="50" cy="50" r="${r}" stroke-dasharray="${(arc*p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(135 50 50)"/></svg><div class="gg-in">${ic(icon)}<b>${esc(val)}</b></div><small>${esc(label)}</small></div>`;
+}
+function healthHtml(){
+  const h=D.home; if(!h) return '<div class="w">The Mac mini has not reported home health yet.</div>';
+  const n=h.net||{}, d=h.disk||{}, b=h.backup||{}, st=D.storage, up=n.avail_24h, ms=n.ms;
+  const g=[
+    gauge(up??0, up!=null?up+"%":"n/a","Uptime 24h","wifi", up==null?"mute":up>=99?"ok":up>=95?"warn":"bad"),
+    gauge(n.up===false?0:ms!=null?Math.max(6,100-ms*.6):0, n.up===false?"Off":ms!=null?ms+" ms":"n/a","Internet","activity", n.up===false?"bad":ms==null?"mute":ms<=60?"ok":ms<=120?"warn":"bad"),
+    gauge(d.pct_used!=null?100-d.pct_used:0, d.free_gb!=null?d.free_gb+" GB":"n/a","Disk free","disk", d.pct_used==null?"mute":d.pct_used>=90?"bad":d.pct_used>=80?"warn":"ok"),
+    st?gauge(st.pct, st.pct+"%","Mail storage","mail", st.pct>=90?"bad":st.pct>=70?"warn":"ok"):""
+  ].join("");
+  const bk=b.off?["Off","warn"]:b.ok?[(b.age_h<1?"Just now":b.age_h<48?Math.round(b.age_h)+"h ago":Math.round(b.age_h/24)+"d ago"),b.age_h>72?"warn":"ok"]:["Failing","bad"];
+  return `<div class="ggs">${g}</div><div class="hl8"><div class="t-${bk[1]}">${ic("shield")}<span><small>Backup</small><b>${esc(bk[0])}</b></span></div><div class="t-ok">${ic("power")}<span><small>Mac up</small><b>${h.uptime_days==null?"n/a":h.uptime_days<1?Math.max(1,Math.round(h.uptime_days*24))+"h":Math.round(h.uptime_days)+"d"}</b></span></div></div>`;
+}
+
+/* family and friends */
+function cdnHtml(c){
+  return `<div class="cdn c-${esc(c.kind)} ${c.days===0?"today":""}"><div class="n">${c.days===0?"Now":c.days}<small>${c.days===0?"today":c.days===1?"day":"days"}</small></div><div><b>${esc(c.n)}</b><span>${esc(new Date(c.d+"T12:00:00").toLocaleDateString([],{weekday:"long",month:"short",day:"numeric"}))}${c.t?" · "+esc(c.t):""}</span></div></div>`;
+}
+function renderFam(){
+  const el=$("#fam"); if(!el||!D) return;
+  const cd=countdowns(45).slice(0,4), rec=((D.people||{}).reconnect||[]).slice(0,4), wt=((D.inbox||{}).texts||{}).waiting||[];
+  el.innerHTML=`<h2 class="lbl" data-s="people">Family <span class="sub">${wt.length?wt.length+" waiting on you":"no one waiting"}</span></h2>
+    ${cd.map(cdnHtml).join("")||'<div class="w">No birthdays or holidays in the next 45 days.</div>'}
+    ${rec.length?`<h3>Reconnect</h3>${rec.map(r=>`<div class="rc">${av(r.name)}<span class="rn">${esc(r.name)}</span><span class="rd">${r.days} days</span></div>`).join("")}`:""}`;
+  fit();
+}
+
+/* daily brief: plain status checks, computed here, no AI */
+function briefItems(){
+  const out=[], now=new Date(), srcs=D.sources||[];
+  (D.alerts||[]).forEach(a=>out.push(["alert","bad",`${a.event}: ${a.head}`]));
+  const bad=srcs.filter(s=>!s.ok||(s.updated&&(now-new Date(s.updated))/60000>(s.key==="mac"?180:120)));
+  if(srcs.length) out.push(bad.length?["alert","warn",`${bad.map(s=>s.label).join(", ")} not updating`]:["check","ok",`All ${srcs.length} data sources are fresh`]);
+  if(!(D.alerts||[]).length) out.push(["check","ok","No weather alerts for home"]);
+  try{ let dn={}; try{dn=JSON.parse(store.getItem("done:"+today())||"{}")}catch(e){}
+    const od=allTasks().filter(x=>x.p&&x.p[0]==="Overdue"&&!dn[x.t]).length; if(od) out.push(["clock","warn",`${od} reminder${od===1?" is":"s are"} overdue`]); }catch(e){}
+  const g=pickGame();
+  if(g){ const L=LIVE[g.team], nx=(g.next||[])[0];
+    if(L&&L.state==="in") out.push(["trophy","live",`${g.team} live: ${L.away.a} ${L.away.s}, ${L.home.a} ${L.home.s}`]);
+    else if(L&&L.state==="post") out.push(["trophy","info",`${g.team} final: ${L.away.a} ${L.away.s}, ${L.home.a} ${L.home.s}`]);
+    else if(nx&&dayDiff(new Date(nx.when))<=1) out.push(["trophy","info",`${g.team} ${oppOf(nx.name,g.abbr).txt} ${whenShort(nx.when)}${nx.tv?" on "+nx.tv:""}`]); }
+  const bd=countdowns(30).find(c=>c.kind==="bday"); if(bd) out.push(["gift","info",`${bd.n} ${bd.days===0?"is today":bd.days===1?"is tomorrow":"in "+bd.days+" days"}`]);
+  const wt=(((D.inbox||{}).texts||{}).waiting||[]).length; out.push(wt?["message","warn",`${wt} text${wt===1?"":"s"} waiting on a reply`]:["check","ok","No texts waiting on a reply"]);
+  const b=(D.home||{}).backup; if(b&&b.off) out.push(["shield","warn","No backup drive is set up for the Mac mini"]); else if(b&&b.ok===false) out.push(["shield","bad","Mac mini backup is failing"]);
+  const st=D.storage; if(st&&st.pct>=70) out.push(["mail","warn",`Hotmail storage is ${st.pct}% full`]);
+  const ye=yearEnd(); if(ye.days>=0&&ye.days<=60) out.push(["calendar","info",`${ye.days} days left in ${dkey(now).slice(0,4)}, ${ye.biz} of them weekdays`]);
+  return out;
+}
+function renderBrief(){
+  const el=$("#brief"); if(!el||!D) return;
+  const it=briefItems(), warn=it.filter(x=>x[1]==="warn"||x[1]==="bad").length;
+  el.innerHTML=`<h2 class="lbl">Daily brief <span class="sub">${warn?warn+" to look at":"all good"}</span></h2><ul class="bl8">${it.map(([i,t,s])=>`<li class="t-${t}">${ic(i)}<span>${esc(s)}</span></li>`).join("")}</ul>`;
+  fit();
+}
+
+/* game day card: the live game, today's game, or the next one up */
+function pickGame(){
+  const ts=D.teams||[], td=dkey(new Date());
+  return ts.find(t=>LIVE[t.team]&&LIVE[t.team].state==="in")
+    || ts.find(t=>(LIVE[t.team]&&LIVE[t.team].state==="pre")||((t.next||[])[0]&&dkey(new Date(t.next[0].when))===td))
+    || ts.find(t=>LIVE[t.team]&&LIVE[t.team].state==="post")
+    || ts.filter(t=>(t.next||[])[0]).sort((a,b)=>Date.parse(a.next[0].when)-Date.parse(b.next[0].when))[0] || ts[0] || null;
+}
+function gameParts(t){
+  const L=LIVE[t.team], nx=(t.next||[])[0], r=resultOf(t,(t.last||[])[0]);
+  const col=TEAMC[t.team]||(t.color?"#"+String(t.color).replace(/[^0-9a-f]/gi,"").slice(0,6):"#0f766e");
+  let away,home,mid,status="",live=false,extra="";
+  if(L&&L.away){
+    away=L.away; home=L.home;
+    if(L.state==="pre"){ mid=`<div class="when">${esc(cap(whenShort(nx?.when||Date.now())))}</div>`; status=nx?`<div class="cd">in ${esc(COUNT(new Date(nx.when)-Date.now()))}</div>`:""; }
+    else { mid=`<div class="score">${esc(away.s)} - ${esc(home.s)}</div>`; status=L.state==="in"?`<div class="cd lv">Live · ${esc(L.detail||"")}</div>`:`<div class="cd">Final</div>`; live=L.state==="in"; }
+    if(live){ if(L.sit) extra+=`<div class="sit">${esc(L.sit)}</div>`; if(L.wp!=null){ const mine=home.a===t.abbr?L.wp:100-L.wp; extra+=`<div class="wp"><span>Win chance</span><span class="bt"><i style="width:${Math.max(2,Math.min(98,mine))}%"></i></span><span>${Math.round(mine)}%</span></div>`; } }
+  } else if(nx){
+    const parts=String(nx.name||"").split(/\s+(?:@|at|vs\.?)\s+/i); away={a:parts[0]}; home={a:parts[1]||t.abbr};
+    mid=`<div class="when">${esc(cap(whenShort(nx.when)))}</div>`; status=`<div class="cd">in ${esc(COUNT(new Date(nx.when)-Date.now()))}</div>`;
+  } else { away={a:t.abbr}; home={a:""}; mid='<div class="when">No game scheduled</div>'; }
+  const meta=nx&&!(L&&L.state!=="pre")?[nx.tv,nx.venue].filter(Boolean).join(" · "):"";
+  return {L,nx,r,col,away,home,mid,status,live,extra,meta};
+}
+function miniTeam(t){
+  const L=LIVE[t.team], nx=(t.next||[])[0], col=TEAMC[t.team]||"#0f766e";
+  const line=L&&L.state!=="pre"&&L.away?`${L.state==="in"?"Live":"Final"}: ${L.away.a} ${L.away.s}, ${L.home.a} ${L.home.s}`:nx?`${oppOf(nx.name,t.abbr).txt} · ${cap(whenShort(nx.when))}${nx.tv?" · "+nx.tv:""}`:"No game scheduled";
+  return `<div class="gm" style="--team:${esc(col)}">${logo(t.path,t.abbr,"tlg")}<div><b>${esc(t.team)}${t.record?` <span class="rec">${esc(t.record)}</span>`:""}</b><small>${esc(line)}</small></div></div>`;
+}
+function renderTeams(){
+  const gh=$("#gamehero"), tl=$("#teams"); if(!gh&&!tl) return;
+  const g=pickGame();
+  if(gh){
+    if(!g){ gh.className="gd-hero"; gh.innerHTML='<div class="w">Schedules unavailable.</div>'; }
+    else { const P=gameParts(g), side=x=>`<div class="tm">${x.a?`<span class="lg">${logo(g.path,x.a)}</span>`:""}<div class="ab">${esc(x.a||"")}</div></div>`;
+      gh.className="gd-hero"+(P.live?" live":""); gh.style.setProperty("--team",P.col); gh.dataset.s="sports";
+      gh.innerHTML=`<div class="gd-top"><span class="gd-k">${ic("trophy")}${P.live?"Live now":P.L&&P.L.state==="post"?"Final":P.nx&&dayDiff(new Date(P.nx.when))===0?"Game day":"Next game"}</span><span>${esc([g.team,g.record].filter(Boolean).join(" · "))}</span></div>
+        <div class="vs">${side(P.away)}<div class="mid">${P.mid}${P.status}</div>${side(P.home)}</div>${P.extra}${P.meta?`<div class="gd-meta">${ic("tv")}${esc(P.meta)}</div>`:""}`; }
+  }
+  if(tl) tl.innerHTML=(D.teams||[]).filter(t=>!g||t.team!==g.team).map(miniTeam).join("");
+  renderBrief(); fit();
+}
 function renderChannels(){
   const cls = {live:"",snap:"snap",off:"off"};
   $("#chan").innerHTML = D.channels.map(c=>`<article class="card ch"><div class="nm">${esc(c.name)}<span class="dot ${cls[c.state]||""}" title="${esc(c.state==="live"?"Connected":c.state==="snap"?"Manual entry":"Not connected")}"></span></div><div class="h">${esc(c.handle)}</div><div class="s">${esc(c.stat)}</div><div class="x">${esc(c.next)}</div></article>`).join("");
@@ -931,12 +1455,21 @@ function renderHealth(){
   $("#stale").innerHTML = wxa + stHtml + (a>90 ? `<div class="stale">Data is ${esc(rel(a*60000))} old. The cloud job may have stopped.</div>` : "");
 }
 function renderWx(){
-  if(!WX){ $("#wx").innerHTML=""; return; }
-  const [ic,txt]=wxInfo(WX.code), el=$("#wx"), nt=!!(DECOR&&DECOR.night);
-  el.dataset.wx=ic; el.classList.toggle("nt",nt);
-  const icon=nt&&ic==="sun"?WXI.moon:WXI[ic];
-  el.innerHTML = `<div class="wxh"><b class="wxtemp">${Math.round(WX.t)}°</b><span class="wxi" aria-hidden="true">${icon}</span></div><div class="wxc">${esc(nt&&ic==="sun"?(WX.code===0?"Clear night":"Mostly clear"):txt)}</div><div class="wxd"><span>High ${Math.round(WX.hi)}°</span><span>Low ${Math.round(WX.lo)}°</span>${WX.pp!=null?`<span>${WX.pp}% rain</span>`:""}</div>`;
+  renderChips();
+  const el=$("#wx"), card=$("#wxcard"); if(!el) return;
+  if(!WX){ el.innerHTML='<div class="w8-top"><span>'+ic("thermo")+'Weather</span><small>Loading</small></div>'; return; }
+  const [kind,txt]=wxInfo(WX.code), nt=!!(DECOR&&DECOR.night);
+  if(card){ card.dataset.wx=kind; card.classList.toggle("nt",nt); card.dataset.s="today"; }
+  const t=Math.round(WX.t), lo=Math.round(WX.lo), hi=Math.round(WX.hi), p=WX.hi>WX.lo?Math.max(0,Math.min(1,(WX.t-WX.lo)/(WX.hi-WX.lo))):.5;
+  const r=40, c=2*Math.PI*r, arc=c*.75, label=nt&&kind==="sun"?(WX.code===0?"Clear night":"Mostly clear"):txt;
+  const days=(WX.daily||[]).slice(1,4).map(d=>`<div><span>${esc(new Date(d.d+"T12:00:00").toLocaleDateString([],{weekday:"short"}))}</span><i>${WXI[wxInfo(d.code)[0]]}</i><b>${Math.round(d.hi)}°</b><small>${Math.round(d.lo)}°</small></div>`).join("");
+  el.innerHTML=`<div class="w8-top"><span>${ic("thermo")}Weather</span><small>Youngsville, NC</small></div>
+    <div class="w8-main"><div class="w8-arc"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="wxg8" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7dd3fc"/><stop offset=".55" stop-color="#fde68a"/><stop offset="1" stop-color="#fb923c"/></linearGradient></defs><circle cx="50" cy="50" r="${r}" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${arc.toFixed(1)} ${c.toFixed(1)}" transform="rotate(135 50 50)"/><circle cx="50" cy="50" r="${r}" fill="none" stroke="url(#wxg8)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${Math.max(1,arc*p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(135 50 50)"/></svg><div class="w8-in"><b>${t}°</b><small>${esc(label)}</small></div></div>
+      <div class="w8-side"><i class="w8-ico">${nt&&kind==="sun"?WXI.moon:WXI[kind]}</i><div><small>High</small><b>${hi}°</b></div><div><small>Low</small><b>${lo}°</b></div>${WX.pp!=null?`<div><small>Rain</small><b>${WX.pp}%</b></div>`:""}</div></div>
+    ${WX.sunrise?`<div class="w8-sun"><span>${ic("sunrise")}${esc(WX.sunrise)}</span><span>${ic("sunset")}${esc(WX.sunset)}</span></div>`:""}
+    ${days?`<div class="w8-days">${days}</div>`:""}`;
   if(DECOR.th) drawWindow();
+  renderBrief();
 }
 function tick(){
   const n = new Date(), z = TZ();
@@ -1108,7 +1641,7 @@ function briefLine(){
   }catch(e){}
   return "";
 }
-function rerender(){ applyDecor(); renderWork(); renderKpis(); renderTasks(); renderEvents(); renderTeams(); renderChannels(); renderStrip(); renderHealth(); $("#line").textContent = ""; shellLine(); }
+function rerender(){ applyDecor(); renderWork(); renderKpis(); renderTasks(); renderEvents(); renderTeams(); renderChannels(); renderStrip(); renderHealth(); renderHome(); renderBdays(); renderFam(); renderHero(); renderBrief(); $("#line").textContent = ""; shellLine(); }
 function shellLine(){
   const nTasks=D.tasks.length, ne=nextEvent();
   const fact = (typeof decorFact==="function" && DECOR.th) ? decorFact()+" " : "";
@@ -1304,7 +1837,7 @@ function homeHtml(big){
     <div><div class="lbl">Mac up</div><b>${h.uptime_days!=null?h.uptime_days+"d":"n/a"}</b><small>since last restart</small></div>
     <div><div class="lbl">Checks</div><b>${n.checks_24h||0}</b><small>in 24h, every 10 min</small></div></div>`;
 }
-function renderHome(){ const el=$("#home"); if(!el) return; el.innerHTML=`<h2 class="lbl">Home <span class="sub">Mac mini</span></h2>${homeHtml()}`; }
+function renderHome(){ const el=$("#home"); if(!el) return; el.dataset.s="home"; const ck=((D.home||{}).net||{}).checks_24h; el.innerHTML=`<h2 class="lbl">Home health <span class="sub">${ck?ck+" checks today":"Mac mini"}</span></h2>${healthHtml()}`; }
 function bdayRows(list){
   if(!list||!list.length) return '<div class="w">No birthdays in the next 45 days.</div>';
   return list.map(b=>{const d=new Date(b.date+"T12:00:00");const when=b.days===0?"Today":b.days===1?"Tomorrow":d.toLocaleDateString([],{weekday:"short",month:"short",day:"numeric"});
@@ -1337,7 +1870,7 @@ function renderScene(fresh=true){
     const inner=[...c.querySelectorAll(".lines>div,.nw,.cdn,.rc,.wt,.gb>*,.hl>a")];
     for(let g=0; g<30 && c.scrollHeight>c.clientHeight+3; g++){ const vis=inner.filter(x=>x.style.display!=="none"); if(vis.length<=1) break; vis[vis.length-1].style.display="none"; }
     }));
-  document.querySelectorAll("#snav button[data-s]").forEach(b=>b.classList.toggle("on",b.dataset.s===SCENE));
+  document.querySelectorAll("#snav button[data-s]").forEach(b=>{ b.classList.toggle("on",b.dataset.s===SCENE); b.style.setProperty("--p",0); });
 }
 function setScene(id,user){
   SCENE=id; sceneAt=Date.now(); if(user) pauseUntil=Date.now()+5*60000; if(id==="sports") lastSports=Date.now();
@@ -1346,19 +1879,20 @@ function setScene(id,user){
 function autoTick(){
   const b=document.body, rot=$("#rot"); if(!rot) return;
   b.dataset.tod=(h=>h<5?"night":h<11?"morning":h<17?"day":h<21?"evening":"night")(hourIn(new Date()));
-  if(!b.classList.contains("wall")||!autoOn||Date.now()<pauseUntil){ rot.style.width="0"; return; }
+  const ab=document.querySelector("#snav button.on");
+  if(!b.classList.contains("wall")||!autoOn||Date.now()<pauseUntil){ rot.style.width="0"; if(ab) ab.style.setProperty("--p",0); return; }
   const live=Object.values(LIVE).some(l=>l.state==="in"), cur=SCENES.find(s=>s[0]===SCENE)||SCENES[0];
   const dur=(SCENE==="sports"&&live?45:cur[2])*1000, el=Date.now()-sceneAt;
-  rot.style.width=Math.min(100,el/dur*100)+"%";
+  rot.style.width=Math.min(100,el/dur*100)+"%"; if(ab) ab.style.setProperty("--p",Math.min(1,el/dur).toFixed(3));
   if(el>=dur){
     const i=SCENES.findIndex(s=>s[0]===SCENE);
     let nxs=SCENES[(i+1)%SCENES.length][0]; if(nxs==="work"&&isPlash()) nxs=SCENES[(i+2)%SCENES.length][0];
     setScene(live&&SCENE!=="sports"&&Date.now()-lastSports>100000?"sports":nxs);
   }
 }
-function navHtml(){ return SCENES.map(s=>`<button data-s="${s[0]}">${s[1]}</button>`).join("")+`<button id="bAuto" class="${autoOn?"on":""}" title="Auto-rotate scenes on the wall display (Space)">Auto</button>`; }
+function navHtml(){ return `<div class="rl-brand" aria-hidden="true">${ic("home")}</div>`+SCENES.map(s=>`<button data-s="${s[0]}" title="${s[1]}">${ic(SICON[s[0]]||"grid")}<span>${s[1]}</span><i class="rl-p"></i></button>`).join("")+`<button id="bAuto" class="${autoOn?"on":""}" title="Auto-rotate scenes on the wall display (Space)">${ic("play","ia")}${ic("pause","ip")}<span>Auto</span></button>`; }
 function toggleAuto(){ autoOn=!autoOn; store.setItem("cc_auto",autoOn?"1":"0"); sceneAt=Date.now(); $("#bAuto")?.classList.toggle("on",autoOn); }
-addEventListener("click",e=>{ if(e.target.id==="bAuto") toggleAuto(); });
+addEventListener("click",e=>{ if(e.target.closest&&e.target.closest("#bAuto")) toggleAuto(); });
 addEventListener("keydown",e=>{
   if(e.target.tagName==="INPUT") return;
   const i=SCENES.findIndex(s=>s[0]===SCENE);
@@ -1526,14 +2060,16 @@ function applyDecor(){
   root.style.setProperty("--ground",room.ground); root.style.setProperty("--surface",room.surface); root.style.setProperty("--raised",room.raised);
   root.style.setProperty("--g1",g1); root.style.setProperty("--g2",g2); root.style.setProperty("--g3",g3);
   root.style.setProperty("--accent",gl[1]); root.style.setProperty("--trim",th.trim); root.style.setProperty("--frame",th.frame);
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content",room.ground);
+  const ban=li.phase==="night"?"night":(li.phase==="golden"||li.phase==="dusk"||li.phase==="dawn")?"golden":"day";
+  root.style.setProperty("--banner",`url(art/banner-${ban}.jpg)`); root.dataset.banner=ban;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content",root.dataset.look==="bright"?room.ground:"#0d201c");
   const g=gameToday(now), b=birthdayToday();
   const major=["christmas","thanksgiving","newyear","july4"].includes(id);
   const art=(g&&g.team==="Phillies"&&!major)?"base-ball-1866":th.art[Math.floor(localDate(now)/DAY)%th.art.length];
   const changed=DECOR.id!==id||DECOR.night!==night||DECOR.g!==(g&&g.team)||DECOR.b!==(b&&b.name);
   DECOR={id,th,li,night,now,art,game:g,g:g&&g.team,bday:b,b:b&&b.name,major};
   const bt=$("#bDecor"); if(bt) bt.textContent="Decor: "+((QS.get("decor")||store.getItem("cc_decor"))?th.name:"Auto");
-  drawWindow(); if(changed){ drawGarland(); fxSetup(); renderWx(); } renderPrint(); renderAlmanac();
+  drawWindow(); if(changed){ drawGarland(); fxSetup(); renderWx(); } renderPrint(); renderAlmanac(); renderHero();
 }
 
 /* ---------- the garland across the top of the room ---------- */
@@ -1945,7 +2481,7 @@ function sceneSports(){
 }
 
 /* ---- version check: a new design applies itself overnight or while the tab is in the background, never mid-day in front of you */
-const UI_VER="b4bb7a699166";
+const UI_VER="e5d0ad276396";
 let UPD=null;
 function checkUpdate(nd){
   if(!nd||!nd.ui||!UI_VER||nd.ui===UI_VER) return;
@@ -1968,8 +2504,10 @@ async function start(model){
   initV3(); wakeUI(); loadWx(); loadScores(); plashMode(); setTimeout(plashMode,1500);
   setInterval(renderStrip, 60000);
   $("#bDecor").onclick = cycleDecor; addEventListener("keydown",e=>{ if(e.target.tagName!=="INPUT"&&(e.key==="d"||e.key==="D")) cycleDecor(); });
+  setLook(document.documentElement.dataset.look); $("#bLook").onclick = ()=>setLook(document.documentElement.dataset.look==="bright"?"hub":"bright");
+  addEventListener("keydown",e=>{ if(e.target.tagName!=="INPUT"&&(e.key==="l"||e.key==="L")) setLook(document.documentElement.dataset.look==="bright"?"hub":"bright"); });
   setInterval(()=>{ applyDecor(); shellLine(); }, 60000);
-  setInterval(tick, 1000); setInterval(()=>{renderEvents();renderHealth();shellLine();}, 30000);
+  setInterval(tick, 1000); setInterval(()=>{renderEvents();renderHealth();shellLine();renderBrief();}, 30000);
   setInterval(loadWx, 900000); setInterval(refreshData, 90000);
   // gentle drift protects panels from burn-in
   let k=0; setInterval(()=>{ k=(k+1)%4; document.body.style.transform = `translate(${[0,2,2,0][k]}px,${[0,0,2,2][k]}px)`; }, 300000);
