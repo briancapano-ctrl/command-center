@@ -7,6 +7,15 @@ Mac job (launchd, every 10 minutes, pushes only when something changed, and at l
 In the browser: the clock, weather and live scores update by themselves (scores every 30 seconds during a game), and the page re-checks for new data every 90 seconds without reloading.
 Output: one page at `https://<your-github-name>.github.io/<repo>/`. All data inside is AES-256 encrypted and opens only with your passphrase. A phone alert with the top items arrives once a day after 6 AM Eastern through ntfy.
 
+## Look (v7, Nov 22, 2026)
+- Bright around the clock: a sunlit wall tinted by the season (three soft color glows that shift toward indigo at night), white cards, bold Cabinet Grotesk and Satoshi type. The dark night room and night dimming are retired.
+- Every area has its own color and icon: Needs you rose, Today orange, Work blue, Home green, Teams teal, Family pink, News by section, Inbox in each service's color.
+- The five counters are solid color tiles; the next-game tile wears the team's color.
+- Weather is a tile in the header (sky color follows the conditions and the night). The window illustration and the framed print left the header; the print still hangs in the Almanac scene.
+- Sports cards carry the team color across the top with large logos; Family shows faces (initials) for Reconnect, Most texted and Birthdays.
+- Garland only for celebrations: team pennants on game day, a banner on birthdays. Falling leaves and snow are off; birthday confetti stays.
+- On the wall, the overview puts Home under Needs you so Today and next has room, and shows On this day photos in place of the print.
+
 ## What you see (v6, Nov 22, 2026)
 - Your world ticker: a slow crawl along the bottom with live scores, today's games and TV channel, last results, birthdays and holidays coming up, the year-end countdown, and the top headlines. Hover to pause. It says "Game on" in red while a Philly team is playing.
 - News scene: Philly sports (Eagles, Flyers, Phillies stories from ESPN and the Inquirer, tagged by team), Hotel world (Hotel Dive, Skift, hotel technology news, with any Allbridge mention pinned first), Close to home (WRAL, ABC11), Nation and world (NPR, Google News), AI and tech (The Verge). Headlines refresh at most every 45 minutes. Click any one to open the story.
@@ -27,7 +36,7 @@ Output: one page at `https://<your-github-name>.github.io/<repo>/`. All data ins
 2. Press F for full screen and click Keep awake so the screen never sleeps. Hide the mouse and the buttons fade out.
 3. Wall mode is one screen with no scrolling. Rows that do not fit are dropped from the bottom instead of being cut in half.
 4. It picks its layout from the monitor: three columns on a landscape screen, one tall stack on a portrait screen. Nothing to set.
-5. From 10 PM to 6 AM it dims, and the layout drifts a few pixels over time to prevent burn-in. Add `?dim=off` to the URL to disable dimming.
+5. It stays bright day and night (v7), and the layout drifts a few pixels over time to prevent burn-in.
 6. If data is more than 90 minutes old a red banner appears, so a dead job never goes unnoticed.
 7. Keys: W wall/desk, F full screen. On a phone use Share > Add to Home Screen and it opens like an app.
 Tip: a spare iPad, an old laptop or a Raspberry Pi with Chromium in kiosk mode works as the display. Use `chromium --kiosk "https://.../#wall"`.
