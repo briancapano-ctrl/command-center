@@ -7,6 +7,16 @@ Mac job (launchd, every 10 minutes, pushes only when something changed, and at l
 In the browser: the clock, weather and live scores update by themselves (scores every 30 seconds during a game), and the page re-checks for new data every 90 seconds without reloading.
 Output: one page at `https://<your-github-name>.github.io/<repo>/`. All data inside is AES-256 encrypted and opens only with your passphrase. A phone alert with the top items arrives once a day after 6 AM Eastern through ntfy.
 
+## Look (v8 Hub, Nov 22, 2026)
+- Modeled on the smart-home hub screens you sent: a deep green frame, a left icon rail for the 11 scenes (the active one glows amber, with a thin bar showing time until the next auto scene), and warm cream cards.
+- Header bar over a Carolina pines-and-lake panorama that follows the sun: day, golden hour, night. Brand, greeting with the daily line, status chips (internet ping, texts, Gmail, Hotmail, outside temperature; the mail and text chips open their drawers), clock and date.
+- Overview, four columns: a full-bleed On this day photo (or the print on the wall when there are no photos) over Needs you; Home health gauges (uptime, internet, Mac disk free, Hotmail storage, plus backup and Mac uptime) over Today and next and Work; a weather card with a temperature arc between today's low and high, rain chance, sunrise and sunset and the next three days over Family (countdowns and Reconnect); a Game day card in the team's colors (live score and win chance during a game, otherwise the next game with TV) with the other teams below, over the Daily brief.
+- Daily brief is plain status checks computed in the page (no AI): data sources fresh, weather alerts, overdue reminders, today's game or final, nearest birthday, texts waiting, backup, Hotmail storage, days left in the year.
+- Photo, health, weather and game cards open their scenes when clicked.
+- Look button (or L key) switches to Bright: the v7 light wall with white cards. Saved per browser; Hub is the default, including in Plash.
+- Portrait wall: 2 x 2 columns with the rail as a dock along the bottom. Phone: rail scrolls across the top, one column.
+- The colored counter tiles and the header weather tile are retired; their numbers moved to the header chips and the weather card.
+
 ## Look (v7, Nov 22, 2026)
 - Bright around the clock: a sunlit wall tinted by the season (three soft color glows that shift toward indigo at night), white cards, bold Cabinet Grotesk and Satoshi type. The dark night room and night dimming are retired.
 - Every area has its own color and icon: Needs you rose, Today orange, Work blue, Home green, Teams teal, Family pink, News by section, Inbox in each service's color.
