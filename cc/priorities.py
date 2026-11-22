@@ -226,4 +226,5 @@ def build(src, cfg):
     return {"generated": n.isoformat(), "meta": {"name": cfg.get("name", "Brian"), "lat": cfg.get("lat", 36.0217), "lon": cfg.get("lon", -78.4756), "tz": "America/New_York", "dim": cfg.get("night_dim", True)},
             "events": events_out, "kpis": kpis, "tasks": tasks[:9], "week": week, "teams": sports,
             "triage": triage, "channels": channels, "inbox": inbox_detail,
-            "birthdays": bdays[:8], "home": home or None, "memories": memories, "errors": errors, "storage": storage}
+            "birthdays": bdays[:8], "home": home or None, "memories": memories, "errors": errors, "storage": storage,
+            "news": src.get("news"), "alerts": src.get("alerts") or [], "people": mac.get("people") if isinstance(mac.get("people"), dict) and "err" not in mac.get("people") else None}

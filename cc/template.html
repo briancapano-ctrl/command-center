@@ -345,6 +345,79 @@ body.wall .sc-alm .print img{max-height:calc(100vh - 25vh - 300px);min-height:12
 .sc-alm .alm svg.moon{width:6rem;height:6rem}
 .sc-alm .alm .big2{font-size:clamp(2rem,3vw,3rem)}
 @media (orientation:portrait){body.wall .sc-alm{grid-template-columns:1fr;grid-template-rows:minmax(0,1.3fr) auto}}
+
+/* ===== v6: your world. Ticker, News, Family and friends, game day ===== */
+.wall-strip.tk{display:block;position:sticky;bottom:0;z-index:15;margin:1rem 0 0;padding:0;background:var(--surface);border-radius:999px;box-shadow:var(--shadow);outline:1px solid var(--edge);overflow:hidden;height:2.6rem}
+body.wall .wall-strip.tk{display:block;position:relative;margin:0;height:2.5em}
+@media (orientation:portrait){body.wall .wall-strip.tk{display:block}body.wall .snav.wallnav{flex-wrap:nowrap;max-width:96vw}body.wall:not(.idle) .snav.wallnav button{padding:.25rem .5rem;font-size:.64rem}}
+.tk-view{position:absolute;inset:0 0 0 9em;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 2.5em,#000 calc(100% - 2.5em),transparent);mask-image:linear-gradient(90deg,transparent,#000 2.5em,#000 calc(100% - 2.5em),transparent)}
+.tk-brand{position:absolute;left:0;top:0;bottom:0;width:11.6em;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:.45em;font:600 .74em var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ground);background:var(--ink);border-radius:999px 0 0 999px;z-index:2}
+.tk-brand i{width:.5em;height:.5em;border-radius:50%;background:var(--accent);box-shadow:0 0 0 .18em color-mix(in srgb,var(--accent) 35%,transparent)}
+.tk-brand.live i{background:var(--negative);animation:pulse 1.4s infinite}
+.tk-track{display:inline-flex;align-items:center;height:100%;white-space:nowrap;will-change:transform;animation:tkmove var(--tkdur,90s) linear infinite}
+.tk-view:hover .tk-track{animation-play-state:paused}
+@keyframes tkmove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tk-i{display:inline-flex;align-items:center;gap:.5em;padding:0 1.5em;font-size:.86em;color:var(--ink2);text-decoration:none}
+.tk-i+.tk-i{border-left:1px solid var(--rule)}
+a.tk-i:hover{color:var(--ink)}
+.tk-i b{color:var(--ink);font-weight:600}
+.tk-k{font:600 .72em var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.tk-live{display:inline-flex;align-items:center;gap:.35em;color:var(--negative);font:700 .76em var(--sans);text-transform:uppercase;letter-spacing:.05em}
+.tk-live::before{content:"";width:.45em;height:.45em;border-radius:50%;background:var(--negative);animation:pulse 1.4s infinite}
+.tk-al{color:var(--negative)}
+.tk-w{color:var(--pos);font-weight:600}.tk-l{color:var(--negative);font-weight:600}
+@media(prefers-reduced-motion:reduce){.tk-track{animation:none}}
+@media(max-width:640px){.tk-brand{width:3em}.tk-brand span{display:none}.tk-view{left:2.4em}}
+.tag{display:inline-block;font:600 .68rem var(--sans);letter-spacing:.04em;text-transform:uppercase;padding:.12rem .5rem;border-radius:99px;background:var(--neu-bg);color:var(--ink2);vertical-align:.1em;margin-right:.35rem}
+.tag.t-Eagles{background:#004c54;color:#fff}.tag.t-Flyers{background:#c43c00;color:#fff}.tag.t-Phillies{background:#c8102e;color:#fff}.tag.t-Allbridge{background:var(--accent);color:#fff}
+/* news scene */
+.sc-news{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
+.sc-news>.card:first-child{grid-row:1/3}
+.nw{display:block;padding:.55rem 0;border-top:1px solid var(--rule);color:var(--ink);text-decoration:none}
+.nw:first-of-type{border-top:0;padding-top:.2rem}
+.nw .h{font:500 .95rem/1.32 var(--sans);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nw.lead .h{font:400 1.45rem/1.18 var(--serif);-webkit-line-clamp:3}
+.nw small{display:block;margin-top:.18rem;color:var(--muted);font-size:.76rem}
+a.nw:hover .h{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.18em}
+.sc-news .lbl .sub{font-weight:500}
+body.wall .sc-news .nw .h{font-size:.92em}body.wall .sc-news .nw.lead .h{font-size:1.5em}
+@media(max-width:980px){.sc-news{grid-template-columns:1fr;grid-template-rows:none}.sc-news>.card:first-child{grid-row:auto}}
+@media (orientation:portrait){body.wall .sc-news{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr)}body.wall .sc-news>.card:first-child{grid-row:auto;grid-column:1/-1}}
+/* family and friends scene */
+.sc-people{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) minmax(0,1fr)}
+.cdn{display:grid;grid-template-columns:3.4rem 1fr;align-items:center;gap:.8rem;padding:.5rem 0;border-top:1px solid var(--rule)}
+.cdn:first-of-type{border-top:0}
+.cdn .n{font:400 2rem/1 var(--serif);text-align:center;color:var(--accent)}
+.cdn .n small{display:block;font:600 .62rem var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:.15rem}
+.cdn.today .n{color:var(--warn-ink)}
+.cdn b{display:block;font-weight:600;font-size:.95rem}.cdn span{color:var(--muted);font-size:.8rem}
+.wt{padding:.55rem .7rem;border-radius:12px;background:var(--raised);margin-bottom:.45rem}
+.wt b{font-weight:600}.wt small{color:var(--muted);margin-left:.35rem}.wt p{margin:.2rem 0 0;font-size:.86rem;color:var(--ink2)}
+.rc{display:flex;justify-content:space-between;align-items:center;padding:.42rem 0;border-top:1px solid var(--rule);font-size:.92rem}
+.rc:first-of-type{border-top:0}.rc span{color:var(--muted);font-size:.8rem}
+.pw{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.2rem}.pw span{background:var(--raised);border-radius:99px;padding:.25rem .75rem;font-size:.84rem}.pw b{font-weight:600;margin-left:.3rem;color:var(--accent)}
+.sc-people .memcard{display:flex;flex-direction:column}.sc-people .mem{aspect-ratio:auto;flex:1;min-height:9rem;margin-top:.5rem}
+@media(max-width:980px){.sc-people{grid-template-columns:1fr}}
+@media (orientation:portrait){body.wall .sc-people{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}body.wall .sc-people>.card:last-child{grid-column:1/-1}}
+/* game day */
+.gc{border-top:4px solid var(--team,var(--accent))}
+.gc .lbl .sub{font:600 .8rem var(--sans);color:var(--ink2)}
+.gc .meta{text-align:center;color:var(--muted);font-size:.84rem}
+.gc .sit{text-align:center;font:600 .92rem var(--sans);color:var(--ink)}
+.gc .lp{text-align:center;color:var(--ink2);font-size:.86rem;line-height:1.35;max-width:36rem;margin:0 auto}
+.wp{display:grid;grid-template-columns:auto 1fr auto;gap:.6rem;align-items:center;font:600 .78rem var(--sans);color:var(--muted)}
+.wp .bt{height:.55rem}.wp .bt i{background:color-mix(in srgb,var(--team,var(--accent)) 72%,var(--ink))}
+.gc .nx{display:flex;flex-wrap:wrap;gap:.35rem;justify-content:center}.gc .nx span{background:var(--raised);border-radius:99px;padding:.2rem .7rem;font-size:.78rem;color:var(--ink2)}
+.gc .hl{border-top:1px solid var(--rule);padding-top:.55rem;display:grid;gap:.35rem}
+.gc .hl a{color:var(--ink2);text-decoration:none;font-size:.84rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.gc .hl a:hover{color:var(--ink)}
+.game .rec{color:var(--muted);font-weight:500;font-size:.8em;margin-left:.35rem}
+/* desktop wallpaper (Plash) and update chip */
+body.wall .snav.wallnav{flex-wrap:nowrap;white-space:nowrap}
+@media(max-width:1700px){body.wall:not(.idle) .snav.wallnav button{padding:.22rem .55rem;font-size:.66rem}}
+body.wall .pt{padding:1rem 1.1rem;gap:.2rem}body.wall .pt .st{font-size:clamp(1.15rem,1.5vw + .9vh,2.4rem);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html.is-plash-app .ctl,html.is-plash-app #work,html.is-plash-app #bAuto{display:none!important}
+.upd{margin-left:auto;border:0;background:var(--ink);color:var(--ground);font:600 .72rem var(--sans);border-radius:99px;padding:.25rem .8rem;cursor:pointer}
+.stale.wxa{background:var(--neg-bg);color:var(--neg-ink)}
 </style>
 </head>
 <body>
@@ -362,7 +435,8 @@ body.wall .sc-alm .print img{max-height:calc(100vh - 25vh - 300px);min-height:12
 </div>
 <div id="app" class="wrap" hidden></div>
 <script>
-const BLOB = /*__BLOB__*/null;
+let BLOB = /*__BLOB__*/null;
+async function getBlob(){ if(!BLOB) BLOB = await (await fetch("data.enc.json?t="+Date.now(), {cache:"no-store"})).json(); return BLOB; }
 const PLAIN = /*__PLAIN__*/null;
 let PASS = null, D = null, WX = null, LIVE = {};
 const $ = (s,r=document)=>r.querySelector(s);
@@ -486,12 +560,12 @@ function gameHtml(t){
   let st="", sc="";
   if(L){
     sc = L.score; st = L.state==="in" ? `<span class="livetag">Live</span> ${esc(L.detail||"")}` : L.state==="post" ? "Final" : "Today " + esc(L.detail||"");
-    return `<div class="game"><div class="row"><b>${esc(t.team)}</b><span class="sc">${esc(sc)}</span></div><div class="st">${st} ${esc(L.name||"")}</div></div>`;
+    return `<div class="game"><div class="row"><b>${esc(t.team)}${t.record?`<span class="rec">${esc(t.record)}</span>`:""}</b><span class="sc">${esc(sc)}</span></div><div class="st">${st} ${esc(L.name||"")}</div></div>`;
   }
   const nx=(t.next||[])[0], lt=(t.last||[])[0];
   const when = nx ? new Date(nx.when).toLocaleString([], {weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit", timeZone:TZ()}) : "No game scheduled";
   const last = lt ? "Last: "+Object.entries(lt.score||{}).map(([a,b])=>a+" "+b).join(", ") : "";
-  return `<div class="game"><div class="row"><b>${esc(t.team)}</b><span class="st">${nx?esc(nx.name):""}</span></div><div class="st">${esc(when)}</div><div class="st">${esc(last)}</div></div>`;
+  return `<div class="game"><div class="row"><b>${esc(t.team)}${t.record?`<span class="rec">${esc(t.record)}</span>`:""}</b><span class="st">${nx?esc(nx.name):""}</span></div><div class="st">${esc(when)}${nx&&nx.tv?" · "+esc(nx.tv):""}</div><div class="st">${esc(last)}</div></div>`;
 }
 
 /* wall mode: hide trailing rows that do not fit, so nothing is ever cut in half */
@@ -503,6 +577,9 @@ function fit(){ cancelAnimationFrame(fitQ); fitQ=requestAnimationFrame(()=>{
     cards.forEach(c=>{ items(c).forEach(i=>i.style.display=""); if(c.classList.contains("tri-card")||c.dataset.autohide) { c.style.display=""; delete c.dataset.autohide; } });
     if(!document.body.classList.contains("wall")) return;
     const over = c => c.scrollHeight > c.clientHeight+1;
+    for(let pass=0; pass<2; pass++){
+    if(pass){ const sq=cards.filter(c=>c.style.display!=="none" && c.clientHeight<72 && c.scrollHeight>c.clientHeight+12); if(!sq.length) break;
+      sq.forEach(c=>{ c.style.display="none"; c.dataset.autohide="1"; }); cards.forEach(c=>{ if(!c.dataset.autohide) items(c).forEach(i=>i.style.display=""); }); }
     for(let g=0; g<200; g++){
       let target = cards.find(c=>over(c) && items(c).filter(i=>i.style.display!=="none").length>1);
       if(!target && over(col)) target = [...cards].reverse().find(c=>items(c).filter(i=>i.style.display!=="none").length>1);
@@ -510,7 +587,9 @@ function fit(){ cancelAnimationFrame(fitQ); fitQ=requestAnimationFrame(()=>{
       let vis = items(target).filter(i=>i.style.display!=="none"); vis[vis.length-1].style.display="none";
       vis = items(target).filter(i=>i.style.display!=="none"); while(vis.length>1 && vis[vis.length-1].classList.contains("day")){ vis[vis.length-1].style.display="none"; vis.pop(); }
     }
+    }
     /* a card squeezed down to its heading alone is hidden instead of showing an empty sliver */
+    cards.forEach(c=>{ if(c.style.display!=="none" && c.clientHeight<72 && c.scrollHeight>c.clientHeight+12){ c.style.display="none"; c.dataset.autohide="1"; } });
     cards.forEach(c=>{ const all=items(c); if(all.length && !all.some(i=>i.style.display!=="none" && !i.classList.contains("day")) && c.clientHeight<90){ c.style.display="none"; c.dataset.autohide="1"; } });
   });
 });}
@@ -519,9 +598,6 @@ function renderTeams(){ $("#teams").innerHTML = (D.teams||[]).map(gameHtml).join
 function renderChannels(){
   const cls = {live:"",snap:"snap",off:"off"};
   $("#chan").innerHTML = D.channels.map(c=>`<article class="card ch"><div class="nm">${esc(c.name)}<span class="dot ${cls[c.state]||""}" title="${esc(c.state==="live"?"Connected":c.state==="snap"?"Manual entry":"Not connected")}"></span></div><div class="h">${esc(c.handle)}</div><div class="s">${esc(c.stat)}</div><div class="x">${esc(c.next)}</div></article>`).join("");
-}
-function renderStrip(){
-  $("#strip").innerHTML = D.channels.map(c=>`<span class="chip"><span class="dot ${c.state==="snap"?"snap":c.state==="off"?"off":""}"></span>${esc(c.name)} <span style="color:var(--mute)">${esc(c.stat)}</span></span>`).join("");
 }
 function renderHealth(){
   const now = new Date();
@@ -540,7 +616,8 @@ function renderHealth(){
   const mac=(D.sources||[]).find(x=>x.key==="mac"), macAge=mac&&mac.updated?(now-new Date(mac.updated))/60000:null;
   const macHtml = mac && (!mac.ok || (macAge!==null && macAge>90)) ? `<div class="stale">The Mac mini has not reported ${macAge!==null?"for "+esc(rel(macAge*60000)):"yet"}. Texts, reminders, calendar and home health are paused until it does.</div>` : "";
   const st=D.storage, stHtml = macHtml + (st && st.pct>=90 ? `<div class="stale ${st.pct>=97?"crit":""}">Hotmail storage is ${st.pct}% full (${st.used_gb} of ${st.cap_gb} GB, shared with OneDrive). New mail stops arriving when it fills.</div>` : "");
-  $("#stale").innerHTML = stHtml + (a>90 ? `<div class="stale">Data is ${esc(rel(a*60000))} old. The cloud job may have stopped.</div>` : "");
+  const wxa=(D.alerts||[]).map(x=>`<div class="stale wxa">${esc(x.event)}: ${esc(x.head)}</div>`).join("");
+  $("#stale").innerHTML = wxa + stHtml + (a>90 ? `<div class="stale">Data is ${esc(rel(a*60000))} old. The cloud job may have stopped.</div>` : "");
 }
 function renderWx(){
   if(!WX){ $("#wx").innerHTML=""; return; }
@@ -570,6 +647,12 @@ async function loadWx(){
     renderWx(); applyDecor();
   }catch(e){}
 }
+function sitText(s,path){
+  if(!s) return "";
+  if(s.downDistanceText) return s.downDistanceText;
+  if(/baseball/.test(path||"") && s.outs!=null){ const b=[s.onFirst&&"1st",s.onSecond&&"2nd",s.onThird&&"3rd"].filter(Boolean); return `${s.balls??0}-${s.strikes??0}, ${s.outs} out${s.outs===1?"":"s"}${b.length?", on "+b.join(" and "):""}`; }
+  return "";
+}
 async function loadScores(){
   let anyLive=false;
   for(const t of (D.teams||[])){
@@ -582,19 +665,21 @@ async function loadScores(){
       if(st.state==="pre" && !sameDay){ delete LIVE[t.team]; continue; }
       if(st.state==="post" && !sameDay){ delete LIVE[t.team]; continue; }
       const away = comp.competitors.find(c=>c.homeAway==="away"), home = comp.competitors.find(c=>c.homeAway==="home");
-      LIVE[t.team] = {state:st.state, detail:st.shortDetail, name:ev.shortName, away:{a:away.team.abbreviation,s:away.score}, home:{a:home.team.abbreviation,s:home.score}, score: st.state==="pre" ? "" : `${away.team.abbreviation} ${away.score}  ${home.team.abbreviation} ${home.score}`};
+      const sit = comp.situation||{}, pr = sit.lastPlay?.probability?.homeWinPercentage;
+      LIVE[t.team] = {state:st.state, detail:st.shortDetail, name:ev.shortName, away:{a:away.team.abbreviation,s:away.score}, home:{a:home.team.abbreviation,s:home.score}, score: st.state==="pre" ? "" : `${away.team.abbreviation} ${away.score}  ${home.team.abbreviation} ${home.score}`,
+        sit: sitText(sit, t.path), lp: String(sit.lastPlay?.text||"").slice(0,180), wp: typeof pr==="number" ? pr*100 : null};
       if(st.state==="in") anyLive=true;
     }catch(e){}
   }
-  renderTeams(); applyDecor();
+  renderTeams(); applyDecor(); renderStrip(); shellLine(); if(SCENE==="sports") renderScene(false);
   setTimeout(loadScores, anyLive ? 30000 : 300000);
 }
 async function refreshData(){
-  if(!BLOB && !PLAIN) return;
   if(PLAIN) return;
   try{
     const blob = await (await fetch("data.enc.json?t="+Date.now(), {cache:"no-store"})).json();
-    const nd = await decryptBlob(blob, PASS);
+    const nd = await decryptBlob(blob, PASS); BLOB = blob;
+    checkUpdate(nd);
     if(nd.generated !== D.generated){ D = nd; rerender(); }
   }catch(e){}
 }
@@ -742,7 +827,7 @@ addEventListener("keydown",e=>{ if(e.target.tagName==="INPUT") return; if(e.key=
 function toggleFs(){ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.(); }
 
 /* ===== v3: scenes, drawer, local tasks, progress ring ===== */
-const SCENES=[["overview","Overview",50],["work","Work",45],["today","Today",25],["sports","Sports",22],["inbox","Inbox",25],["week","Week",25],["home","Home",22],["almanac","Almanac",25],["pulse","Pulse",15]];
+const SCENES=[["overview","Overview",50],["work","Work",45],["today","Today",25],["sports","Sports",22],["news","News",35],["people","Family",28],["inbox","Inbox",25],["week","Week",25],["home","Home",22],["almanac","Almanac",25],["pulse","Pulse",15]];
 let SCENE="overview", sceneAt=Date.now(), autoOn=store.getItem("cc_auto")!=="0", pauseUntil=0, lastSports=0;
 const GM="https://mail.google.com/mail/u/0/";
 const fmtN=n=>n==null?"n/a":Number(n).toLocaleString();
@@ -862,26 +947,6 @@ function sceneToday(){
      ${WX?.sunrise?`<div class="sun"><span>Sunrise ${esc(WX.sunrise)}</span><span>Sunset ${esc(WX.sunset)}</span></div>`:""}</section>
      <section class="card"><h2 class="lbl">Still open <span class="sub">${open.length} shown</span></h2>${open.length?open.map(x=>`<div class="it">${esc(x.t)}<small>${esc(x.w)}</small></div>`).join(""):'<div class="w">All clear.</div>'}</section></div></div>`;
 }
-function sceneSports(){
-  const cards=(D.teams||[]).map(t=>{
-    const L=LIVE[t.team], lt=(t.last||[])[0], nx=(t.next||[])[0];
-    const me=lg(t.path,t.abbr);
-    let away,home,mid,status="",cls="";
-    if(L&&L.away){
-      away=L.away;home=L.home;
-      if(L.state==="pre"){mid=`<div class="when">${esc(L.detail||"")}</div>`;status=nx?`<div class="cd">in ${esc(COUNT(new Date(nx.when)-Date.now()))}</div>`:""}
-      else {mid=`<div class="score">${esc(away.s)} - ${esc(home.s)}</div>`; status=L.state==="in"?`<div class="cd" style="color:var(--bad)">Live &middot; ${esc(L.detail||"")}</div>`:`<div class="cd">Final</div>`; if(L.state==="in")cls="live";}
-    } else if(nx){
-      const parts=String(nx.name||"").split(/\s+(?:@|at|vs\.?)\s+/i); away={a:parts[0]}; home={a:parts[1]||t.abbr};
-      mid=`<div class="when">${esc(new Date(nx.when).toLocaleString([],{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZone:TZ()}))}</div>`;
-      status=`<div class="cd">in ${esc(COUNT(new Date(nx.when)-Date.now()))}</div>`;
-    } else { away={a:t.abbr}; home={a:""}; mid='<div class="when">No game scheduled</div>'; }
-    const lastTxt=lt?"Last: "+Object.entries(lt.score||{}).map(([a,b])=>a+" "+b).join(", "):"";
-    const side=x=>`<div class="tm">${x.a?logo(t.path,x.a):""}<div class="ab">${esc(x.a||"")}</div></div>`;
-    return `<section class="card gc ${cls}"><h2 class="lbl">${esc(t.team)}</h2><div class="vs">${side(away)}<div class="mid">${mid}${status}</div>${side(home)}</div><div class="last">${esc(lastTxt)}</div></section>`;
-  }).join("");
-  return `<div class="sc sc-sports">${cards||'<section class="card"><div class="w">No teams configured.</div></section>'}</div>`;
-}
 function sceneInbox(){
   return `<div class="sc sc-inbox"><section class="card"><h2 class="lbl">Gmail <span class="sub">briancapano@gmail.com</span></h2>${gmailCard()}</section>
   <section class="card"><h2 class="lbl">Hotmail <span class="sub">personal</span></h2>${hotmailCard()}</section>
@@ -946,7 +1011,7 @@ function sceneHome(){
   <section class="card"><h2 class="lbl">Birthdays <span class="sub">next 45 days</span></h2>${bdayRows((D.birthdays||[]).slice(0,8))}</section>
   <section class="card memcard"><h2 class="lbl">On this day <span class="sub">Photos</span></h2>${memHtml()}</section></div>`;
 }
-const RENDER={work:sceneWork,today:sceneToday,sports:sceneSports,inbox:sceneInbox,week:sceneWeek,home:sceneHome,almanac:sceneAlmanac,pulse:scenePulse};
+const RENDER={work:sceneWork,today:sceneToday,sports:sceneSports,news:sceneNews,people:scenePeople,inbox:sceneInbox,week:sceneWeek,home:sceneHome,almanac:sceneAlmanac,pulse:scenePulse};
 function renderScene(fresh=true){
   const ov=$("#overlay"); if(!ov) return; ov.classList.toggle("still",!fresh);
   ov.innerHTML=SCENE==="overview"?"":RENDER[SCENE]();
@@ -955,7 +1020,10 @@ function renderScene(fresh=true){
       const vis=[...c.children].filter(x=>x.style.display!=="none"); if(vis.length<=2) break;
       vis[vis.length-1].style.display="none";
       const v2=[...c.children].filter(x=>x.style.display!=="none"); const last=v2[v2.length-1]; if(last && last.tagName==="H3") last.style.display="none";
-    }}));
+    }
+    const inner=[...c.querySelectorAll(".lines>div,.nw,.cdn,.rc,.wt")];
+    for(let g=0; g<30 && c.scrollHeight>c.clientHeight+3; g++){ const vis=inner.filter(x=>x.style.display!=="none"); if(vis.length<=1) break; vis[vis.length-1].style.display="none"; }
+    }));
   document.querySelectorAll("#snav button[data-s]").forEach(b=>b.classList.toggle("on",b.dataset.s===SCENE));
 }
 function setScene(id,user){
@@ -971,7 +1039,8 @@ function autoTick(){
   rot.style.width=Math.min(100,el/dur*100)+"%";
   if(el>=dur){
     const i=SCENES.findIndex(s=>s[0]===SCENE);
-    setScene(live&&SCENE!=="sports"&&Date.now()-lastSports>100000?"sports":SCENES[(i+1)%SCENES.length][0]);
+    let nxs=SCENES[(i+1)%SCENES.length][0]; if(nxs==="work"&&isPlash()) nxs=SCENES[(i+2)%SCENES.length][0];
+    setScene(live&&SCENE!=="sports"&&Date.now()-lastSports>100000?"sports":nxs);
   }
 }
 function navHtml(){ return SCENES.map(s=>`<button data-s="${s[0]}">${s[1]}</button>`).join("")+`<button id="bAuto" class="${autoOn?"on":""}" title="Auto-rotate scenes on the wall display (Space)">Auto</button>`; }
@@ -1424,7 +1493,7 @@ function decorFact(){
   const h=hs[0], dd=h?Math.round((h.d-tday)/DAY):99;
   if(h&&dd===0) return `Happy ${h.n}.`;
   const g=gameToday(now);
-  if(g){ const L=LIVE[g.team]; if(L&&L.state==="in") return `The ${g.team} are on now: ${L.score.replace(/\s+/g," ")}.`; const nx=(g.next||[])[0]; if(nx) return `${g.team} tonight, ${fmtTime(new Date(nx.when))}: ${nx.name}.`; }
+  if(g){ const L=LIVE[g.team]; if(L&&L.state==="in") return `The ${g.team} are on now: ${L.score.replace(/\s+/g," ")}.`; const nx=(g.next||[])[0]; if(nx){ const gd=new Date(nx.when); return `${g.team} ${hourIn(gd)>=17?"tonight":"today"}, ${fmtTime(gd)}: ${nx.name}${nx.tv?" on "+nx.tv:""}.`; } }
   const soon=(D?.birthdays||[]).find(x=>x.days>0&&x.days<=3);
   if(soon) return `${soon.name}'s birthday is ${soon.days===1?"tomorrow":new Date(soon.date+"T12:00:00").toLocaleDateString([],{weekday:"long"})}.`;
   if(h&&dd<=30) return countdown({n:h.n,days:dd})+".";
@@ -1437,6 +1506,132 @@ function cycleDecor(){
 }
 addEventListener("resize",()=>{ clearTimeout(window.__gz); window.__gz=setTimeout(()=>{ if(DECOR.th) drawGarland(); },200); });
 
+
+/* ===== v6: your world. Ticker, News, Family and friends, game day, desktop wallpaper ===== */
+const TEAMC={Eagles:"#004c54",Flyers:"#c43c00",Phillies:"#c8102e"};
+const isPlash=()=>document.documentElement.classList.contains("is-plash-app");
+const ago=iso=>{ const t=Date.parse(iso||""); if(isNaN(t)) return ""; const m=Math.max(0,Math.round((Date.now()-t)/60000)); return m<1?"just now":m<60?m+"m ago":m<1440?Math.floor(m/60)+"h ago":Math.floor(m/1440)+"d ago"; };
+const cap=x=>String(x||"").replace(/^./,c=>c.toUpperCase());
+const safeUrl=u=>/^https:\/\//i.test(u||"")?u:"";
+const NEWS_KEYS=["philly","hotel","local","world","tech"];
+function newsSec(k){ return ((D.news||{}).sections||[]).find(s=>s.key===k)||{key:k,label:k,items:[]}; }
+function teamNews(team,n){ return newsSec("philly").items.filter(x=>x.tag===team).slice(0,n); }
+function oppOf(name,abbr){ const p=String(name||"").split(/\s+(?:@|at|vs\.?)\s+/i); if(p.length<2) return {txt:name||"",home:true}; const home=p[1]===abbr; return {txt:(home?"vs ":"at ")+(home?p[0]:p[1]),home}; }
+function whenShort(iso){ const d=new Date(iso), dd=dayDiff(d); const t=fmtTime(d); if(dd===0) return (hourIn(d)>=17?"tonight ":"today ")+t; if(dd===1) return "tomorrow "+t; if(dd>1&&dd<7) return d.toLocaleDateString([],{weekday:"short",timeZone:TZ()})+" "+t; return d.toLocaleDateString([],{month:"short",day:"numeric",timeZone:TZ()})+" "+t; }
+function resultOf(t,lt){ if(!lt) return ""; const sc=lt.score||{}, me=sc[t.abbr], op=Object.keys(sc).find(k=>k!==t.abbr); if(me==null||op==null) return ""; const w=lt.won!=null?lt.won:Number(me)>Number(sc[op]); const o=oppOf(lt.name,t.abbr); return {w, txt:`${w?"W":"L"} ${me}-${sc[op]} ${o.txt}`}; }
+function countdowns(maxDays){
+  const now=new Date(), out=[];
+  (D.birthdays||[]).forEach(b=>{ if(b.days>=0&&b.days<=maxDays) out.push({n:b.name+"'s birthday",days:b.days,kind:"bday",d:b.date}); });
+  try{ upcomingHolidays(now,6).forEach(h=>{ const dd=Math.round((h.d-localDate(now))/DAY); if(dd<=maxDays) out.push({n:h.n,days:dd,kind:"hol",d:h.d.toISOString().slice(0,10)}); }); }catch(e){}
+  const seen=new Set(out.map(x=>x.n.toLowerCase()));
+  dropWorkDupes(D.events||[]).forEach(e=>{ if(!e.start||/holiday|birthday/i.test((e.cal||"")+" "+e.title)) return; const d=e.all_day?new Date(e.start+"T12:00:00"):new Date(e.start); const dd=dayDiff(d); if(dd>=0&&dd<=maxDays&&!seen.has(e.title.toLowerCase())) out.push({n:e.title,days:dd,kind:"ev",d:dkey(d),t:e.all_day?"":fmtTime(d)}); });
+  const games={}; (D.teams||[]).forEach(t=>(t.next||[]).forEach(g=>{ const k=dkey(new Date(g.when)); (games[k]=games[k]||[]).push(`${t.team} ${oppOf(g.name,t.abbr).txt}, ${fmtTime(new Date(g.when))}${g.tv?" on "+g.tv:""}`); }));
+  out.forEach(x=>{ if(x.kind!=="ev"&&games[x.d]) x.g=games[x.d][0]; });
+  return out.sort((a,b)=>a.days-b.days);
+}
+function yearEnd(){ const now=new Date(), y=Number(dkey(now).slice(0,4)), end=Date.UTC(y,11,31,12), t=Date.parse(dkey(now)+"T12:00:00Z"); const days=Math.round((end-t)/DAY); let biz=0; for(let i=0;i<=days;i++){ const d=new Date(t+i*DAY), w=d.getUTCDay(); if(w&&w<6) biz++; } return {days,biz}; }
+
+/* ---- ticker: scores, countdowns and headlines in one slow crawl */
+let TK_SIG="";
+function tickerItems(){
+  const it=[], now=new Date();
+  (D.alerts||[]).forEach(a=>it.push(`<span class="tk-i"><b class="tk-al">${esc(a.event)}</b>${esc(a.head)}</span>`));
+  (D.teams||[]).forEach(t=>{
+    const L=LIVE[t.team], nx=(t.next||[])[0], r=resultOf(t,(t.last||[])[0]);
+    if(L&&L.state==="in") it.push(`<span class="tk-i"><span class="tk-live">Live</span><b>${esc(L.away.a)} ${esc(L.away.s)}</b><b>${esc(L.home.a)} ${esc(L.home.s)}</b>${esc(L.detail||"")}${L.sit?" · "+esc(L.sit):""}</span>`);
+    else if(L&&L.state==="post") it.push(`<span class="tk-i"><span class="tk-k">Final</span><b>${esc(L.away.a)} ${esc(L.away.s)}</b><b>${esc(L.home.a)} ${esc(L.home.s)}</b></span>`);
+    else if(nx&&Date.parse(nx.when)-now<8*DAY){ const o=oppOf(nx.name,t.abbr); it.push(`<span class="tk-i"><b>${esc(t.team)}</b>${esc(o.txt)}, ${esc(whenShort(nx.when))}${nx.tv?" · "+esc(nx.tv):""}</span>`); }
+    if(r&&!(L&&L.state!=="pre")&&(t.last||[])[0]&&Date.now()-Date.parse(t.last[0].when||0)<4*DAY) it.push(`<span class="tk-i"><b>${esc(t.team)}</b><span class="${r.w?"tk-w":"tk-l"}">${esc(r.txt)}</span>${t.record?` · ${esc(t.record)}`:""}</span>`);
+  });
+  countdowns(21).slice(0,4).forEach(c=>it.push(`<span class="tk-i"><span class="tk-k">${c.days===0?"Today":c.days===1?"Tomorrow":"In "+c.days+" days"}</span>${esc(c.n)}</span>`));
+  const ye=yearEnd(); if(ye.days>=0&&ye.days<=60) it.push(`<span class="tk-i"><span class="tk-k">Year-end</span>${ye.days} days left, ${ye.biz} weekdays</span>`);
+  const lab={philly:"Philly",hotel:"Hotel world",local:"Close to home",world:"World",tech:"AI and tech"};
+  const per=Object.fromEntries(NEWS_KEYS.map(k=>[k,newsSec(k).items.slice(0,k==="philly"||k==="hotel"?3:2)]));
+  for(let i=0;i<3;i++) NEWS_KEYS.forEach(k=>{ const x=per[k][i]; if(!x) return; const u=safeUrl(x.u);
+    const inner=`<span class="tk-k">${esc(x.tag||lab[k])}</span>${esc(x.t)}`; it.push(u?`<a class="tk-i" href="${esc(u)}" target="_blank" rel="noopener">${inner}</a>`:`<span class="tk-i">${inner}</span>`); });
+  return it;
+}
+function renderStrip(){
+  const el=$("#strip"); if(!el) return;
+  const items=tickerItems(), live=Object.values(LIVE).some(l=>l.state==="in");
+  const sig=items.join("|")+live; if(sig===TK_SIG&&el.querySelector(".tk-track")) return; TK_SIG=sig;
+  el.classList.add("tk"); el.setAttribute("aria-label","Scores, countdowns and headlines");
+  if(!items.length){ el.innerHTML=""; el.style.display="none"; return; } el.style.display="";
+  el.innerHTML=`<div class="tk-brand ${live?"live":""}"><i></i><span>${live?"Game on":"Your world"}</span></div><div class="tk-view"><div class="tk-track">${items.join("")}${items.join("")}</div></div>`;
+  requestAnimationFrame(()=>{ const tr=el.querySelector(".tk-track"); if(tr) tr.style.setProperty("--tkdur",Math.max(40,Math.round(tr.scrollWidth/2/48))+"s"); });
+}
+
+/* ---- News scene */
+function newsCard(k,n,big){
+  const s=newsSec(k), items=s.items.slice(0,n);
+  const srcs=[...new Set(s.items.map(x=>x.src).filter(Boolean))].slice(0,2).join(", ");
+  const rows=items.map((x,i)=>{ const u=safeUrl(x.u), inner=`<div class="h">${x.tag?`<span class="tag t-${esc(x.tag)}">${esc(x.tag)}</span>`:""}${esc(x.t)}</div><small>${esc(x.src)}${x.ts?" · "+esc(ago(x.ts)):""}</small>`;
+    const cls=`nw${i===0&&big!==false?" lead":""}`; return u?`<a class="${cls}" href="${esc(u)}" target="_blank" rel="noopener">${inner}</a>`:`<div class="${cls}">${inner}</div>`; }).join("");
+  return `<section class="card"><h2 class="lbl">${esc(s.label)} <span class="sub">${esc(srcs)}</span></h2>${rows||'<div class="w">No fresh headlines right now.</div>'}</section>`;
+}
+function sceneNews(){
+  if(!D.news) return `<div class="sc sc-news"><section class="card"><h2 class="lbl">Headlines</h2><div class="w">Headlines arrive with the next cloud update, within 15 minutes.</div></section></div>`;
+  return `<div class="sc sc-news">${newsCard("philly",8)}${newsCard("hotel",4)}${newsCard("local",4)}${newsCard("tech",3)}${newsCard("world",3)}</div>`;
+}
+
+/* ---- Family and friends scene */
+function scenePeople(){
+  const cd=countdowns(45).slice(0,8);
+  const cdHtml=cd.map(c=>`<div class="cdn ${c.days===0?"today":""}"><div class="n">${c.days===0?"Now":c.days}<small>${c.days===0?"today":c.days===1?"day":"days"}</small></div><div><b>${esc(c.n)}</b><span>${esc(new Date(c.d+"T12:00:00").toLocaleDateString([],{weekday:"long",month:"short",day:"numeric"}))}${c.t?" · "+esc(c.t):""}${c.g?" · "+esc(c.g):""}</span></div></div>`).join("");
+  const wt=((D.inbox||{}).texts||{}).waiting||[];
+  const wtHtml=wt.length?wt.slice(0,4).map(w=>`<div class="wt"><b>${esc(w.label)}</b><small>${esc(w.ago)} ago</small><p>${esc(w.snippet)}</p></div>`).join(""):'<div class="w">Nobody is waiting on a reply.</div>';
+  const P=D.people;
+  const rec=P?(P.reconnect||[]):null;
+  const recHtml=rec===null?'<div class="w">Turns on after the Mac mini sends its next report.</div>':rec.length?rec.slice(0,5).map(r=>`<div class="rc">${esc(r.name)}<span>${r.days} days since you talked</span></div>`).join(""):'<div class="w">You are caught up with everyone you text often.</div>';
+  const wk=P&&(P.week||[]).length?`<h3>Most texted this week</h3><div class="pw">${P.week.slice(0,6).map(x=>`<span>${esc(x.name)}<b>${x.n}</b></span>`).join("")}</div>`:"";
+  return `<div class="sc sc-people">
+   <section class="card"><h2 class="lbl">Coming up <span class="sub">next 45 days</span></h2>${cdHtml||'<div class="w">A quiet stretch. No birthdays or holidays in the next 45 days.</div>'}</section>
+   <section class="card"><h2 class="lbl">Waiting on you <span class="sub">texts</span></h2>${wtHtml}<h3>Reconnect</h3>${recHtml}${wk}</section>
+   <section class="card memcard"><h2 class="lbl">On this day <span class="sub">Photos</span></h2>${memHtml()}</section></div>`;
+}
+
+/* ---- Sports scene with game-day detail */
+function sceneSports(){
+  const cards=(D.teams||[]).map(t=>{
+    const L=LIVE[t.team], nx=(t.next||[])[0], r=resultOf(t,(t.last||[])[0]);
+    const col=TEAMC[t.team]||(t.color?"#"+String(t.color).replace(/[^0-9a-f]/gi,"").slice(0,6):"");
+    let away,home,mid,status="",cls="",extra="";
+    if(L&&L.away){
+      away=L.away;home=L.home;
+      if(L.state==="pre"){mid=`<div class="when">${esc(cap(whenShort(nx?.when||Date.now())))}</div>`;status=nx?`<div class="cd">in ${esc(COUNT(new Date(nx.when)-Date.now()))}</div>`:""}
+      else { mid=`<div class="score">${esc(away.s)} - ${esc(home.s)}</div>`; status=L.state==="in"?`<div class="cd" style="color:var(--bad)">Live &middot; ${esc(L.detail||"")}</div>`:`<div class="cd">Final</div>`; if(L.state==="in")cls="live"; }
+      if(L.state==="in"){
+        if(L.sit) extra+=`<div class="sit">${esc(L.sit)}</div>`;
+        if(L.wp!=null){ const mine=home.a===t.abbr?L.wp:100-L.wp; extra+=`<div class="wp"><span>Win chance</span><span class="bt"><i style="width:${Math.max(2,Math.min(98,mine))}%"></i></span><span>${Math.round(mine)}%</span></div>`; }
+        if(L.lp) extra+=`<div class="lp">${esc(L.lp)}</div>`;
+      }
+    } else if(nx){
+      const parts=String(nx.name||"").split(/\s+(?:@|at|vs\.?)\s+/i); away={a:parts[0]}; home={a:parts[1]||t.abbr};
+      mid=`<div class="when">${esc(cap(whenShort(nx.when)))}</div>`;
+      status=`<div class="cd">in ${esc(COUNT(new Date(nx.when)-Date.now()))}</div>`;
+    } else { away={a:t.abbr}; home={a:""}; mid='<div class="when">No game scheduled</div>'; }
+    const meta=nx&&!(L&&L.state!=="pre")?[nx.tv,nx.venue].filter(Boolean).join(" · "):"";
+    const later=(t.next||[]).filter(n=>Date.parse(n.when)>Date.now()).slice(L&&L.state!=="pre"?0:1,3).map(n=>`<span>${esc(oppOf(n.name,t.abbr).txt)} · ${esc(new Date(n.when).toLocaleDateString([],{weekday:"short",month:"short",day:"numeric",timeZone:TZ()}))}</span>`).join("");
+    const hl=teamNews(t.team,2).map(x=>{ const u=safeUrl(x.u); return u?`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(x.t)}</a>`:`<a>${esc(x.t)}</a>`; }).join("");
+    const side=x=>`<div class="tm">${x.a?logo(t.path,x.a):""}<div class="ab">${esc(x.a||"")}</div></div>`;
+    return `<section class="card gc ${cls}" style="${col?`--team:${esc(col)}`:""}"><h2 class="lbl">${esc(t.team)} <span class="sub">${esc([t.record,r?"Last: "+r.txt:""].filter(Boolean).join(" · "))}</span></h2><div class="vs">${side(away)}<div class="mid">${mid}${status}</div>${side(home)}</div>${extra}${meta?`<div class="meta">${esc(meta)}</div>`:""}${later?`<div class="nx">${later}</div>`:""}${hl?`<div class="hl">${hl}</div>`:""}</section>`;
+  }).join("");
+  return `<div class="sc sc-sports">${cards||'<section class="card"><div class="w">No teams configured.</div></section>'}</div>`;
+}
+
+/* ---- version check: a new design applies itself overnight or while the tab is in the background, never mid-day in front of you */
+const UI_VER=/*__UI__*/"";
+let UPD=null;
+function checkUpdate(nd){
+  if(!nd||!nd.ui||!UI_VER||nd.ui===UI_VER) return;
+  UPD=nd.ui; const h=hourIn(new Date());
+  const go=()=>location.replace(location.pathname+"?v="+encodeURIComponent(UPD)+location.hash);
+  if((h>=2&&h<5)||document.visibilityState==="hidden"||isPlash()&&(h<7||h>=21)) return go();
+  const hb=$("#health"); if(hb&&!hb.querySelector(".upd")){ const b=document.createElement("button"); b.className="upd"; b.textContent="New version ready · refresh"; b.onclick=go; hb.appendChild(b); }
+}
+document.addEventListener("visibilitychange",()=>{ if(UPD&&document.visibilityState==="hidden") location.replace(location.pathname+"?v="+encodeURIComponent(UPD)+location.hash); });
+function plashMode(){ if(!isPlash()||!D) return; if(!document.body.classList.contains("wall")) setWall(true); }
+
 async function start(model){
   D = model;
   $("#lock").hidden = true; $("#app").hidden = false; $("#ctl").hidden = false;
@@ -1445,7 +1640,8 @@ async function start(model){
   $("#bMode").onclick = ()=>setWall(!document.body.classList.contains("wall"));
   $("#bFull").onclick = toggleFs; $("#bAwake").onclick = ()=>{ store.setItem("awake", wake?"0":"1"); toggleAwake(); };
   $("#bLock").onclick = ()=>{ store.removeItem("cc_pw"); location.reload(); };
-  initV3(); wakeUI(); loadWx(); loadScores();
+  initV3(); wakeUI(); loadWx(); loadScores(); plashMode(); setTimeout(plashMode,1500);
+  setInterval(renderStrip, 60000);
   $("#bDecor").onclick = cycleDecor; addEventListener("keydown",e=>{ if(e.target.tagName!=="INPUT"&&(e.key==="d"||e.key==="D")) cycleDecor(); });
   setInterval(()=>{ applyDecor(); shellLine(); }, 60000);
   setInterval(tick, 1000); setInterval(()=>{renderEvents();renderHealth();shellLine();}, 30000);
@@ -1456,12 +1652,15 @@ async function start(model){
 async function boot(){
   if(PLAIN){ start(PLAIN); return; }
   $("#lock").hidden = false;
+  let blob=null;
+  for(let i=0;i<5&&!blob;i++){ try{ blob=await getBlob(); }catch(e){ await new Promise(r=>setTimeout(r,4000*(i+1))); } }
+  if(!blob){ $("#msg").textContent="Could not load the data file. Retrying in a minute."; setTimeout(()=>location.reload(),60000); return; }
   const saved = store.getItem("cc_pw");
-  if(saved){ try{ PASS = saved; start(await decryptBlob(BLOB, saved)); return; }catch(e){ store.removeItem("cc_pw"); } }
+  if(saved){ try{ PASS = saved; start(await decryptBlob(blob, saved)); return; }catch(e){ store.removeItem("cc_pw"); } }
 }
 $("#f").addEventListener("submit", async e=>{
   e.preventDefault();
-  try{ PASS = $("#pw").value.replace(/^[\s.,;:]+|[\s.,;:]+$/g, ""); const m = await decryptBlob(BLOB, PASS); if($("#rem").checked) store.setItem("cc_pw", PASS); start(m); }
+  try{ PASS = $("#pw").value.replace(/^[\s.,;:]+|[\s.,;:]+$/g, ""); const m = await decryptBlob(await getBlob(), PASS); if($("#rem").checked) store.setItem("cc_pw", PASS); start(m); }
   catch(err){ $("#msg").textContent = "Wrong passphrase."; }
 });
 boot();

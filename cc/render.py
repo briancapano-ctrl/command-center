@@ -25,14 +25,24 @@ ICON = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect wid
         '<circle cx="256" cy="256" r="16" fill="#4de3c2"/></svg>')
 
 
+def ui_version():
+    """Short fingerprint of the page design. The open page compares it with the data file to know a new design is out."""
+    import hashlib
+    return hashlib.sha256(open(TEMPLATE, "rb").read()).hexdigest()[:12]
+
+
 def write_site(model, passphrase, out_dir, plain=False):
     os.makedirs(out_dir, exist_ok=True)
     html = open(TEMPLATE, encoding="utf-8").read()
+    ui = ui_version()
+    model = {**model, "ui": ui}
+    html = html.replace('/*__UI__*/""', json.dumps(ui))
     if plain:  # for hosts that are already private; no lock screen
         html = html.replace("/*__PLAIN__*/null", json.dumps(model, default=str))
     else:
+        # The encrypted data lives only in data.enc.json; the page fetches it. Keeping it out of index.html
+        # roughly halves how fast the repository grows, since every build used to store the data twice.
         blob = encrypt(model, passphrase)
-        html = html.replace("/*__BLOB__*/null", json.dumps(blob))
         json.dump(blob, open(os.path.join(out_dir, "data.enc.json"), "w"))
     open(os.path.join(out_dir, "index.html"), "w", encoding="utf-8").write(html)
     json.dump(MANIFEST, open(os.path.join(out_dir, "manifest.webmanifest"), "w"))

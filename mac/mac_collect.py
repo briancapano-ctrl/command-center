@@ -136,8 +136,39 @@ def imessage():
             if hrs <= 72 and ASK.search(body):
                 waiting.append({"label": label, "ago": f"{int(hrs)}h" if hrs < 48 else f"{int(hrs // 24)}d",
                                 "snippet": re.sub(r"\s+", " ", body).strip()[:90]})
+    try:
+        ppl = people(db, names)
+    except Exception as e:
+        ppl = {"err": str(e)[:120]}
     return {"unread_total": total, "unread_chats": len(chats),
-            "top_unread": [{"label": c["label"], "unread": c["unread"]} for c in chats[:6]], "waiting": waiting[:6]}
+            "top_unread": [{"label": c["label"], "unread": c["unread"]} for c in chats[:6]], "waiting": waiting[:6], "people": ppl}
+
+
+def people(db, names):
+    """Your regulars: who you texted most this week, and people you text often but have not in three weeks or more.
+    Names and counts only. No message text, numbers or addresses leave the Mac. Unknown numbers and businesses are skipped."""
+    now_s = dt.datetime.now().timestamp()
+    ns = lambda days: (now_s - days * 86400 - APPLE_EPOCH) * 1e9
+    rows = db.execute("""select h.id, count(*), max(m.date), sum(case when m.date>? then 1 else 0 end)
+        from message m join handle h on h.ROWID=m.handle_id
+        where m.date>? and m.item_type=0 and coalesce(m.associated_message_type,0)=0
+        group by h.id""", (ns(7), ns(365))).fetchall()
+    who = {}
+    for ident, n, last, wk in rows:
+        name = names.get(last10(ident)) or names.get((ident or "").lower())
+        if not name:
+            continue
+        p = who.setdefault(name, {"n": 0, "last": 0, "wk": 0})
+        p["n"] += n; p["wk"] += wk or 0; p["last"] = max(p["last"], last or 0)
+    groups = db.execute("""select coalesce(c.display_name,''), count(*) from chat c join chat_message_join j on j.chat_id=c.ROWID
+        join message m on m.ROWID=j.message_id where m.date>? and m.item_type=0 and coalesce(m.associated_message_type,0)=0
+        and coalesce(c.display_name,'')<>'' group by c.ROWID""", (ns(7),)).fetchall()
+    week = [{"name": k, "n": v["wk"]} for k, v in who.items() if v["wk"] >= 5] + [{"name": g.strip(), "n": c, "group": True} for g, c in groups if c >= 5]
+    week.sort(key=lambda x: -x["n"])
+    days = lambda last: int((now_s - (last / 1e9 + APPLE_EPOCH)) // 86400)
+    rec = [{"name": k, "days": days(v["last"]), "n": v["n"]} for k, v in who.items() if v["n"] >= 40 and days(v["last"]) >= 21]
+    rec.sort(key=lambda x: -x["n"])
+    return {"week": week[:6], "reconnect": rec[:6]}
 
 
 def reminders():
@@ -157,7 +188,7 @@ def reminders():
                     if tz:  # fixed instant
                         d = dt.datetime.fromtimestamp(due + APPLE_EPOCH).astimezone()
                     else:   # floating: the stored clock time is the local clock time
-                        d = dt.datetime.utcfromtimestamp(due + APPLE_EPOCH).replace(tzinfo=dt.datetime.now().astimezone().tzinfo)
+                        d = dt.datetime.fromtimestamp(due + APPLE_EPOCH, dt.timezone.utc).replace(tzinfo=dt.datetime.now().astimezone().tzinfo)
                     key = (title, d.strftime("%Y-%m-%d %H:%M"))
                 else:
                     d, key = None, (title, "flag")

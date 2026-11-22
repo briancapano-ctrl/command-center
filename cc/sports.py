@@ -18,13 +18,34 @@ def _event(ev):
         if isinstance(s, dict):
             s = s.get("displayValue")
         score[(t.get("team") or {}).get("abbreviation", "?")] = s
-    return {
+    tv = [((b.get("media") or {}).get("shortName") or "") for b in comp.get("broadcasts") or []]
+    out = {
         "name": ev.get("shortName") or ev.get("name"),
         "when": ev.get("date"),
         "state": status.get("state"),  # pre / in / post
         "detail": status.get("shortDetail"),
         "score": score,
     }
+    if any(tv):
+        out["tv"] = ", ".join(x for x in tv if x)[:30]
+    venue = (comp.get("venue") or {}).get("fullName")
+    if venue:
+        out["venue"] = venue[:60]
+    me = next((t for t in teams if (t.get("team") or {}).get("abbreviation") == "PHI"), None)
+    if me and status.get("state") == "post" and me.get("winner") is not None:
+        out["won"] = bool(me.get("winner"))
+    return out
+
+
+def _team_info(path, slug):
+    """Record, colors and logo. Optional: the card still works without it."""
+    try:
+        t = http("GET", f"https://site.api.espn.com/apis/site/v2/sports/{path}/teams/{slug}").get("team") or {}
+    except Exception:
+        return {}
+    rec = ((t.get("record") or {}).get("items") or [{}])[0].get("summary")
+    info = {"record": rec, "color": t.get("color"), "alt": t.get("alternateColor"), "standing": t.get("standingSummary")}
+    return {k: v for k, v in info.items() if v}
 
 
 def collect(team_slug="phi"):
@@ -38,5 +59,7 @@ def collect(team_slug="phi"):
         upcoming.sort(key=lambda e: e["when"])
         done = [e for e in evs if e["state"] == "post"]
         done.sort(key=lambda e: e["when"])
-        out.append({"team": label, "path": path, "abbr": team_slug.upper(), "live": live[:1], "next": upcoming[:3], "last": done[-1:]})
+        row = {"team": label, "path": path, "abbr": team_slug.upper(), "live": live[:1], "next": upcoming[:3], "last": done[-1:]}
+        row.update(_team_info(path, team_slug))
+        out.append(row)
     return out

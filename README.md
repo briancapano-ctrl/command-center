@@ -7,6 +7,21 @@ Mac job (launchd, every 10 minutes, pushes only when something changed, and at l
 In the browser: the clock, weather and live scores update by themselves (scores every 30 seconds during a game), and the page re-checks for new data every 90 seconds without reloading.
 Output: one page at `https://<your-github-name>.github.io/<repo>/`. All data inside is AES-256 encrypted and opens only with your passphrase. A phone alert with the top items arrives once a day after 6 AM Eastern through ntfy.
 
+## What you see (v6, Nov 22, 2026)
+- Your world ticker: a slow crawl along the bottom with live scores, today's games and TV channel, last results, birthdays and holidays coming up, the year-end countdown, and the top headlines. Hover to pause. It says "Game on" in red while a Philly team is playing.
+- News scene: Philly sports (Eagles, Flyers, Phillies stories from ESPN and the Inquirer, tagged by team), Hotel world (Hotel Dive, Skift, hotel technology news, with any Allbridge mention pinned first), Close to home (WRAL, ABC11), Nation and world (NPR, Google News), AI and tech (The Verge). Headlines refresh at most every 45 minutes. Click any one to open the story.
+- Family scene: countdowns to birthdays, holidays and family calendar events (with any Philly game that day), texts waiting on you, people you text often but have not in three weeks (Reconnect), who you texted most this week, and On this day photos. Names and counts only; message text never leaves the Mac.
+- Sports scene: record, last result, TV and venue, the next games and two team headlines per team. During a game: score, down and distance, a win-chance bar and the last play, updated every 30 seconds.
+- Weather alerts from the National Weather Service show as a red banner when one is active for home.
+- New designs apply themselves overnight (2 to 5 AM) or while the tab is in the background. During the day a small "New version ready" button appears in the status line instead, so nothing reloads in front of you.
+
+## As your Mac desktop wallpaper (Plash)
+1. Install Plash, free, from the Mac App Store (by Sindre Sorhus).
+2. Plash menu bar icon > Add Website > `https://briancapano-ctrl.github.io/command-center/#wall`.
+3. Turn on Browsing Mode once, unlock with the passphrase (leave Remember checked), then turn Browsing Mode off.
+4. Plash Settings > Display: pick the screen. The page detects Plash, goes to wall mode, and hides the buttons and the Work card (work data stays in Chrome).
+5. Leave Plash's reload interval off. The page refreshes its own data every 90 seconds.
+
 ## Wall display (the always-on monitor)
 1. On the monitor's computer open the Pages URL with `#wall` on the end, unlock once, leave "Remember on this device" checked.
 2. Press F for full screen and click Keep awake so the screen never sleeps. Hide the mouse and the buttons fade out.

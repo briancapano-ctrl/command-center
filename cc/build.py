@@ -1,6 +1,6 @@
 """Entry point. `python -m cc.build` collects everything, writes docs/index.html (encrypted), and optionally pushes a phone alert."""
 import json, os, subprocess, sys, datetime as dt, urllib.request
-from . import sports, google_api as G, ms_graph as M, priorities, render
+from . import sports, news, google_api as G, ms_graph as M, priorities, render
 from .util import safe, now, short_date
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -78,6 +78,7 @@ def health(src, model_time):
         row("gcal", "Calendars", src.get("gcal") is not None or src.get("outlook_cal") is not None, t),
         row("youtube", "YouTube", src.get("youtube"), t),
         row("sports", "Sports", src.get("sports"), t),
+        row("news", "Headlines", src.get("news"), (src.get("news") or {}).get("as_of")),
     ]
 
 
@@ -92,7 +93,8 @@ def should_notify(model):
 
 def unchanged(model):
     """Skip rewriting the site when nothing changed in the last hour, so the repo history stays small."""
-    sig = json.dumps({**{k: model[k] for k in ("kpis", "tasks", "week", "teams", "triage", "channels", "errors")},
+    sig = json.dumps({**{k: model.get(k) for k in ("kpis", "tasks", "week", "teams", "triage", "channels", "errors", "alerts", "people")},
+                      "news": (model.get("news") or {}).get("as_of"),
                       "sources": [(x["key"], x["ok"]) for x in model["sources"]]}, sort_keys=True, default=str)
     import hashlib
     # A UI change must publish even if the mailbox/calendar snapshot is unchanged.
@@ -111,6 +113,8 @@ def collect(cfg, pw):
     err = {}
     src = {"errors": err}
     src["sports"] = safe("sports", sports.collect, err)
+    src["news"] = news.cached(os.path.join(ROOT, "state", "news.json"), pw, render.encrypt, render.decrypt, err)
+    src["alerts"] = safe("alerts", lambda: news.alerts(cfg.get("lat", 36.0217), cfg.get("lon", -78.4756)), err)
     env = os.environ
     if env.get("GOOGLE_REFRESH_TOKEN"):
         tok = safe("google", lambda: G.access_token(env["GOOGLE_CLIENT_ID"], env["GOOGLE_CLIENT_SECRET"], env["GOOGLE_REFRESH_TOKEN"]), err)
