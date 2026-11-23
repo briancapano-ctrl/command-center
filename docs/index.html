@@ -1509,7 +1509,7 @@ html:not([data-look=bright]) .card.hkh::after{display:none}
 .hk-lt{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:.5em;align-items:center;padding:.55em .65em;border-radius:1em;background:rgba(255,255,255,.62);outline:1px solid var(--rule);outline-offset:-1px;min-width:0}
 .hk-lt .ic{grid-row:1/3;width:2em;height:2em;padding:.45em;border-radius:50%;background:#8e8e93;color:#fff}
 .hk-lt b{font:600 .84em/1.2 var(--sans);color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.hk-lt small{font:500 .78em/1.25 var(--sans);color:var(--muted)}
+.hk-lt small{font:500 .78em/1.25 var(--sans);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hk-lt.on{background:linear-gradient(135deg,#fff6df,#ffe7b3);outline-color:rgba(255,159,10,.4)}
 .hk-lt.on .ic{background:#ff9f0a;box-shadow:0 0 1em rgba(255,159,10,.65)}
 .hk-lt.on small{color:#a14a00;font-weight:600}
@@ -1533,6 +1533,18 @@ html[data-look=bright] .hk-lt{background:#f3f5fa}html[data-look=bright] .hk-lt.o
 .hk-net small{display:block;font:500 .74em var(--sans);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hk-net b{display:block;font:600 .92em/1.25 var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hk-net .warn b{color:#c93400}.hk-net .bad b{color:#d70015}
+.hk-scb{display:flex;flex-wrap:wrap;gap:.5em;margin-top:.75em}
+.hk-scbtn{display:inline-flex;align-items:center;gap:.45em;padding:.6em 1em;border:0;border-radius:99px;font:600 .88em/1 var(--sans);color:#fff;background:rgba(255,255,255,.15);outline:1px solid rgba(255,255,255,.32);outline-offset:-1px;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);cursor:pointer;text-shadow:none;transition:background-color .2s ease,transform .1s ease}
+.hk-scbtn:hover{background:rgba(255,255,255,.26)}.hk-scbtn:active{transform:scale(.96)}
+.hk-scbtn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.hk-scbtn .ic{width:1.15em;height:1.15em;color:#ffd60a}.hk-scbtn.nt .ic{color:#bfc8ff}
+.hk-scbtn.arm{background:rgba(255,149,0,.62);outline-color:rgba(255,204,128,.9)}.hk-scbtn.arm .ic{color:#fff}
+.hk-scbtn.busy{cursor:progress;animation:hkb 1.2s ease-in-out infinite}
+@keyframes hkb{50%{background:rgba(255,255,255,.3)}}
+.hk-scbtn.done{background:rgba(36,138,61,.78);outline-color:rgba(120,230,150,.8)}.hk-scbtn.done .ic{color:#fff}
+.hk-scbtn.fail{background:rgba(215,0,21,.72);outline-color:rgba(255,140,130,.85)}.hk-scbtn.fail .ic{color:#fff}
+.hk-m.solo{transform:translate(-50%,-50%)}
+@media (prefers-reduced-motion:reduce){.hk-scbtn.busy{animation:none}}
 .hk-m{font-size:min(1em,1.6cqw)}
 .hk-pills{font-size:min(1em,1.5cqw)}
 .hk-top{font-size:min(1em,1.9cqw)}
@@ -2432,8 +2444,8 @@ function loadHouse(){
   }catch(e){ HOUSE_P=null; } })();
 }
 const HK=()=>D&&D.homekit&&D.homekit.state==="ok"?D.homekit:null;
-const hkRoom=r=>r==="2nd Floor Hallway"?"Upstairs":(r||"");
-function hkName(x){ let n=String(x.n||"").trim(); if(/^hue\b.*\b(lamp|light|bulb|lightstrip)$/i.test(n)) n=hkRoom(x.r)+(/lamp$/i.test(n)?" lamp":" light"); return n.replace(/^SmartWings\s+/i,"").replace(/\s+FF\b/,"").replace(/\s+/g," "); }
+const hkRoom=r=>r||"";   // Apple Home room names, exactly as set in the Home app
+function hkName(x){ let n=String(x.n||"").trim(); if(/^hue\b.*\b(lamp|light|bulb|lightstrip)$/i.test(n)) n=hkRoom(x.r)+(/lamp$/i.test(n)?" lamp":" light"); return n.replace(/^SmartWings\s+/i,"").replace(/\s+/g," "); }
 const deg=v=>v==null?"--":Math.round(v)+"\u00b0";
 function hkSum(h){
   const lights=h.lights||[], on=lights.filter(l=>l.on), doors=h.doors||[], open=doors.filter(d=>d.open), locks=h.locks||[], unl=locks.filter(l=>!l.locked);
@@ -2460,18 +2472,21 @@ function hkPills(h,s){
 }
 function hkMarkers(h,s){
   const m=(x,y,cls,icon,b,sm,left)=>`<div class="hk-m ${cls}${left?" l":""}" style="left:${x}%;top:${y}%"><i>${ic(icon)}</i><span><b>${esc(b)}</b>${sm?`<small>${esc(sm)}</small>`:""}</span></div>`;
-  const out=[], up=s.cl.find(c=>c.n==="Upstairs"), lk=s.locks[0], fd=s.doors.find(d=>/front/i.test(d.n||"")), porch=s.lights.find(l=>/front door/i.test(l.r||""));
-  if(up) out.push(m(42.4,28.6,up.mode==="cool"?"cool":"heat","thermo","Upstairs "+deg(up.t),up.set!=null?`${up.mode==="cool"?"Cool":"Heat"} to ${deg(up.set)}`:"",false));
-  if(porch) out.push(m(39.2,39.6,porch.on?"amber":"dim","bulb",hkName(porch),porch.off?"Not responding":porch.on?`On \u00b7 ${porch.b}%`:"Off",true));
+  const out=[], up=s.cl.find(c=>/2nd|second|upstairs/i.test(c.r||"")), lk=s.locks[0], fd=s.doors.find(d=>/front/i.test(d.n||"")), porch=s.lights.find(l=>/front door/i.test(l.r||""));
+  if(up) out.push(m(42.4,28.6,up.mode==="cool"?"cool":"heat","thermo",`${up.r} ${deg(up.t)}`,up.set!=null?`${up.mode==="cool"?"Cool":"Heat"} to ${deg(up.set)}`:"",false));
+  if(porch) out.push(m(39.0,40.6,porch.on?"amber":"dim","bulb",porch.r+" light",porch.off?"Not responding":porch.on?`On \u00b7 ${porch.b}%`:"Off",true));
   if(lk||fd) out.push(m(39.2,51,(lk&&!lk.locked)||(fd&&fd.open)?"bad":"ok",lk&&!lk.locked?"unlock":"lock","Front door",[lk?(lk.locked?"Locked":"Unlocked"):"",fd?(fd.open?"Open":"Closed"):""].filter(Boolean).join(" \u00b7 "),false));
-  const office=s.sh.filter(x=>/office/i.test(x.r||""));
-  if(office.length){ const a=Math.round(office.reduce((t,x)=>t+(x.pos||0),0)/office.length); out.push(m(24.6,47.5,"cool","blinds","Office shades",a===0?"Closed":a+"% open",true)); }
+  // The two Office shades cover the two front-left porch windows (confirmed by Brian, Nov 22, 2026): Window Left, Window Right.
+  const office=s.sh.filter(x=>/office/i.test(x.r||"")), pct=x=>x?(x.pos===0?"closed":x.pos+"%"):"", wl=office.find(x=>/left/i.test(x.n||"")), wr=office.find(x=>/right/i.test(x.n||""));
+  if(wl||wr){ const tone=office.some(x=>x.off)?"dim":"cool";
+    if(wr) out.push(`<div class="hk-m ${tone} solo" style="left:31.9%;top:49.1%" title="${esc(wr.r+" shade, right: "+pct(wr))}"><i>${ic("blinds")}</i></div>`);
+    out.push(m(24.8,49.1,tone,"blinds",(wl||wr).r+" shades",[wl?"Left "+pct(wl):"",wr?"Right "+pct(wr):""].filter(Boolean).join(" \u00b7 "),true)); }
   return out.join("");
 }
 function hkHero(h,s){
   const at=hkAgeTxt(s,h);
   return `<section class="card hkh" data-testid="hk-hero"><div class="hk-clip"><div class="hk-stage"><img class="hk-img${HOUSE?" on":""}" alt="Capano Home at night"${HOUSE?` src="${HOUSE}"`:""}>${hkMarkers(h,s)}</div><div class="hk-vig"></div></div>
-    <div class="hk-top"><div><span class="hk-k">${ic("home")}Apple Home</span><b class="hk-t">${esc(h.home||"Home")}</b><small class="${s.age>45?"stale":""}">${esc([at,(h.rooms||[]).length?(h.rooms.length+" rooms"):""].filter(Boolean).join(" \u00b7 "))}</small></div>
+    <div class="hk-top"><div><span class="hk-k">${ic("home")}Apple Home</span><b class="hk-t">${esc(h.home||"Home")}</b><small class="${s.age>45?"stale":""}">${esc([at,(h.rooms||[]).length?(h.rooms.length+" rooms"):""].filter(Boolean).join(" \u00b7 "))}</small>${hkSceneBar(h)}</div>
     <span class="hk-sec ${s.secure?"":"bad"}" data-testid="hk-secure">${ic(s.secure?"shield":"alert")}${esc(s.secure?"All secure":s.alerts[0]+(s.alerts.length>1?` +${s.alerts.length-1}`:""))}</span></div>
     <div class="hk-pills">${hkPills(h,s)}</div></section>`;
 }
@@ -2506,16 +2521,16 @@ function hkDial(c){
     <circle cx="50" cy="50" r="${R}" fill="none" stroke="url(#${id})" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(arc*f(c.t)).toFixed(1)} ${C.toFixed(1)}" transform="rotate(135 50 50)"/>
     ${c.set!=null?`<circle cx="${sx}" cy="${sy}" r="4.6" fill="#fff" stroke="${col}" stroke-width="2.4"/>`:""}</svg>
     <div class="hk-dtx"><b>${deg(c.t)}</b><small>${esc(mode)}${c.set!=null?" "+deg(c.set):""}</small></div></div>
-    <b>${esc(c.n)}</b><small>${esc([c.hum!=null?Math.round(c.hum)+"% humidity":"",c.fan==="active"?"fan on":""].filter(Boolean).join(" \u00b7 "))}</small></div>`;
+    <b>${esc(c.r||c.n)}</b><small>${esc([c.hum!=null?Math.round(c.hum)+"% humidity":"",c.fan==="active"?"fan on":""].filter(Boolean).join(" \u00b7 "))}</small></div>`;
 }
 function hkClimate(h,s){
   const set=s.cl.find(c=>c.set!=null);
   return `<section class="card kd k-clim hk-c" data-testid="hk-climate"><h2 class="lbl">Climate <span class="sub">${esc(set?`${set.mode==="cool"?"Cooling":"Heating"} to ${deg(set.set)}`:"thermostats")}</span></h2><div class="hk-dials">${s.cl.map(hkDial).join("")}</div></section>`;
 }
 function hkLights(h,s){
-  const lt=s.lights.map(l=>`<div class="hk-lt ${l.on?"on":""}">${ic("bulb")}<b>${esc(hkName(l))}</b><small>${l.off?"Not responding":l.on?`On \u00b7 ${l.b}%`:"Off"}</small></div>`).join("");
+  const lt=s.lights.map(l=>`<div class="hk-lt ${l.on?"on":""}" title="${esc(l.n+" in "+(l.r||""))}">${ic("bulb")}<b>${esc(l.r||hkName(l))}</b><small>${l.off?"Not responding":l.on?`On \u00b7 ${l.b}%`:"Off"}</small></div>`).join("");
   const sh=s.sh.map(x=>`<div class="hk-sh"><span>${ic("blinds")}${esc(hkRoom(x.r)+" \u00b7 "+hkName(x).replace(/^Window\s*/i,"").toLowerCase()+" shade")}<em>${x.pos===0?"Closed":x.pos+"% open"}</em></span><i style="--p:${Math.max(0,Math.min(100,x.pos||0))}%"></i></div>`).join("");
-  const sc=(h.scenes||[]).map(x=>`<span class="chip2">${ic("spark")}${esc(x.n)}</span>`).join("");
+  const sc=h.ctl&&PASS?"":(h.scenes||[]).map(x=>`<span class="chip2">${ic("spark")}${esc(x.n)}</span>`).join("");
   return `<section class="card kd k-lite hk-l" data-testid="hk-lights"><h2 class="lbl">Lights and shades <span class="sub">${esc(s.on.length?`${s.on.length} of ${s.lights.length} on`:"all off")}</span></h2>
     <div class="hk-lts">${lt}</div>${sh?`<div class="hk-shs">${sh}</div>`:""}${sc?`<div class="hk-scn">Scenes${sc}</div>`:""}</section>`;
 }
@@ -2531,6 +2546,44 @@ function hkPower(h,s){
   return `<section class="card kd k-bat hk-b" data-testid="hk-power"><h2 class="lbl">Batteries and network <span class="sub">${esc(low?"lowest "+low.lvl+"%":"")}</span></h2>
     <div class="hk-bts">${bt||'<div class="w">No battery readings.</div>'}</div>${net?`<div class="hk-net">${net}</div>`:""}</section>`;
 }
+
+/* Scene buttons (Good Morning, Good Night). A tap arms the button; a second tap within 4 seconds runs it. The request is
+   signed with a key from the passphrase and relayed through a private ntfy topic to the listener on the Mac mini, which
+   runs only these two scenes and answers with a signed reply. */
+const SCN={};
+function hkSceneBar(h){
+  const c=h.ctl; if(!c||!PASS||!(c.scenes||[]).length) return "";
+  return `<div class="hk-scb" data-testid="hk-scenes">${c.scenes.map(n=>{ const st=SCN[n]||{};
+    return `<button type="button" class="hk-scbtn ${/night/i.test(n)?"nt ":""}${st.cls||""}" data-hscene="${esc(n)}" aria-label="Run the ${esc(n)} scene">${ic(/night/i.test(n)?"moon":"sunrise")}<span>${esc(st.txt||n)}</span></button>`; }).join("")}</div>`;
+}
+function setScn(n,st){ SCN[n]=st; document.querySelectorAll("[data-hscene]").forEach(b=>{ if(b.dataset.hscene!==n) return; b.className="hk-scbtn "+(/night/i.test(n)?"nt ":"")+(st.cls||""); b.querySelector("span").textContent=st.txt||n; }); }
+async function runScene(n,dry){
+  const c=(HK()||{}).ctl; if(!c||!PASS) return {ok:false,msg:"Not available"};
+  const enc=t=>new TextEncoder().encode(t), hx=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+  const k=await crypto.subtle.importKey("raw",await crypto.subtle.digest("SHA-256",enc("cc-home-v1:"+PASS)),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
+  const sig=async t=>hx(await crypto.subtle.sign("HMAC",k,enc(t)));
+  const ts=Date.now(), nn=hx(crypto.getRandomValues(new Uint8Array(8))), url="https://ntfy.sh/"+encodeURIComponent(c.topic);
+  const msg={v:1,scene:n,ts,n:nn,dry:!!dry,sig:await sig(`v1|${n}|${ts}|${nn}|${dry?1:0}`)};
+  try{ const r=await fetch(url,{method:"POST",body:JSON.stringify(msg)}); if(!r.ok) throw 0; }catch(e){ return {ok:false,msg:"Relay unreachable"}; }
+  for(let i=0;i<20;i++){
+    await new Promise(r=>setTimeout(r,1500));
+    try{ const t=await (await fetch(`${url}/json?poll=1&since=${Math.floor(ts/1000)-2}`,{cache:"no-store"})).text();
+      for(const line of t.split("\n")){ let m; try{ m=JSON.parse(JSON.parse(line).message||""); }catch(x){ continue; }
+        if(m&&m.re===nn) return (await sig(`r1|${nn}|${m.ok?1:0}`))===m.sig?{ok:!!m.ok,msg:String(m.msg||"")}:{ok:false,msg:"Unverified reply"}; } }catch(e){}
+  }
+  return {ok:false,msg:"No answer from the Mac"};
+}
+document.addEventListener("click",async e=>{
+  const b=e.target.closest?.("[data-hscene]"); if(!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const n=b.dataset.hscene, st=SCN[n]||{};
+  if(st.busy) return;
+  if(!(st.arm&&Date.now()<st.arm)){ const until=Date.now()+4000; setScn(n,{arm:until,cls:"arm",txt:"Tap again to run"}); setTimeout(()=>{ if((SCN[n]||{}).arm===until) setScn(n,{}); },4100); return; }
+  setScn(n,{busy:1,cls:"busy",txt:"Running\u2026"});
+  const r=await runScene(n,false);
+  setScn(n,{cls:r.ok?"done":"fail",txt:r.ok?n+" ran":trunc(r.msg||"Didn't run",26)});
+  setTimeout(()=>{ if(!(SCN[n]||{}).busy) setScn(n,{}); },6000);
+},true);
 function sceneHome(){
   const h=HK();
   if(!h) return `<div class="sc sc-home"><section class="card kd k-home"><h2 class="lbl">Home <span class="sub">Mac mini, every 10 minutes</span></h2>${homeHtml(true)}<div class="w" style="margin-top:.8em">Apple Home appears here once the Mac mini reports it.</div></section>
@@ -3167,7 +3220,7 @@ function sceneSports(){
 }
 
 /* ---- version check: a new design applies itself overnight or while the tab is in the background, never mid-day in front of you */
-const UI_VER="15aee11fefc8";
+const UI_VER="f72f63a24d22";
 let UPD=null;
 function checkUpdate(nd){
   if(!nd||!nd.ui||!UI_VER||nd.ui===UI_VER) return;
