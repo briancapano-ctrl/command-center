@@ -1151,7 +1151,7 @@ body[data-scene=work]:not(.wall) .top.sb>div:first-child{display:flex}
 .is-ic{display:grid;place-items:center;flex:none;width:1.85em;height:1.85em;border-radius:50%;background:#1c1c1e;color:#fff;overflow:hidden}
 .is-ic .ic,.is-ic>i svg{width:1.05em;height:1.05em;display:block}
 .is-ic>i{display:grid;place-items:center}
-.is-ic.c-or{color:#ff9f0a}.is-ic.c-pk{color:#ff375f}.is-ic.c-rd{color:#ff453a}.is-ic.c-bl{color:#64d2ff}
+.is-ic.c-or{color:#ff9f0a}.is-ic.c-pk{color:#ff375f}.is-ic.c-rd{color:#ff453a}.is-ic.c-bl{color:#64d2ff}.is-ic.c-gr{color:#30d158}
 .is-lg{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#fff}
 .is-lg img{width:76%;height:76%;object-fit:contain}
 .is-tx{display:inline-flex;align-items:baseline;gap:.5em}
@@ -1427,6 +1427,121 @@ body.wall .g8 #work .work-open{font-size:max(11px,.7em);padding:.4em .8em}
   .clockw h1{font-size:1.35rem}
 }
 
+/* ---- v10: Apple Home (read-only, from the Mac mini through HomeBot) ---- */
+.k-clim{--k1:#ff9500;--kt:#c93400;--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 14.8V4.5a2 2 0 0 0-4 0v10.3a4 4 0 1 0 4 0z'/%3E%3C/svg%3E")}
+.k-sec{--k1:#34c759;--kt:#248a3d;--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4.5' y='10.5' width='15' height='11' rx='2.5'/%3E%3Cpath d='M8 10.5V7a4 4 0 0 1 8 0v3.5'/%3E%3C/svg%3E")}
+.k-sec.alert{--k1:#ff3b30;--kt:#d70015}
+.k-lite{--k1:#ff9f0a;--kt:#c93400;--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18h6M10 21.5h4M12 2.5a6.5 6.5 0 0 0-3.8 11.8c.5.4.8 1 .8 1.6V16h6v-.1c0-.6.3-1.2.8-1.6A6.5 6.5 0 0 0 12 2.5z'/%3E%3C/svg%3E")}
+.k-bat{--k1:#30b0c7;--kt:#0071a4;--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2.5' y='7' width='17' height='10' rx='2.5'/%3E%3Cpath d='M22 10.5v3M6 10.5v3'/%3E%3C/svg%3E")}
+html:not([data-look=bright]) .k-clim{--k1:#ff9500}html:not([data-look=bright]) .k-sec{--k1:#34c759}html:not([data-look=bright]) .k-sec.alert{--k1:#ff3b30}
+html:not([data-look=bright]) .k-lite{--k1:#ff9f0a}html:not([data-look=bright]) .k-bat{--k1:#30b0c7}
+.sc-hk{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1.62fr) minmax(0,1fr)}
+.sc-hk>.hkh{grid-column:1/3}
+.card.hkh,html:not([data-look=bright]) .card.hkh{padding:0;background:#060b1f!important;color:#fff;container-type:size;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;outline:1px solid rgba(255,255,255,.16)!important;outline-offset:-1px;box-shadow:0 34px 70px -34px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.14)!important}
+html:not([data-look=bright]) .card.hkh::after{display:none}
+.hk-clip{position:absolute;inset:0;overflow:hidden;border-radius:inherit;background:radial-gradient(120% 90% at 50% 60%,#14244f 0,#081030 55%,#040817 100%)}
+.hk-stage{position:absolute;left:50%;top:52%;width:max(100cqw,calc(100cqh * 16 / 9));height:max(100cqh,calc(100cqw * 9 / 16));transform:translate(-50%,-50%)}
+.hk-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.4s ease}
+.hk-img.on{opacity:1}
+.hk-vig{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(3,6,20,.78) 0,rgba(3,6,20,.2) 22%,rgba(3,6,20,0) 34%,rgba(3,6,20,0) 66%,rgba(3,6,20,.55) 84%,rgba(3,6,20,.86) 100%)}
+.hk-top{position:absolute;left:1.25em;right:1.25em;top:1.05em;display:flex;justify-content:space-between;align-items:flex-start;gap:1em;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.hk-k{display:inline-flex;align-items:center;gap:.4em;font:600 .8em var(--sans);color:rgba(255,255,255,.86)}
+.hk-k .ic{width:1.1em;height:1.1em}
+.hk-t{display:block;font:700 2em/1.05 var(--display);letter-spacing:-.02em;color:#fff;margin:.12em 0 .1em}
+.hk-top small{font:500 .84em var(--sans);color:rgba(255,255,255,.84)}
+.hk-top small.stale{color:#ffd60a}
+.hk-sec{display:inline-flex;align-items:center;gap:.45em;flex:none;padding:.55em .95em;border-radius:99px;font:600 .9em/1 var(--sans);background:rgba(48,209,88,.2);color:#d9ffe3;outline:1px solid rgba(48,209,88,.55);outline-offset:-1px;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);text-shadow:none;box-shadow:0 0 1.6em rgba(48,209,88,.25)}
+.hk-sec .ic{width:1.15em;height:1.15em;color:#30d158}
+.hk-sec.bad{background:rgba(255,59,48,.34);color:#fff;outline-color:rgba(255,105,97,.8);box-shadow:0 0 1.8em rgba(255,59,48,.45);animation:hkp 2.2s ease-in-out infinite}
+.hk-sec.bad .ic{color:#fff}
+@keyframes hkp{50%{box-shadow:0 0 2.6em rgba(255,59,48,.75)}}
+.hk-m{position:absolute;display:flex;align-items:center;gap:.5em;transform:translate(-1.3em,-50%);pointer-events:none;--mc:#fff}
+.hk-m.l{flex-direction:row-reverse;transform:translate(calc(-100% + 1.3em),-50%)}
+.hk-m i{position:relative;flex:none;width:2.6em;height:2.6em;border-radius:50%;display:grid;place-items:center;background:rgba(8,14,38,.6);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);outline:1.5px solid var(--mc);box-shadow:0 0 0 .32em color-mix(in srgb,var(--mc) 22%,transparent),0 0 1.5em color-mix(in srgb,var(--mc) 70%,transparent);color:#fff}
+.hk-m i::after{content:"";position:absolute;inset:-.32em;border-radius:50%;border:1.5px solid var(--mc);opacity:0;animation:hkr 3.2s ease-out infinite}
+.hk-m:nth-child(2n) i::after{animation-delay:1.1s}.hk-m:nth-child(3n) i::after{animation-delay:2.1s}
+@keyframes hkr{0%{transform:scale(.9);opacity:.75}100%{transform:scale(1.7);opacity:0}}
+.hk-m i .ic{width:1.25em;height:1.25em}
+.hk-m span{display:flex;flex-direction:column;padding:.38em .75em;border-radius:.85em;background:rgba(8,14,38,.66);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);outline:1px solid rgba(255,255,255,.2);outline-offset:-1px;line-height:1.2}
+.hk-m b{font:600 .84em var(--sans);color:#fff;white-space:nowrap}
+.hk-m small{font:500 .76em var(--sans);color:rgba(255,255,255,.86);white-space:nowrap}
+.hk-m.ok{--mc:#30d158}.hk-m.amber{--mc:#ffb340}.hk-m.cool{--mc:#64d2ff}.hk-m.heat{--mc:#ff9f0a}.hk-m.bad{--mc:#ff453a}.hk-m.dim{--mc:rgba(255,255,255,.6)}
+.hk-pills{position:absolute;left:1em;right:1em;bottom:1em;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.6em}
+.hk-pill{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:.6em;align-items:center;min-width:0;padding:.62em .8em;border-radius:1.15em;background:rgba(16,24,56,.6);-webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);outline:1px solid rgba(255,255,255,.18);outline-offset:-1px;color:#fff}
+.hk-pill .ic{grid-row:1/3;width:2.15em;height:2.15em;padding:.5em;border-radius:50%;background:rgba(255,255,255,.16);color:#fff}
+.hk-pill b{align-self:end;font:600 .9em/1.2 var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hk-pill small{align-self:start;font:500 .8em/1.3 var(--sans);color:rgba(255,255,255,.86);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hk-pill.on{background:linear-gradient(135deg,rgba(255,170,50,.5),rgba(255,130,0,.26));outline-color:rgba(255,196,110,.6)}.hk-pill.on .ic{background:#ff9f0a}
+.hk-pill.ok .ic{background:#30d158}.hk-pill.cool .ic{background:#0a84ff}.hk-pill.heat .ic{background:#ff9500}
+.hk-pill.bad{background:rgba(255,59,48,.42);outline-color:rgba(255,120,110,.7)}.hk-pill.bad .ic{background:#ff453a}
+.card.hk-s{display:flex;flex-direction:column}.hk-s .hk-sg{flex:1 0 auto;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:.9em;align-items:center;margin-top:.5em}
+.hk-ringw{position:relative;width:100%;max-width:13.5em;aspect-ratio:1;margin:0 auto}
+.hk-ring{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.hk-ring .rot{transform-origin:100px 100px;animation:hks 40s linear infinite}
+.hk-ring .rot2{transform-origin:100px 100px;animation:hks 70s linear infinite reverse}
+@keyframes hks{to{transform:rotate(360deg)}}
+.hk-ringtx{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.hk-ringtx b{font:700 1.5em/1 var(--display);letter-spacing:-.01em;color:var(--hc)}
+.hk-ringtx small{font:500 .78em/1.3 var(--sans);color:var(--muted);margin-top:.3em}
+.hk-s{--hc:#248a3d}.hk-s.alert{--hc:#d70015}
+.hk-rows{display:flex;flex-direction:column;min-width:0}
+.hk-r{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.55em;align-items:center;padding:.42em 0;border-bottom:1px solid var(--rule)}
+.hk-r:last-child{border-bottom:0}
+.hk-r>.ic{width:1.9em;height:1.9em;padding:.42em;border-radius:50%;background:var(--rc,#34c759);color:#fff}
+.hk-r b{font:600 .88em/1.2 var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hk-r b small{display:block;font:500 .86em/1.2 var(--sans);color:var(--muted)}
+.hk-r em{font:600 .86em var(--sans);font-style:normal;color:var(--rt,#248a3d);white-space:nowrap}
+.hk-r.bad{--rc:#ff3b30;--rt:#d70015}
+.hk-act{display:flex;flex-wrap:wrap;align-items:center;gap:.4em;margin-top:.7em;font:500 .82em var(--sans);color:var(--muted)}
+.hk-act .ic{width:1.15em;height:1.15em;color:#5856d6}
+.hk-act span.chip2{display:inline-flex;align-items:center;gap:.35em;font-size:1em;padding:.22em .7em;color:var(--ink)}
+.hk-act span.chip2::before{content:"";width:.45em;height:.45em;border-radius:50%;background:#5856d6;box-shadow:0 0 .5em #5856d6}
+.hk-dials{display:grid;grid-template-columns:repeat(auto-fit,minmax(8em,1fr));gap:.8em;margin-top:.4em}
+.hk-d{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
+.hk-dw{position:relative;width:100%;max-width:9.5em;aspect-ratio:1}
+.hk-dw svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.hk-dtx{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.hk-dtx b{font:300 2.4em/1 var(--display);letter-spacing:-.04em;color:var(--ink)}
+.hk-dtx small{font:600 .74em var(--sans);color:var(--dc,#c93400);margin-top:.2em}
+.hk-d>b{font:600 .9em/1.2 var(--sans);color:var(--ink);margin-top:-.4em}
+.hk-d>small{font:500 .78em/1.3 var(--sans);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.hk-lts{display:grid;grid-template-columns:repeat(auto-fit,minmax(7.4em,1fr));gap:.5em;margin-top:.45em}
+.hk-lt{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:.5em;align-items:center;padding:.55em .65em;border-radius:1em;background:rgba(255,255,255,.62);outline:1px solid var(--rule);outline-offset:-1px;min-width:0}
+.hk-lt .ic{grid-row:1/3;width:2em;height:2em;padding:.45em;border-radius:50%;background:#8e8e93;color:#fff}
+.hk-lt b{font:600 .84em/1.2 var(--sans);color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hk-lt small{font:500 .78em/1.25 var(--sans);color:var(--muted)}
+.hk-lt.on{background:linear-gradient(135deg,#fff6df,#ffe7b3);outline-color:rgba(255,159,10,.4)}
+.hk-lt.on .ic{background:#ff9f0a;box-shadow:0 0 1em rgba(255,159,10,.65)}
+.hk-lt.on small{color:#a14a00;font-weight:600}
+html[data-look=bright] .hk-lt{background:#f3f5fa}html[data-look=bright] .hk-lt.on{background:linear-gradient(135deg,#fff6df,#ffe7b3)}
+.hk-shs{display:flex;flex-direction:column;gap:.45em;margin-top:.7em}
+.hk-sh span{display:flex;align-items:center;gap:.45em;font:600 .84em var(--sans);color:var(--ink)}
+.hk-sh span .ic{width:1.15em;height:1.15em;color:#0a84ff}
+.hk-sh span em{margin-left:auto;font-style:normal;color:var(--muted);font-weight:500}
+.hk-sh>i{display:block;height:.42em;margin-top:.3em;border-radius:99px;background:linear-gradient(90deg,#0a84ff var(--p),rgba(120,120,128,.2) var(--p))}
+.hk-scn{display:flex;flex-wrap:wrap;gap:.4em;margin-top:.7em;align-items:center;font:500 .78em var(--sans);color:var(--muted)}
+.hk-scn .chip2{display:inline-flex;align-items:center;gap:.35em;font-size:1em;padding:.24em .7em;color:var(--ink)}
+.hk-scn .chip2 .ic{width:1em;height:1em;color:#ff9f0a}
+.hk-bts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.35em 1em;margin-top:.45em}
+.hk-bt{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:.5em;min-width:0}
+.hk-bt b{font:600 .82em/1.25 var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hk-bt em{font:600 .8em var(--sans);font-style:normal;color:var(--bc,#248a3d)}
+.hk-bt>i{grid-column:1/-1;display:block;height:.36em;margin-top:.2em;border-radius:99px;background:linear-gradient(90deg,var(--bc,#34c759) var(--p),rgba(120,120,128,.2) var(--p))}
+.hk-bt.t-warn{--bc:#c93400}.hk-bt.t-bad{--bc:#d70015}
+.hk-net{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.45em;margin-top:.8em;padding-top:.7em;border-top:1px solid var(--rule)}
+.hk-net div{min-width:0}
+.hk-net small{display:block;font:500 .74em var(--sans);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hk-net b{display:block;font:600 .92em/1.25 var(--sans);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hk-net .warn b{color:#c93400}.hk-net .bad b{color:#d70015}
+.hk-m{font-size:min(1em,1.6cqw)}
+.hk-pills{font-size:min(1em,1.5cqw)}
+.hk-top{font-size:min(1em,1.9cqw)}
+.card.hk-s,.card.hk-b{container-type:inline-size}
+@container (max-width:22em){.hk-s .hk-sg{grid-template-columns:1fr}.hk-s .hk-ringw{display:none}}
+@media (prefers-reduced-motion:reduce){.hk-m i::after,.hk-ring .rot,.hk-ring .rot2,.hk-sec.bad{animation:none}}
+@media (orientation:portrait){body.wall .sc-hk{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr)}body.wall .sc-hk>.hkh{grid-column:1/-1}body.wall .hk-s .hk-sg{grid-template-columns:1fr}body.wall .hk-s .hk-ringw{display:none}}
+@media (max-width:980px){body:not(.wall) .sc-hk{grid-template-columns:1fr;grid-template-rows:none;height:auto}body:not(.wall) .sc-hk>.hkh{grid-column:auto;aspect-ratio:16/10}body:not(.wall) .sc-hk>.card:not(.hkh){min-height:16em}}
+@media (max-width:640px){body:not(.wall) .sc-hk>.hkh{aspect-ratio:4/5}.hk-m{display:none}.hk-top{font-size:.9em}.hk-t{font-size:1.6em}.hk-pills{font-size:.92em;grid-template-columns:repeat(2,minmax(0,1fr))}.hk-pills .hk-pill:nth-child(n+5){display:none}}
 </style>
 </head>
 <body>
@@ -1654,10 +1769,17 @@ const IC={
   sunrise:'<path d="M17 18a5 5 0 0 0-10 0M12 2v7M4.2 10.2l1.4 1.4M1 18h2M21 18h2M18.4 11.6l1.4-1.4M23 22H1M8 6l4-4 4 4"/>',
   sunset:'<path d="M17 18a5 5 0 0 0-10 0M12 9V2M4.2 10.2l1.4 1.4M1 18h2M21 18h2M18.4 11.6l1.4-1.4M23 22H1M16 5l-4 4-4-4"/>',
   drop:'<path d="M12 2.7l5.7 5.7a8 8 0 1 1-11.3 0z"/>',
-  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>'
+  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>',
+  homekit:'<path d="M3.5 10.5L12 3.5l8.5 7v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M8.8 14.6a4.6 4.6 0 0 1 6.4 0M10.6 16.9a2 2 0 0 1 2.8 0"/>',
+  lock:'<rect x="4.5" y="10.5" width="15" height="11" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>',
+  unlock:'<rect x="4.5" y="10.5" width="15" height="11" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 7.7-1.6"/>',
+  door:'<path d="M5.5 21.5V4A1.5 1.5 0 0 1 7 2.5h10A1.5 1.5 0 0 1 18.5 4v17.5M3 21.5h18M14.5 12.5h.01"/>',
+  bulb:'<path d="M9 18h6M10 21.5h4M12 2.5a6.5 6.5 0 0 0-3.8 11.8c.5.4.8 1 .8 1.6V16h6v-.1c0-.6.3-1.2.8-1.6A6.5 6.5 0 0 0 12 2.5z"/>',
+  blinds:'<path d="M3.5 3.5h17M5 3.5v12h14v-12M5 7.5h14M5 11.5h14M12 15.5v4"/><circle cx="12" cy="20.5" r="1"/>',
+  walk:'<circle cx="13.5" cy="4" r="1.8"/><path d="M9 21l2.6-6.4 2.9 2.4v4.5M7.5 12l2.8-3.6 3.6 1 2.6 3.6M11.6 14.6l1.4-6"/>'
 };
 const ic=(n,cls)=>`<svg class="ic${cls?" "+cls:""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]||""}</svg>`;
-const SICON={overview:"grid",work:"briefcase",today:"calendar",sports:"trophy",news:"news",people:"heart",inbox:"inbox",week:"week",home:"server",almanac:"moon",pulse:"activity"};
+const SICON={overview:"grid",work:"briefcase",today:"calendar",sports:"trophy",news:"news",people:"heart",inbox:"inbox",week:"week",home:"homekit",almanac:"moon",pulse:"activity"};
 function setLook(l){ l=l==="bright"?"bright":"hub"; document.documentElement.dataset.look=l; store.setItem("cc_look",l); const b=$("#bLook"); if(b) b.textContent="Look: "+(l==="bright"?"Bright":"Glass"); if(D) applyDecor(); }
 
 /* header status chips */
@@ -1665,7 +1787,9 @@ function renderChips(){
   const el=$("#chips"); if(!el||!D) return;
   const k=Object.fromEntries((D.kpis||[]).filter(x=>x.key).map(x=>[x.key,x])), n=(D.home||{}).net||{};
   const chip=(icon,val,label,open,cls)=>`<button class="chip8${cls?" "+cls:""}"${open?` data-open="${open}"`:""} title="${esc(label)}" aria-label="${esc(label+": "+val)}">${ic(icon)}<b>${esc(val)}</b></button>`;
+  const hk=HK(), q=hk&&hkSum(hk);
   el.innerHTML=[
+    q&&q.checks?`<button class="chip8 ${q.secure?"ok":"bad"}" data-s="home" title="Apple Home" aria-label="Apple Home: ${esc(q.secure?"secure":q.alerts.join(", "))}">${ic(q.unl.length?"unlock":"lock")}<b>${esc(q.secure?"Secure":q.alerts.length===1?q.alerts[0]:q.alerts.length+" alerts")}</b></button>`:"",
     n.ms!=null||n.up===false?chip("wifi",n.up===false?"Offline":n.ms+" ms","Internet",null,n.up===false?"bad":n.ms>80?"warn":"ok"):"",
     k.texts?chip("message",k.texts.value,"Texts","texts",""):"",
     k.gmail?chip("mail",k.gmail.value,"Gmail","gmail",""):"",
@@ -1699,6 +1823,16 @@ function healthHtml(){
   const tile=(icon,name,val,tone,c)=>`<div class="ht t-${tone}" style="--hc:${c}">${ic(icon)}<b>${esc(name)}</b><small>${esc(val)}</small></div>`;
   const ud=h.uptime_days, upTxt=ud==null?"n/a":ud<1?"Up "+Math.max(1,Math.round(ud*24))+" h":"Up "+Math.round(ud)+(Math.round(ud)===1?" day":" days");
   const bk=b.off?["Off","warn"]:b.ok?[(b.age_h<1?"Just now":b.age_h<48?Math.round(b.age_h)+" h ago":Math.round(b.age_h/24)+" days ago"),b.age_h>72?"warn":"ok"]:["Failing","bad"];
+  const hk=HK();
+  if(hk){ const q=hkSum(hk), c=q.cl;
+    return `<div class="hts">${[
+      q.locks.length?tile(q.unl.length?"unlock":"lock",q.locks.length===1?hkName(q.locks[0]):"Locks",q.unl.length?"Unlocked":"Locked",q.unl.length?"bad":"ok","#34c759"):"",
+      q.doors.length?tile("door","Doors",q.open.length?q.open.map(hkName).join(", ")+" open":`All ${q.doors.length} closed`,q.open.length?"bad":"ok","#30b0c7"):"",
+      q.lights.length?tile("bulb","Lights",q.on.length?`${q.on.length} of ${q.lights.length} on`:"All off",q.on.length?"ok":"mute","#ff9f0a"):"",
+      c.length?tile("thermo","Inside",c.map(x=>deg(x.t)).join(" \u00b7 "),"ok","#ff9500"):"",
+      tile("wifi","Internet", n.up===false?"Offline":ms!=null?ms+" ms":"n/a", n.up===false?"bad":ms==null?"mute":ms<=60?"ok":ms<=120?"warn":"bad", "#007aff"),
+      tile("shield","Backup", bk[0], bk[1], "#30b0c7")
+    ].join("")}</div>`; }
   return `<div class="hts">${[
     tile("wifi","Internet", n.up===false?"Offline":ms!=null?ms+" ms":"n/a", n.up===false?"bad":ms==null?"mute":ms<=60?"ok":ms<=120?"warn":"bad", "#007aff"),
     tile("activity","Uptime 24 h", up!=null?up+"%":"n/a", up==null?"mute":up>=99?"ok":up>=95?"warn":"bad", "#34c759"),
@@ -1737,6 +1871,9 @@ function briefItems(){
     else if(L&&L.state==="post") out.push(["trophy","info",`${g.team} final: ${L.away.a} ${L.away.s}, ${L.home.a} ${L.home.s}`]);
     else if(nx&&dayDiff(new Date(nx.when))<=1) out.push(["trophy","info",`${g.team} ${oppOf(nx.name,g.abbr).txt} ${whenShort(nx.when)}${nx.tv?" on "+nx.tv:""}`]); }
   const bd=countdowns(30).find(c=>c.kind==="bday"); if(bd) out.push(["gift","info",`${bd.n} ${bd.days===0?"is today":bd.days===1?"is tomorrow":"in "+bd.days+" days"}`]);
+  const hk=HK(); if(hk){ const q=hkSum(hk);
+    if(q.alerts.length) out.push(["alert","bad",q.alerts.join(", ")]);
+    else if(q.checks) out.push(["lock","ok",[q.locks.length?(q.locks.length===1?hkName(q.locks[0])+" locked":"All locks locked"):"",q.doors.length?`all ${q.doors.length} doors closed`:""].filter(Boolean).join(", ").replace(/^./,c=>c.toUpperCase())]); }
   const wt=(((D.inbox||{}).texts||{}).waiting||[]).length; out.push(wt?["message","warn",`${wt} text${wt===1?"":"s"} waiting on a reply`]:["check","ok","No texts waiting on a reply"]);
   const b=(D.home||{}).backup; if(b&&b.off) out.push(["shield","warn","No backup drive is set up for the Mac mini"]); else if(b&&b.ok===false) out.push(["shield","bad","Mac mini backup is failing"]);
   const st=D.storage; if(st&&st.pct>=70) out.push(["mail","warn",`Hotmail storage is ${st.pct}% full`]);
@@ -1867,6 +2004,9 @@ function islandItems(){
   if(g){ const L=LIVE[g.team], nx=(g.next||[])[0];
     if(L&&L.state==="post"&&L.away) out.push({ic:lgo(g),b:`${g.team} final`,s:`${L.away.a} ${L.away.s} \u2013 ${L.home.a} ${L.home.s}`,go:"sports"});
     else if(!(L&&L.state==="in")&&nx){ const ms=new Date(nx.when)-now; out.push({ic:lgo(g),b:`${g.team} ${oppOf(nx.name,g.abbr).txt}`,s:cap(whenShort(nx.when)),r:ms>0&&ms<36*3600e3?"in "+COUNT(ms):"",go:"sports"}); } }
+  const hk=HK(); if(hk){ const q=hkSum(hk);
+    if(q.alerts.length) out.push({ic:ic("alert"),cls:"c-rd",b:q.alerts.length===1?trunc(q.alerts[0],34):q.alerts.length+" home alerts",s:q.alerts.length===1?"Apple Home":trunc(q.alerts.join(", "),40),go:"home"});
+    else if(q.checks) out.push({ic:ic("lock"),cls:"c-gr",b:"Home secure",s:[q.locks.length?"Locked":"",q.cl.length?q.cl.map(x=>deg(x.t)).join("/")+" inside":""].filter(Boolean).join(" \u00b7 "),go:"home"}); }
   const ne=nextEvent(); if(ne&&ne._d-now<12*3600e3) out.push({ic:ic("calendar"),cls:"c-or",b:trunc(ne.title,34),s:"in "+rel(ne._d-now),go:"today"});
   const cd=countdowns(45)[0]; if(cd) out.push({ic:ic(cd.kind==="bday"?"gift":"calendar"),cls:"c-pk",b:trunc(cd.n,34),s:cd.days===0?"today":cd.days===1?"tomorrow":`in ${cd.days} days`,go:"people"});
   try{ let dn={}; try{dn=JSON.parse(store.getItem("done:"+today())||"{}")}catch(e){}
@@ -2262,7 +2402,8 @@ function homeHtml(big){
     <div><div class="lbl">Mac up</div><b>${h.uptime_days!=null?h.uptime_days+"d":"n/a"}</b><small>since last restart</small></div>
     <div><div class="lbl">Checks</div><b>${n.checks_24h||0}</b><small>in 24h, every 10 min</small></div></div>`;
 }
-function renderHome(){ const el=$("#home"); if(!el) return; el.dataset.s="home"; const ck=((D.home||{}).net||{}).checks_24h; el.innerHTML=`<h2 class="lbl">Home <span class="sub">${ck?ck+" checks today":"Mac mini"}</span></h2>${healthHtml()}`; }
+function renderHome(){ const el=$("#home"); if(!el) return; el.dataset.s="home"; const ck=((D.home||{}).net||{}).checks_24h, hk=HK(), q=hk&&hkSum(hk);
+  el.innerHTML=`<h2 class="lbl">Home <span class="sub">${q?esc(q.secure?"All secure":q.alerts.length+" to check")+(q.age!=null?" \u00b7 "+esc(q.age>45?rel(q.age*60000)+" ago":fmtTime(new Date(hk.at))):""):ck?ck+" checks today":"Mac mini"}</span></h2>${healthHtml()}`; }
 function bdayRows(list){
   if(!list||!list.length) return '<div class="w">No birthdays in the next 45 days.</div>';
   return list.map(b=>{const d=new Date(b.date+"T12:00:00");const when=b.days===0?"Today":b.days===1?"Tomorrow":d.toLocaleDateString([],{weekday:"short",month:"short",day:"numeric"});
@@ -2277,10 +2418,127 @@ function memHtml(){
   return `<div class="w">${m.count} photo${m.count===1?"":"s"} taken on this day, ${esc(span)}.</div>${th?`<div class="mem">${th}</div>`:""}`;
 }
 function renderMem(){ const el=$("#mem"); if(!el) return; document.body.classList.toggle("has-mem",!!(D.memories&&(D.memories.thumbs||[]).length)); el.innerHTML=`<h2 class="lbl">On this day <span class="sub">Photos</span></h2>${memHtml()}`; }
+/* ---- v10: Apple Home, read-only. The Mac mini reads it through HomeBot every 10 minutes. ---- */
+let HOUSE=null, HOUSE_P=null;
+function loadHouse(){
+  if(HOUSE||HOUSE_P||!PASS) return;
+  HOUSE_P=(async()=>{ try{
+    const blob=await (await fetch("art/house.enc")).json();
+    const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(PASS),"PBKDF2",false,["deriveKey"]);
+    const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(blob.salt),iterations:blob.iter,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["decrypt"]);
+    const buf=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(blob.iv)},key,b64(blob.ct));
+    HOUSE=URL.createObjectURL(new Blob([buf],{type:blob.type||"image/jpeg"}));
+    document.querySelectorAll("img.hk-img:not(.on)").forEach(i=>{ i.onload=()=>i.classList.add("on"); i.src=HOUSE; });
+  }catch(e){ HOUSE_P=null; } })();
+}
+const HK=()=>D&&D.homekit&&D.homekit.state==="ok"?D.homekit:null;
+const hkRoom=r=>r==="2nd Floor Hallway"?"Upstairs":(r||"");
+function hkName(x){ let n=String(x.n||"").trim(); if(/^hue\b.*\b(lamp|light|bulb|lightstrip)$/i.test(n)) n=hkRoom(x.r)+(/lamp$/i.test(n)?" lamp":" light"); return n.replace(/^SmartWings\s+/i,"").replace(/\s+FF\b/,"").replace(/\s+/g," "); }
+const deg=v=>v==null?"--":Math.round(v)+"\u00b0";
+function hkSum(h){
+  const lights=h.lights||[], on=lights.filter(l=>l.on), doors=h.doors||[], open=doors.filter(d=>d.open), locks=h.locks||[], unl=locks.filter(l=>!l.locked);
+  const garage=h.garage||[], gopen=garage.filter(g=>g.open), safety=(h.safety||[]).filter(s=>s.alarm), sh=h.shades||[], cl=h.climate||[];
+  const act=[...new Set((h.motion||[]).filter(m=>m.on).map(m=>/^(motion|occupancy) sensor$/i.test(m.n||"")?hkRoom(m.r):m.n))].filter(Boolean);
+  const alerts=[...safety.map(s=>hkName(s)+" alarm"),...unl.map(l=>hkName(l)+" unlocked"),...open.map(d=>hkName(d)+" open"),...gopen.map(g=>hkName(g)+" open")];
+  const checks=locks.length+doors.length+garage.length+(h.safety||[]).length, good=checks-unl.length-open.length-gopen.length-safety.length;
+  const off=[...lights,...cl,...sh,...locks,...doors].filter(x=>x.off).map(hkName);
+  const age=h.at?(Date.now()-new Date(h.at))/60000:null;
+  return {lights,on,doors,open,locks,unl,garage,sh,cl,act,alerts,checks,good,off,age,secure:!alerts.length};
+}
+function hkAgeTxt(s,h){ if(s.age==null) return ""; return s.age>45?"Last reading "+rel(s.age*60000)+" ago":"Updated "+fmtTime(new Date(h.at)); }
+function hkPills(h,s){
+  const p=(icon,name,val,cls)=>`<div class="hk-pill ${cls||""}">${ic(icon)}<b>${esc(name)}</b><small>${esc(val)}</small></div>`;
+  const avg=s.sh.length?Math.round(s.sh.reduce((a,x)=>a+(x.pos||0),0)/s.sh.length):null;
+  const c0=s.cl[0], heating=s.cl.some(c=>c.mode==="heat"), cooling=s.cl.some(c=>c.mode==="cool");
+  return [
+    s.lights.length?p("bulb","Lights",s.on.length?`${s.on.length} of ${s.lights.length} on`:"All off",s.on.length?"on":""):"",
+    s.doors.length?p("door","Doors",s.open.length?s.open.map(hkName).join(", ")+" open":`All ${s.doors.length} closed`,s.open.length?"bad":"ok"):"",
+    s.locks.length?p(s.unl.length?"unlock":"lock",s.locks.length===1?hkName(s.locks[0])+" lock":"Locks",s.unl.length?"Unlocked":"Locked",s.unl.length?"bad":"ok"):"",
+    s.sh.length?p("blinds","Shades",avg===0?"Closed":avg+"% open",""):"",
+    c0?p("thermo","Climate",s.cl.map(c=>deg(c.t)).join(" \u00b7 ")+" inside",cooling?"cool":heating?"heat":""):""
+  ].join("");
+}
+function hkMarkers(h,s){
+  const m=(x,y,cls,icon,b,sm,left)=>`<div class="hk-m ${cls}${left?" l":""}" style="left:${x}%;top:${y}%"><i>${ic(icon)}</i><span><b>${esc(b)}</b>${sm?`<small>${esc(sm)}</small>`:""}</span></div>`;
+  const out=[], up=s.cl.find(c=>c.n==="Upstairs"), lk=s.locks[0], fd=s.doors.find(d=>/front/i.test(d.n||"")), porch=s.lights.find(l=>/front door/i.test(l.r||""));
+  if(up) out.push(m(42.4,28.6,up.mode==="cool"?"cool":"heat","thermo","Upstairs "+deg(up.t),up.set!=null?`${up.mode==="cool"?"Cool":"Heat"} to ${deg(up.set)}`:"",false));
+  if(porch) out.push(m(39.2,39.6,porch.on?"amber":"dim","bulb",hkName(porch),porch.off?"Not responding":porch.on?`On \u00b7 ${porch.b}%`:"Off",true));
+  if(lk||fd) out.push(m(39.2,51,(lk&&!lk.locked)||(fd&&fd.open)?"bad":"ok",lk&&!lk.locked?"unlock":"lock","Front door",[lk?(lk.locked?"Locked":"Unlocked"):"",fd?(fd.open?"Open":"Closed"):""].filter(Boolean).join(" \u00b7 "),false));
+  const office=s.sh.filter(x=>/office/i.test(x.r||""));
+  if(office.length){ const a=Math.round(office.reduce((t,x)=>t+(x.pos||0),0)/office.length); out.push(m(24.6,47.5,"cool","blinds","Office shades",a===0?"Closed":a+"% open",true)); }
+  return out.join("");
+}
+function hkHero(h,s){
+  const at=hkAgeTxt(s,h);
+  return `<section class="card hkh" data-testid="hk-hero"><div class="hk-clip"><div class="hk-stage"><img class="hk-img${HOUSE?" on":""}" alt="Capano Home at night"${HOUSE?` src="${HOUSE}"`:""}>${hkMarkers(h,s)}</div><div class="hk-vig"></div></div>
+    <div class="hk-top"><div><span class="hk-k">${ic("home")}Apple Home</span><b class="hk-t">${esc(h.home||"Home")}</b><small class="${s.age>45?"stale":""}">${esc([at,(h.rooms||[]).length?(h.rooms.length+" rooms"):""].filter(Boolean).join(" \u00b7 "))}</small></div>
+    <span class="hk-sec ${s.secure?"":"bad"}" data-testid="hk-secure">${ic(s.secure?"shield":"alert")}${esc(s.secure?"All secure":s.alerts[0]+(s.alerts.length>1?` +${s.alerts.length-1}`:""))}</span></div>
+    <div class="hk-pills">${hkPills(h,s)}</div></section>`;
+}
+function hkRing(s){
+  const C=2*Math.PI*78, f=s.checks?s.good/s.checks:1, col=s.secure?"#30d158":"#ff453a";
+  return `<div class="hk-ringw"><svg class="hk-ring" viewBox="0 0 200 200" aria-hidden="true">
+    <circle class="rot2" cx="100" cy="100" r="96" fill="none" stroke="${col}" stroke-opacity=".35" stroke-width="1" stroke-dasharray="2 6"/>
+    <g class="rot"><circle cx="100" cy="100" r="88" fill="none" stroke="${col}" stroke-opacity=".5" stroke-width="2" stroke-dasharray="46 22"/></g>
+    <circle cx="100" cy="100" r="78" fill="none" stroke="rgba(120,120,128,.2)" stroke-width="9"/>
+    <circle cx="100" cy="100" r="78" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(C*f).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 100 100)" style="filter:drop-shadow(0 0 6px ${col})"/>
+    <circle cx="100" cy="100" r="64" fill="${col}" fill-opacity=".08"/></svg>
+    <div class="hk-ringtx"><b>${s.secure?"Secure":"Alert"}</b><small>${s.good} of ${s.checks} checks<br>${s.secure?"locked and closed":"need a look"}</small></div></div>`;
+}
+function hkSecurity(h,s){
+  const row=(icon,name,sub,val,bad)=>`<div class="hk-r ${bad?"bad":""}">${ic(icon)}<b>${esc(name)}${sub?`<small>${esc(sub)}</small>`:""}</b><em>${esc(val)}</em></div>`;
+  const bat=n=>{ const b=(h.battery||[]).find(x=>/lock/i.test(x.n||"")&&(x.r||"")===n.r); return b?`Battery ${b.lvl}%`:""; };
+  const rows=[...s.locks.map(l=>row(l.locked?"lock":"unlock",hkName(l)+" lock",l.off?"Not responding":bat(l),l.locked?"Locked":"Unlocked",!l.locked)),
+    ...s.doors.map(d=>row("door",hkName(d),d.off?"Not responding":"",d.open?"Open":"Closed",d.open)),
+    ...s.garage.map(g=>row("door",hkName(g),"",g.open?"Open":"Closed",g.open)),
+    ...(h.safety||[]).map(x=>row("alert",hkName(x),hkRoom(x.r),x.alarm?"Alarm":"Clear",x.alarm))].join("");
+  return `<section class="card kd k-sec hk-s ${s.secure?"":"alert"}" data-testid="hk-security"><h2 class="lbl">Security <span class="sub">${esc(s.secure?"all clear":s.alerts.length+" to check")}</span></h2>
+    <div class="hk-sg">${hkRing(s)}<div class="hk-rows">${rows}</div></div>
+    ${s.act.length?`<div class="hk-act">${ic("walk")}Activity now${s.act.slice(0,5).map(a=>`<span class="chip2">${esc(a)}</span>`).join("")}</div>`:`<div class="hk-act">${ic("walk")}No motion right now</div>`}</section>`;
+}
+function hkDial(c){
+  const lo=55,hi=85,R=40,C=2*Math.PI*R,arc=C*.75,f=v=>Math.max(0,Math.min(1,(v-lo)/(hi-lo)));
+  const heat=c.mode!=="cool", col=heat?"#ff9500":"#0a84ff", a=(135+270*f(c.set??c.t))*Math.PI/180;
+  const sx=(50+R*Math.cos(a)).toFixed(1), sy=(50+R*Math.sin(a)).toFixed(1), id="g"+Math.random().toString(36).slice(2,7);
+  const mode=c.mode==="off"?"Off":c.mode==="auto"?"Auto":heat?"Heat":"Cool";
+  return `<div class="hk-d" style="--dc:${heat?"#c93400":"#0040dd"}"><div class="hk-dw"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="${heat?"#ffd60a":"#64d2ff"}"/><stop offset="1" stop-color="${col}"/></linearGradient></defs>
+    <circle cx="50" cy="50" r="${R}" fill="none" stroke="rgba(120,120,128,.2)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${arc.toFixed(1)} ${C.toFixed(1)}" transform="rotate(135 50 50)"/>
+    <circle cx="50" cy="50" r="${R}" fill="none" stroke="url(#${id})" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(arc*f(c.t)).toFixed(1)} ${C.toFixed(1)}" transform="rotate(135 50 50)"/>
+    ${c.set!=null?`<circle cx="${sx}" cy="${sy}" r="4.6" fill="#fff" stroke="${col}" stroke-width="2.4"/>`:""}</svg>
+    <div class="hk-dtx"><b>${deg(c.t)}</b><small>${esc(mode)}${c.set!=null?" "+deg(c.set):""}</small></div></div>
+    <b>${esc(c.n)}</b><small>${esc([c.hum!=null?Math.round(c.hum)+"% humidity":"",c.fan==="active"?"fan on":""].filter(Boolean).join(" \u00b7 "))}</small></div>`;
+}
+function hkClimate(h,s){
+  const set=s.cl.find(c=>c.set!=null);
+  return `<section class="card kd k-clim hk-c" data-testid="hk-climate"><h2 class="lbl">Climate <span class="sub">${esc(set?`${set.mode==="cool"?"Cooling":"Heating"} to ${deg(set.set)}`:"thermostats")}</span></h2><div class="hk-dials">${s.cl.map(hkDial).join("")}</div></section>`;
+}
+function hkLights(h,s){
+  const lt=s.lights.map(l=>`<div class="hk-lt ${l.on?"on":""}">${ic("bulb")}<b>${esc(hkName(l))}</b><small>${l.off?"Not responding":l.on?`On \u00b7 ${l.b}%`:"Off"}</small></div>`).join("");
+  const sh=s.sh.map(x=>`<div class="hk-sh"><span>${ic("blinds")}${esc(hkRoom(x.r)+" \u00b7 "+hkName(x).replace(/^Window\s*/i,"").toLowerCase()+" shade")}<em>${x.pos===0?"Closed":x.pos+"% open"}</em></span><i style="--p:${Math.max(0,Math.min(100,x.pos||0))}%"></i></div>`).join("");
+  const sc=(h.scenes||[]).map(x=>`<span class="chip2">${ic("spark")}${esc(x.n)}</span>`).join("");
+  return `<section class="card kd k-lite hk-l" data-testid="hk-lights"><h2 class="lbl">Lights and shades <span class="sub">${esc(s.on.length?`${s.on.length} of ${s.lights.length} on`:"all off")}</span></h2>
+    <div class="hk-lts">${lt}</div>${sh?`<div class="hk-shs">${sh}</div>`:""}${sc?`<div class="hk-scn">Scenes${sc}</div>`:""}</section>`;
+}
+function hkPower(h,s){
+  const dn=new Set(s.doors.map(d=>d.n));
+  const bt=(h.battery||[]).slice(0,8).map(b=>{ const t=b.lvl<=20?"bad":b.lvl<=35?"warn":"ok", w=/^(?:SmartWings\s+)?Window\s+(\w+)$/i.exec(b.n||""), nm=dn.has(b.n)?b.n+" sensor":w?`${hkRoom(b.r)||"Window"} shade, ${w[1].toLowerCase()}`:/\block$/i.test(b.n||"")&&b.r?b.r+" lock":hkName(b);
+    return `<div class="hk-bt t-${t}"><b>${esc(nm)}</b><em>${b.lvl}%</em><i style="--p:${b.lvl}%"></i></div>`; }).join("");
+  const H=D.home||{}, n=H.net||{}, d=H.disk||{}, b=H.backup||{};
+  const cell=(k,v,c)=>`<div class="${c||""}"><small>${esc(k)}</small><b>${esc(v)}</b></div>`;
+  const net=H.net?cell("Internet",n.up===false?"Offline":n.ms!=null?n.ms+" ms":"n/a",n.up===false?"bad":n.ms>120?"warn":"")+cell("Uptime 24 h",n.avail_24h!=null?n.avail_24h+"%":"n/a",n.avail_24h!=null&&n.avail_24h<99?"warn":"")
+    +cell("Backup",b.off?"Off":b.ok?"OK":"Failing",b.off?"warn":b.ok?"":"bad")+cell("Mac disk",d.free_gb!=null?d.free_gb+" GB free":"n/a",d.pct_used>=90?"bad":d.pct_used>=80?"warn":""):"";
+  const low=(h.battery||[])[0];
+  return `<section class="card kd k-bat hk-b" data-testid="hk-power"><h2 class="lbl">Batteries and network <span class="sub">${esc(low?"lowest "+low.lvl+"%":"")}</span></h2>
+    <div class="hk-bts">${bt||'<div class="w">No battery readings.</div>'}</div>${net?`<div class="hk-net">${net}</div>`:""}</section>`;
+}
 function sceneHome(){
-  return `<div class="sc sc-home"><section class="card kd k-home"><h2 class="lbl">Home <span class="sub">Mac mini, every 10 minutes</span></h2>${homeHtml(true)}</section>
+  const h=HK();
+  if(!h) return `<div class="sc sc-home"><section class="card kd k-home"><h2 class="lbl">Home <span class="sub">Mac mini, every 10 minutes</span></h2>${homeHtml(true)}<div class="w" style="margin-top:.8em">Apple Home appears here once the Mac mini reports it.</div></section>
   <section class="card kd k-family"><h2 class="lbl">Birthdays <span class="sub">next 45 days</span></h2>${bdayRows((D.birthdays||[]).slice(0,8))}</section>
   <section class="card kd k-photo memcard"><h2 class="lbl">On this day <span class="sub">Photos</span></h2>${memHtml()}</section></div>`;
+  loadHouse();
+  const s=hkSum(h);
+  return `<div class="sc sc-hk">${hkHero(h,s)}${hkSecurity(h,s)}${hkClimate(h,s)}${hkLights(h,s)}${hkPower(h,s)}</div>`;
 }
 const RENDER={work:sceneWork,today:sceneToday,sports:sceneSports,news:sceneNews,people:scenePeople,inbox:sceneInbox,week:sceneWeek,home:sceneHome,almanac:sceneAlmanac,pulse:scenePulse};
 function renderScene(fresh=true){
@@ -2909,7 +3167,7 @@ function sceneSports(){
 }
 
 /* ---- version check: a new design applies itself overnight or while the tab is in the background, never mid-day in front of you */
-const UI_VER="ce987213f0cc";
+const UI_VER="15aee11fefc8";
 let UPD=null;
 function checkUpdate(nd){
   if(!nd||!nd.ui||!UI_VER||nd.ui===UI_VER) return;
