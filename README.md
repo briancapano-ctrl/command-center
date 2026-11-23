@@ -7,6 +7,16 @@ Mac job (launchd, every 10 minutes, pushes only when something changed, and at l
 In the browser: the clock, weather and live scores update by themselves (scores every 30 seconds during a game), and the page re-checks for new data every 90 seconds without reloading.
 Output: one page at `https://<your-github-name>.github.io/<repo>/`. All data inside is AES-256 encrypted and opens only with your passphrase. A phone alert with the top items arrives once a day after 6 AM Eastern through ntfy.
 
+## Look (v9 Glass, Nov 22, 2026)
+- Apple-style wall display: frosted-glass widgets over a vivid glass-ribbon wallpaper that changes with the day. Morning peach (sunrise to 11 AM), daytime blue, evening amber (the hour before sunset through dusk), night navy. The wallpapers crossfade; they never move, so the glass stays cheap to draw.
+- Status bar: Capano Home and the current scene on the left (plus the time on every scene except Overview), a black Dynamic Island in the middle, and glass status capsules on the right (internet ping, texts, Gmail, Hotmail, outside temperature).
+- Dynamic Island rotates one update every 7 seconds: the next or live game, the next event within 12 hours, the nearest birthday or holiday, overdue reminders, the weather. During a game it alternates the live score (red ring) with everything else. Click it to open that scene or list.
+- Overview on a 12-column grid. Top row, four equal widgets: a lock-screen clock (date, big time, the greeting as the page title, the daily line); the On this day photo with its date ("November 22, 2018"); an Apple Weather-style widget (big temperature, condition, high and low, rain chance, six hours, three days with range bars, and moving rain, snow, clouds, sun glow, stars or lightning behind it); the game in team colors like a Live Activity, with the other teams below. Second row: Needs you, Up next and Work, Family, Daily brief. Bottom row: six Home tiles (internet, uptime over 24 hours, Mac mini, disk free, backup, Hotmail storage; amber when something needs a look) and a Sun and moon card.
+- Siri-style rainbow edge glow: sweeps once when the page opens, breathes during a live Eagles, Flyers or Phillies game and on a birthday.
+- Icon rail is a glass capsule of icons (names show on hover). Portrait wall: 2 x 2 widgets, Home tiles across the bottom, the rail as a dock. Phone: one column.
+- Lock screen shows the date and time over the wallpaper with a glass passphrase panel.
+- Type uses the Mac's San Francisco fonts (Inter on other computers). Look button or L key still switches to Bright; Glass is the default, including in Plash.
+
 ## Look (v8 Hub, Nov 22, 2026)
 - Modeled on the smart-home hub screens you sent: a deep green frame, a left icon rail for the 11 scenes (the active one glows amber, with a thin bar showing time until the next auto scene), and warm cream cards.
 - Header bar over a Carolina pines-and-lake panorama that follows the sun: day, golden hour, night. Brand, greeting with the daily line, status chips (internet ping, texts, Gmail, Hotmail, outside temperature; the mail and text chips open their drawers), clock and date.

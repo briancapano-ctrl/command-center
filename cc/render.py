@@ -17,7 +17,7 @@ def encrypt(obj, passphrase):
 
 
 MANIFEST = {"name": "Command Center", "short_name": "Command", "start_url": "./#wall", "display": "standalone",
-            "background_color": "#0d201c", "theme_color": "#0d201c",
+            "background_color": "#0b1430", "theme_color": "#0b1430",
             "icons": [{"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}]}
 ICON = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#05070a"/>'
         '<circle cx="256" cy="256" r="150" fill="none" stroke="#4de3c2" stroke-width="22"/>'
