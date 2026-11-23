@@ -472,12 +472,11 @@ def _hk_slim(items, skipped):
         if x.get("item_is_reachable") is False:
             d["off"] = True   # not responding
         return d
-    climate_names = {"2nd Floor Hallway": "Upstairs"}
     out = {
         "state": "ok",
         "home": next((x.get("home_name") for x in items if x.get("home_name")), "Home"),
         "lights": [{**base(x), "on": bool(x.get("item_is_active")), "b": x.get("light_brightness")} for x in of("lightbulb")],
-        "climate": [{**base(x), "n": climate_names.get(x.get("room_name"), x.get("room_name") or x.get("item_name")),
+        "climate": [{**base(x),
                      "t": _f(x.get("temperature_sensor_measurement")), "set": _f(x.get("target_temperature")),
                      "heat": _f(x.get("heating_threshold_temperature")), "cool": _f(x.get("cooling_threshold_temperature")),
                      "mode": x.get("thermostat_mode") or x.get("heater_cooler_mode"), "hum": x.get("relative_humidity_sensor_measurement"),
@@ -501,6 +500,60 @@ def _hk_slim(items, skipped):
     for k in [k for k, v in out.items() if v == []]:
         del out[k]
     return out
+
+
+HK_LISTENER = os.path.join(HOME, "CommandCenter", "home_listener.py")
+HK_AGENT = "com.commandcenter.homectl"
+HK_SCENES = ("Good Morning", "Good Night")   # the only scenes the dashboard buttons can run (approved Nov 22, 2026)
+
+
+def install_home_listener():
+    """Keeps the scene-button listener (home_listener.py) running as a launchd agent. Idempotent."""
+    if not os.path.exists(HK_LISTENER):
+        return False
+    if len(ENV.get("CC_HOME_TOPIC", "")) < 24:
+        import secrets
+        topic = "cc-" + secrets.token_urlsafe(24)
+        with open(CONF, "a") as fh:
+            fh.write(("\n" if open(CONF).read()[-1:] not in ("", "\n") else "") + "CC_HOME_TOPIC=" + topic + "\n")
+        os.chmod(CONF, 0o600)
+        ENV["CC_HOME_TOPIC"] = topic
+    plist = os.path.join(HOME, "Library", "LaunchAgents", HK_AGENT + ".plist")
+    body = f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>Label</key><string>{HK_AGENT}</string>
+<key>ProgramArguments</key><array><string>{os.path.realpath(sys.executable)}</string><string>{HK_LISTENER}</string></array>
+<key>RunAtLoad</key><true/>
+<key>KeepAlive</key><true/>
+<key>ThrottleInterval</key><integer>30</integer>
+<key>StandardOutPath</key><string>{HK_DIR}/listener.out</string>
+<key>StandardErrorPath</key><string>{HK_DIR}/listener.out</string>
+</dict></plist>
+"""
+    dom = f"gui/{os.getuid()}"
+    changed = not os.path.exists(plist) or open(plist).read() != body
+    if changed:
+        open(plist, "w").write(body)
+        subprocess.run(["launchctl", "bootout", f"{dom}/{HK_AGENT}"], capture_output=True)
+    loaded = subprocess.run(["launchctl", "print", f"{dom}/{HK_AGENT}"], capture_output=True).returncode == 0
+    if changed or not loaded:
+        subprocess.run(["launchctl", "bootstrap", dom, plist], capture_output=True)
+    return True
+
+
+def _hk_ctl(items):
+    """Scene buttons are offered only while the listener is alive (it checks in at least every minute)."""
+    try:
+        b = json.load(open(os.path.join(HK_DIR, "listener.json")))
+        alive = b.get("state") == "listening" and dt.datetime.now().timestamp() - b.get("at", 0) < 900
+    except Exception:
+        alive = False
+    have = {x.get("item_name") for x in items if x.get("item_type") == "scene"}
+    scenes = [n for n in HK_SCENES if n in have]
+    if not (alive and scenes and len(ENV.get("CC_HOME_TOPIC", "")) >= 24):
+        return None
+    return {"topic": ENV["CC_HOME_TOPIC"], "scenes": scenes}
 
 
 def homekit():
@@ -583,7 +636,15 @@ def homekit():
         fh.write(f"{secs}s, {len(items)} items, skipped: {skipped}\n" + "\n".join(log))
     if not items:
         return {"state": "error", "err": "HomeBot returned no items"}
-    return {**_hk_slim(items, skipped), "secs": secs}
+    try:
+        install_home_listener()
+    except Exception as e:
+        open(os.path.join(HK_DIR, "listener_install_err.txt"), "w").write(repr(e))
+    out = {**_hk_slim(items, skipped), "secs": secs}
+    ctl = _hk_ctl(items)
+    if ctl:
+        out["ctl"] = ctl
+    return out
 
 
 def encrypt(payload, passphrase):
