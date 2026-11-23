@@ -20,6 +20,21 @@ class T(unittest.TestCase):
         m = priorities.build({"errors": {"gmail": "boom"}}, {})
         self.assertIn("gmail", m["errors"])
 
+    def test_homekit_passes_through_and_flags(self):
+        src = sample()
+        src["mac"] = {**(src.get("mac") or {}), "as_of_iso": "2026-11-22T19:46:00-05:00", "homekit": {
+            "state": "ok", "home": "Home", "locks": [{"n": "Front Door", "locked": False}],
+            "doors": [{"n": "Back Door", "open": True}, {"n": "Front Door", "open": False}],
+            "battery": [{"n": "Yale Lock", "r": "Front Door", "lvl": 12}]}}
+        m = priorities.build(src, {})
+        self.assertEqual(m["homekit"]["at"], "2026-11-22T19:46:00-05:00")
+        ts = [t["t"] for t in m["tasks"]]
+        self.assertIn("Back Door is open", ts)
+        self.assertIn("Front Door lock is unlocked", ts)
+        src["mac"]["homekit"] = {"state": "error", "err": "x"}
+        self.assertIsNone(priorities.build(src, {})["homekit"])
+
+
 class CollectNoCredentials(unittest.TestCase):
     def test_collect_runs_without_any_secrets(self):
         import os

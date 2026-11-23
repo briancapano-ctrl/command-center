@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Runs on the Mac mini. Reads texts, reminders, Apple Calendar, birthdays, photo memories and home health locally, encrypts the result, pushes it to your GitHub repo.
+"""Runs on the Mac mini. Reads texts, reminders, Apple Calendar, birthdays, photo memories, home health and Apple Home accessory status locally, encrypts the result, pushes it to your GitHub repo.
 Python 3.9 standard library plus the macOS `openssl` and `sqlite` already installed. Nothing leaves the Mac unencrypted."""
-import atexit, urllib.parse, base64, datetime as dt, glob, json, os, re, shutil, sqlite3, subprocess, sys, tempfile
+import atexit, urllib.parse, base64, datetime as dt, glob, json, os, re, shutil, sqlite3, subprocess, sys, tempfile, time
 
 HOME = os.path.expanduser("~")
 CONF = os.path.join(HOME, ".config", "command-center", "env")
@@ -396,6 +396,196 @@ def home():
     return out
 
 
+HK_DIR = os.path.join(HOME, "CommandCenter", "home")
+HK_RAW = os.path.join(HK_DIR, "homebot.json")                 # last raw reading, kept on this Mac only
+HB_CLI = "/Applications/HomeBot.app/Contents/MacOS/homebot-cli"
+HK_TYPES = ("lightbulb", "switch", "outlet", "fan", "thermostat", "heater-cooler", "window-covering", "window", "door",
+            "garage-door-opener", "lock-mechanism", "temperature-sensor", "humidity-sensor", "air-quality-sensor",
+            "contact-sensor", "motion-sensor", "occupancy-sensor", "leak-sensor", "smoke-sensor", "carbon-monoxide-sensor",
+            "light-sensor", "battery", "stateful-programmable-switch", "air-purifier", "valve")
+
+
+def _hk_cli(args, tok, timeout=120):
+    return subprocess.run([HB_CLI] + args, capture_output=True, text=True, timeout=timeout,
+                          env={**os.environ, "HOMEBOT_AUTOMATION_TOKEN": tok})
+
+
+def _hk_read(tok, args, log):
+    """One get-home-items call. Returns the item list, or None when HomeBot could not export it."""
+    for attempt in range(3):   # HomeBot is sometimes killed mid-read (exit -9); a retry usually succeeds
+        try:
+            r = _hk_cli(["get-home-items", "--json"] + args, tok)
+            code, o, err = r.returncode, r.stdout, (r.stderr or "").strip()
+        except subprocess.TimeoutExpired:
+            code, o, err = -1, "", "timed out"
+        if code != -9:
+            break
+        time.sleep(1.5)
+    try:
+        data = json.loads(o)
+        if isinstance(data, list):
+            log.append(f"{' '.join(args)}: ok {len(data)}")
+            return data
+    except Exception:
+        pass
+    log.append(f"{' '.join(args)}: exit {code} " + re.sub(r"\s+", " ", (o or err))[:160])
+    return None
+
+
+def _hk_parse_text(out, service):
+    """Parse HomeBot's readable listing ("[*] item" headers, "[ ] Key: Value" lines) into the JSON field names."""
+    items, cur = [], None
+    for line in out.splitlines():
+        line = line.strip()
+        if line.startswith("[*]") and "Home Items:" not in line:
+            cur = {"item_service_type": service}
+            items.append(cur)
+            continue
+        m = re.match(r"\[ \] ([^:]+): (.*)$", line)
+        if not (m and cur is not None):
+            continue
+        k, v = m.group(1).strip().lower().replace(" ", "_"), m.group(2).strip()
+        if k in ("item_service_type", "item_property_types", "item_action_types"):
+            continue
+        if v in ("true", "false"):
+            val = v == "true"
+        else:
+            n = re.match(r"^(-?\d+(?:\.\d+)?)\s*(%|°C|K|lx)?$", v)
+            val = float(n.group(1)) if n else v
+            if isinstance(val, float) and val.is_integer():
+                val = int(val)
+        cur[k] = val.lower() if k == "item_type" and isinstance(val, str) else val
+    return items
+
+
+def _f(c):
+    return None if c is None else round(c * 9 / 5 + 32, 1)
+
+
+def _hk_slim(items, skipped):
+    """Trim the raw HomeBot reading to what the page shows. No identifiers leave the Mac."""
+    dev = [x for x in items if x.get("item_type") == "device"]
+    def of(t):
+        return [x for x in dev if x.get("item_service_type") == t]
+    def base(x):
+        d = {"n": x.get("item_name"), "r": x.get("room_name")}
+        if x.get("item_is_reachable") is False:
+            d["off"] = True   # not responding
+        return d
+    climate_names = {"2nd Floor Hallway": "Upstairs"}
+    out = {
+        "state": "ok",
+        "home": next((x.get("home_name") for x in items if x.get("home_name")), "Home"),
+        "lights": [{**base(x), "on": bool(x.get("item_is_active")), "b": x.get("light_brightness")} for x in of("lightbulb")],
+        "climate": [{**base(x), "n": climate_names.get(x.get("room_name"), x.get("room_name") or x.get("item_name")),
+                     "t": _f(x.get("temperature_sensor_measurement")), "set": _f(x.get("target_temperature")),
+                     "heat": _f(x.get("heating_threshold_temperature")), "cool": _f(x.get("cooling_threshold_temperature")),
+                     "mode": x.get("thermostat_mode") or x.get("heater_cooler_mode"), "hum": x.get("relative_humidity_sensor_measurement"),
+                     "fan": x.get("fan_state")} for x in of("thermostat") + of("heater-cooler")],
+        "shades": [{**base(x), "pos": x.get("current_position"), "to": x.get("target_position")} for x in of("window-covering") + of("window")],
+        # HomeBot exposes no lock-state field, so an active lock is read as secured (HomeKit lock state 1); a contact sensor
+        # that is detecting means open (HomeKit contact state 1).
+        "locks": [{**base(x), "locked": bool(x.get("item_is_active"))} for x in of("lock-mechanism")],
+        "doors": [{**base(x), "open": bool(x.get("detection_sensor_measurement"))} for x in of("contact-sensor")],
+        "garage": [{**base(x), "open": x.get("current_door_state") not in (None, "closed"), "st": x.get("current_door_state")} for x in of("garage-door-opener")],
+        "motion": [{**base(x), "on": bool(x.get("detection_sensor_measurement"))} for x in of("motion-sensor") + of("occupancy-sensor")],
+        "temps": [{**base(x), "t": _f(x.get("temperature_sensor_measurement"))} for x in of("temperature-sensor")],
+        "safety": [{**base(x), "alarm": bool(x.get("detection_sensor_measurement")), "kind": x.get("item_service_type")}
+                   for x in of("smoke-sensor") + of("carbon-monoxide-sensor") + of("leak-sensor")],
+        "battery": sorted([{**base(x), "lvl": x.get("battery_level")} for x in of("battery") if x.get("battery_level") is not None],
+                          key=lambda b: b["lvl"]),
+        "scenes": [{"n": x.get("item_name"), "on": bool(x.get("item_is_active"))} for x in items if x.get("item_type") == "scene"],
+        "rooms": sorted(x.get("item_name") for x in items if x.get("item_type") == "room" and x.get("item_name") != "Default Room"),
+        "skipped": len(skipped),
+    }
+    for k in [k for k, v in out.items() if v == []]:
+        del out[k]
+    return out
+
+
+def homekit():
+    """Apple Home status through the HomeBot for HomeKit command-line reader. Read-only: this only ever calls get-home-items,
+    never run-home-action. The raw reading stays on this Mac; the page gets a trimmed copy inside the encrypted snapshot."""
+    os.makedirs(HK_DIR, exist_ok=True)
+    for old in ("home_shortcut.plist", "Command Center Home.shortcut", "last.txt"):   # retired Shortcuts attempt
+        try:
+            os.remove(os.path.join(HK_DIR, old))
+        except FileNotFoundError:
+            pass
+    try:
+        os.chmod(CONF, 0o600)
+    except Exception:
+        pass
+    tok = ENV.get("HOMEBOT_AUTOMATION_TOKEN", "").strip()
+    if not os.path.exists(HB_CLI):
+        return {"state": "setup", "err": "HomeBot is not installed"}
+    if not tok:
+        return {"state": "setup", "err": "HomeBot token is missing"}
+    helpf = os.path.join(HK_DIR, "help.txt")
+    if not os.path.exists(helpf):
+        try:
+            h = _hk_cli(["get-home-items", "--help"], tok, 30)
+            open(helpf, "w").write(h.stdout + h.stderr)
+        except Exception as e:
+            open(helpf, "w").write("help failed: " + str(e))
+    probe = os.path.join(HK_DIR, "probe.txt")   # one-time reference notes kept on this Mac (help text, lock wording)
+    if not os.path.exists(probe):
+        out = []
+        for a in (["run-home-action", "--help"], ["get-home-items", "--item-service-type", "lock-mechanism"],
+                  ["get-home-items", "--item-service-type", "contact-sensor"]):
+            try:
+                r = _hk_cli(a, tok, 60)
+                out.append("$ " + " ".join(a) + "\n" + r.stdout + r.stderr)
+            except Exception as e:
+                out.append("$ " + " ".join(a) + " failed: " + str(e))
+        open(probe, "w").write("\n\n".join(out))
+    t0 = dt.datetime.now().timestamp()
+    log, skipped = [], []
+    items = _hk_read(tok, ["--verbose"], log)
+    if items is None:
+        # One device can make HomeBot's whole JSON export fail, so read each service type on its own, then each room for a
+        # type that still fails. Anything that still fails is skipped (and logged on this Mac) instead of blanking the panel.
+        items = []
+        rooms = _hk_read(tok, ["--verbose", "--item-type", "room"], log) or _hk_read(tok, ["--item-type", "room"], log) or []
+        items += rooms + (_hk_read(tok, ["--verbose", "--item-type", "scene"], log) or [])
+        for t in HK_TYPES:
+            got = _hk_read(tok, ["--verbose", "--item-service-type", t], log)
+            if got is None:
+                got = _hk_read(tok, ["--item-service-type", t], log)
+            if got is None:
+                got = []
+                for rm in sorted({x.get("item_name") for x in rooms if x.get("item_name")}):
+                    part = _hk_read(tok, ["--verbose", "--item-service-type", t, "--room-name", rm], log)
+                    if part is None:
+                        part = _hk_read(tok, ["--item-service-type", t, "--room-name", rm], log)
+                    if part is not None:
+                        got += part
+                        continue
+                    try:   # the plain-text listing still works when one value breaks the JSON export
+                        txt = _hk_cli(["get-home-items", "--item-service-type", t, "--room-name", rm], tok, 60)
+                        part = _hk_parse_text(txt.stdout + "\n" + txt.stderr, t)
+                        log.append(f"  text exit {txt.returncode}, out {len(txt.stdout)}, err {len(txt.stderr)}: " + re.sub(r"\s+", " ", txt.stdout + txt.stderr)[:300])
+                    except Exception as e:
+                        part = []
+                        log.append("  text failed: " + str(e))
+                    log.append(f"  text {t} in {rm}: {len(part)}")
+                    if part:
+                        got += part
+                    else:
+                        skipped.append(f"{t} in {rm}")
+            items += got
+    secs = round(dt.datetime.now().timestamp() - t0, 1)
+    with open(HK_RAW + ".tmp", "w") as fh:
+        json.dump(items, fh)
+    os.chmod(HK_RAW + ".tmp", 0o600)
+    os.replace(HK_RAW + ".tmp", HK_RAW)
+    with open(os.path.join(HK_DIR, "last_err.txt"), "w") as fh:
+        fh.write(f"{secs}s, {len(items)} items, skipped: {skipped}\n" + "\n".join(log))
+    if not items:
+        return {"state": "error", "err": "HomeBot returned no items"}
+    return {**_hk_slim(items, skipped), "secs": secs}
+
+
 def encrypt(payload, passphrase):
     r = subprocess.run(["openssl", "enc", "-aes-256-cbc", "-pbkdf2", "-iter", "200000", "-salt", "-pass", "env:CC_PW"],
                        input=payload, capture_output=True, env={**os.environ, "CC_PW": passphrase})
@@ -520,7 +710,7 @@ def main():
             print("work lane:", fn.__name__, type(e).__name__, str(e)[:120])
     now = dt.datetime.now().astimezone()
     snap = {"as_of": "Updated " + now.strftime("%-I:%M %p"), "as_of_iso": now.isoformat()}
-    for key, fn in (("imessage", imessage), ("reminders", reminders), ("calendar", calendar), ("birthdays", birthdays), ("photos", photos), ("home", home)):
+    for key, fn in (("imessage", imessage), ("reminders", reminders), ("calendar", calendar), ("birthdays", birthdays), ("photos", photos), ("home", home), ("homekit", homekit)):
         try:
             snap[key] = fn()
         except Exception as e:
@@ -537,6 +727,8 @@ def main():
     # Push only when something changed, or at least once an hour so the page can tell the Mac is alive.
     import hashlib, time
     core = {k: v for k, v in flat.items() if k not in ("as_of", "as_of_iso")}
+    if isinstance(core.get("homekit"), dict):   # motion flips constantly and timing varies; neither alone forces a push
+        core["homekit"] = {k: v for k, v in core["homekit"].items() if k not in ("motion", "secs")}
     digest = hashlib.sha256(json.dumps(core, sort_keys=True, default=str).encode()).hexdigest()
     mark = os.path.expanduser("~/CommandCenter/.last")
     try:

@@ -70,6 +70,24 @@ def build(src, cfg):
     if nt and nt.get("checks_24h", 0) >= 6 and nt.get("outages_24h", 0) >= 2:
         tasks.append({"t": f"Home internet dropped {nt['outages_24h']} times in 24 hours", "w": f"{nt['avail_24h']}% available. Worst latency {nt['worst_ms']} ms.", "p": ["Home", "p-med"], "rank": 3})
 
+    # ---- Apple Home (Mac, read-only through HomeBot)
+    hk = mac.get("homekit") if isinstance(mac.get("homekit"), dict) and mac["homekit"].get("state") == "ok" else None
+    if hk:
+        hk = {**hk, "at": mac.get("as_of_iso")}
+        for d in hk.get("doors") or []:
+            if d.get("open"):
+                tasks.append({"t": f"{d['n']} is open", "w": "Apple Home contact sensor.", "p": ["Home", "p-high"], "rank": 2})
+        for lk in hk.get("locks") or []:
+            if not lk.get("locked"):
+                tasks.append({"t": f"{lk['n']} lock is unlocked", "w": "Apple Home lock.", "p": ["Home", "p-high"], "rank": 2})
+        for s_ in hk.get("safety") or []:
+            if s_.get("alarm"):
+                tasks.append({"t": f"{s_['n']} alarm in {s_.get('r') or 'the house'}", "w": "Apple Home safety sensor.", "p": ["Home", "p-high"], "rank": 1})
+        low = [b for b in hk.get("battery") or [] if b.get("lvl") is not None and b["lvl"] <= 20]
+        if low:
+            tasks.append({"t": "Replace " + ", ".join(f"{b['n']} ({b['lvl']}%)" for b in low[:3]) + (" batteries" if len(low) > 1 else " battery"),
+                          "w": "Low battery in Apple Home.", "p": ["Home", "p-low"], "rank": 5})
+
     # ---- texts waiting on you (Mac)
     for c in (mac.get("waiting") or [])[:4]:
         w = f"\u201c{c['snippet']}\u201d, {c['ago']} ago." if c.get("snippet") else f"Last message {c['ago']} ago ends with a question or request."
@@ -226,5 +244,5 @@ def build(src, cfg):
     return {"generated": n.isoformat(), "meta": {"name": cfg.get("name", "Brian"), "lat": cfg.get("lat", 36.0217), "lon": cfg.get("lon", -78.4756), "tz": "America/New_York", "dim": cfg.get("night_dim", True)},
             "events": events_out, "kpis": kpis, "tasks": tasks[:9], "week": week, "teams": sports,
             "triage": triage, "channels": channels, "inbox": inbox_detail,
-            "birthdays": bdays[:8], "home": home or None, "memories": memories, "errors": errors, "storage": storage,
+            "birthdays": bdays[:8], "home": home or None, "homekit": hk, "memories": memories, "errors": errors, "storage": storage,
             "news": src.get("news"), "alerts": src.get("alerts") or [], "people": mac.get("people") if isinstance(mac.get("people"), dict) and "err" not in mac.get("people") else None}

@@ -3,9 +3,17 @@
 A live command center for Brian's personal accounts, built to stay open on a dedicated monitor all day. It runs on free GitHub Actions plus a small job on the Mac mini. No AI credits, no Perplexity Computer.
 
 Cloud job (GitHub Actions, every 15 minutes): Gmail, Hotmail/Outlook, Google and Outlook calendars, YouTube, sports, trend history.
-Mac job (launchd, every 10 minutes, pushes only when something changed, and at least hourly): iMessage and SMS unread counts, texts waiting on a reply, Apple Reminders. Encrypted before it leaves the Mac.
+Mac job (launchd, every 10 minutes, pushes only when something changed, and at least hourly): iMessage and SMS unread counts, texts waiting on a reply, Apple Reminders, Apple Home status (read-only, through HomeBot). Encrypted before it leaves the Mac.
 In the browser: the clock, weather and live scores update by themselves (scores every 30 seconds during a game), and the page re-checks for new data every 90 seconds without reloading.
 Output: one page at `https://<your-github-name>.github.io/<repo>/`. All data inside is AES-256 encrypted and opens only with your passphrase. A phone alert with the top items arrives once a day after 6 AM Eastern through ntfy.
+
+## Apple Home (v10, Nov 22, 2026)
+- Home scene: a night illustration of the house (drawn from the builder's listing photo) with glowing markers for the upstairs thermostat, front door light, front door lock and door sensor, and the office shades. Five glass pills across the bottom: lights on, doors, lock, shades, inside temperatures. An "All secure" badge turns red and pulses when a door is open or the lock is unlocked.
+- Beside it: Security (ring of checks, the lock with its battery, each door sensor, rooms with motion right now), Climate (a dial per thermostat with the set point, humidity and fan), Lights and shades (each light, shade positions, the Home scenes), Batteries and network (lowest battery first, then internet, uptime, backup, Mac disk).
+- Elsewhere: a Secure or alert capsule in the status bar, a Home line in the Daily brief and the Dynamic Island, and the overview Home tiles now lead with the lock, doors, lights and inside temperature. Open doors, an unlocked lock, a safety alarm or a battery at 20% or less also become Needs you items.
+- Read-only. The Mac job calls HomeBot for HomeKit's command-line reader (`get-home-items` only, never `run-home-action`) with the automation token kept in `~/.config/command-center/env`. HomeBot cannot export everything in one go on this home, so the job reads one device type at a time, then one room at a time, then the plain-text listing for anything left. The raw reading stays on the Mac (`~/CommandCenter/home/homebot.json`, owner-only); only names, rooms and states, with no device identifiers, go into the encrypted snapshot. Temperatures arrive in Celsius and are shown in Fahrenheit.
+- The house picture is encrypted with the same passphrase (`docs/art/house.enc`) and decrypted in the browser, so the public repository does not show the house.
+- HomeBot has no lock-state field, so a lock it reports as active is shown as locked (HomeKit's secured state). Cameras and the doorbell are not exposed by HomeBot and do not appear.
 
 ## Look (v9 Glass, Nov 22, 2026)
 - Apple-style wall display: frosted-glass widgets over a vivid glass-ribbon wallpaper that changes with the day. Morning peach (sunrise to 11 AM), daytime blue, evening amber (the hour before sunset through dusk), night navy. The wallpapers crossfade; they never move, so the glass stays cheap to draw.
